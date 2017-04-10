@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Class List</string>
+    <string name="image">Image</string>
+    <string name="take_picture">Take Picture</string>
+    <string name="admission_number">Admission Number</string>
+    <string name="submit_button">Submit</string>
+</resources>
