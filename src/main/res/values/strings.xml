@@ -3,5 +3,19 @@
     <string name="image">Image</string>
     <string name="take_picture">Take Picture</string>
     <string name="admission_number">Admission Number</string>
+    <string name="full_name">Full Name</string>
+    <string name="first_name">First Name</string>
+    <string name="last_name">Last Name</string>
     <string name="submit_button">Submit</string>
+    <string name="url_name">Url Address</string>
+    <string name="sign_in">SIGN IN</string>
+    <string name="suggestions">SUGGESTIONS</string>
+    <string name="suggestion_prompt">Choose A Suggestion</string>
+    <string-array name="Type_of_suggestion">
+        <item>None</item>
+        <item>Complaint</item>
+        <item>Recommendation</item>
+        <item>Commendations</item>
+    </string-array>
+    <string name="suggestion_text">Enter your suggestion</string>
 </resources>
