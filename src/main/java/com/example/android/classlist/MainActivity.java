@@ -1,40 +1,52 @@
 package com.example.android.classlist;
 
-import android.Manifest;
 import android.app.Activity;
-import android.app.Dialog;
-import android.content.DialogInterface;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.FaceDetector;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
+import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+import android.text.TextWatcher;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.android.internal.http.multipart.Part;
+import com.android.internal.http.multipart.StringPart;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.text.DateFormat;
-import java.util.Calendar;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.ByteArrayBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Iterator;
+import java.util.List;
+
+import static com.example.android.classlist.R.id.ur_name;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -42,13 +54,26 @@ public class MainActivity extends AppCompatActivity {
     private String mCurrentPhotoPath;
     private Uri imageForUpload;
     private Button mButton;
+    private EditText full_name;
+    private EditText adm_num;
+    private EditText mServerUrl;
+    String name;
+    String reg_no;
 
     LocatingClass mLocatingClass; // instance of locating class
     GoogleApiClient mClient;
+    Bitmap photo = null;
+    MyTextWatcher urlTextWatcher;
+    MyTextWatcher nameWatcher;
+    MyTextWatcher regWatcher;
+    String mast;
+    String statusCode;
 
-    private static final int REQUEST_ERROR = 0;
     private static final int REQUEST_PHOTO = 1;
-    private static final int REQUEST_LOCATION = 123;
+    private static final String URL_TO_SEND_DATA = "192.168.43.77:5000/enternew";
+    private static final String EXTRA_USER_FIRST_NAME = "com.example.android.classlist.first_name";
+    private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
+    private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,13 +82,101 @@ public class MainActivity extends AppCompatActivity {
 
         /*
         This is called before initializing the camera because the camera needs permissions(the cause of the crash)
+        Also checks for other dangerous permissions like location and phone network
         */
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
-            checkPermission();
+            Permissions.checkPermission(MainActivity.this, MainActivity.this);
         }
 
         mImageView = (ImageView) findViewById(R.id.image_view);
         mButton = (Button) findViewById(R.id.submit_btn);
+        full_name = (EditText) findViewById(R.id.full_name);
+        adm_num = (EditText) findViewById(R.id.admission_num);
+        mServerUrl = (EditText) findViewById(ur_name);
+        try {
+            mast = LocatingClass.getCellInfo(this).get("name").toString();
+        } catch (JSONException ex){
+            Log.e(MainActivity.class.toString(), ex.getMessage());
+        }
+
+        // get passed extras
+        name = getIntent().getStringExtra(EXTRA_USER_FIRST_NAME) + " " +
+                getIntent().getStringExtra(EXTRA_USER_LAST_NAME);
+        reg_no = getIntent().getStringExtra(EXTRA_USER_REG_NUM);
+
+        urlTextWatcher = new MyTextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void afterTextChanged(Editable editable) {
+                if (editable.toString().length() == 0) {
+                    empty = true;
+                } else {
+                    empty = false;
+                }
+                updateSubmitButtonState();
+            }
+        };
+
+                nameWatcher = new MyTextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if (editable.toString().length() == 0) {
+                            empty = true;
+                        } else {
+                            empty = false;
+                        }
+                        updateSubmitButtonState();
+                    }
+                };
+
+                regWatcher = new MyTextWatcher() {
+                    @Override
+                    public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                    }
+
+                    @Override
+                    public void afterTextChanged(Editable editable) {
+                        if (editable.toString().length() == 0) {
+                            empty = true;
+                        } else {
+                            empty = false;
+                        }
+                        updateSubmitButtonState();
+                    }
+                };
+
+        mServerUrl.addTextChangedListener(urlTextWatcher);
+        full_name.addTextChangedListener(nameWatcher);
+        adm_num.addTextChangedListener(regWatcher);
+
+        mServerUrl.setText(URL_TO_SEND_DATA);
+        full_name.setText(name);
+        adm_num.setText(reg_no);
 
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -98,11 +211,51 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mLocatingClass.findLocation();
+                ArrayList<Double> location = mLocatingClass.findLocation();
+                String phone = mLocatingClass.getPhone();
+                String time = mLocatingClass.getTime();
+
+                JSONObject param = new JSONObject();
+                JSONObject image = new JSONObject();
+
+                ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+
+                try {
+                    image.put("picture", bos.toByteArray());
+                    param.put("name", full_name.getText().toString());
+                    param.put("regno", adm_num.getText().toString());
+                    param.put("time", time);
+                    /*param.put("latitude",location.get(0));
+                    param.put("longitude", location.get(1));
+                    param.put("altitude",location.get(2));
+                    param.put("phone", phone);
+                    param.put("mast", mast);*/
+                    new HttpRequest().execute(param,image);
+                } catch (JSONException ex){
+                    Log.e(MainActivity.class.toString(), ex.getMessage());
+                }
             }
         });
 
         //setPic();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle b) {
+        b.putParcelable("image", photo);
+        b.putString("url", mServerUrl.getText().toString());
+        b.putString("name", full_name.getText().toString());
+        b.putString("reg", adm_num.getText().toString());
+    }
+
+    @Override
+    public void onRestoreInstanceState(Bundle b) {
+        photo = b.getParcelable("image");
+        mImageView.setImageBitmap(photo);
+        mServerUrl.setText(b.getString("url"));
+        full_name.setText(b.getString("name"));
+        adm_num.setText(b.getString("reg"));
     }
 
     @Override
@@ -118,9 +271,22 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
+     * Method checks whether information has been entered before submission
+     */
+    public void updateSubmitButtonState() {
+        if (photo != null && urlTextWatcher.nonEmpty() && nameWatcher.nonEmpty() && regWatcher.nonEmpty()) {
+            mButton.setEnabled(true);
+        } else {
+            mButton.setEnabled(false);
+        }
+    }
+
+    /**
      * Method invokes intent to take picture
      */
     private void takePicture(){
+
+        // call phone's camera
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // resolveActivity returns first activity component that can handle intent, preventing crash
         if (intent.resolveActivity(getPackageManager()) != null){
@@ -146,26 +312,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Check on permission and redirect user to accept them
-     */
-    private void checkPermission(){
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA},REQUEST_PHOTO);
-        }
-
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                ){
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION},
-                    REQUEST_LOCATION);
-
-        }
-
-
-    }
-
-    /**
      * Method retrieves image sent by return intent as small Bitmap in extras with data as key
      * and displays to ImageView
      * @param requestCode request that was received from take picture
@@ -179,20 +325,25 @@ public class MainActivity extends AppCompatActivity {
                 if (imageForUpload != null) {
                     Uri selectedImage = imageForUpload;
                     getContentResolver().notifyChange(selectedImage,null);
-                    Bitmap bitmap = getBitmap(imageForUpload.getPath());
+                    photo = PictureUtilities.getScaledBitmap(imageForUpload.getPath(),MainActivity.this);
 
-                    if (bitmap != null) {
-                        FaceDetector faceDet = new FaceDetector(bitmap.getWidth(), bitmap.getHeight(), 2);
-                        int faces = faceDet.findFaces(bitmap.copy(Bitmap.Config.RGB_565, false), new FaceDetector.Face[2]);
+                    if (photo != null) {
+                        FaceDetector faceDet = new FaceDetector(photo.getWidth(), photo.getHeight(), 2);
+                        int faces = faceDet.findFaces(photo.copy(Bitmap.Config.RGB_565, false), new FaceDetector.Face[2]);
                         if (faces == 0) {
                             Toast.makeText(this, "No face Detected.", Toast.LENGTH_SHORT).show();
-                            bitmap = null;
+                            mImageView.setImageResource(android.R.drawable.ic_menu_camera);
+                            photo = null;
                         } else if (faces > 1) {
                             Toast.makeText(this, "Detected more than one face.", Toast.LENGTH_SHORT).show();
-                            bitmap = null;
+                            mImageView.setImageResource(android.R.drawable.ic_menu_camera);
+                            photo = null;
                         }
-                        mImageView.setImageBitmap(bitmap);
+                        BitmapDrawable ob = new BitmapDrawable(getResources(),photo);
+                        mImageView.setImageDrawable(ob);
+                        updateSubmitButtonState();
                     } else {
+                        mImageView.setImageResource(android.R.drawable.ic_menu_camera);
                         Toast.makeText(this,"Error1 while capturing image",Toast.LENGTH_SHORT).show();
                     }
                 } else {
@@ -241,64 +392,132 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Method that decodes a scaled image from full size image
+     * Checks whether field is empty
      */
-    private Bitmap getBitmap(String path) {
-        Uri uri = Uri.fromFile(new File(path));
-        InputStream inputStream;
-        try {
-            // set max size of image
-            final int IMAGE_MAX_SIZE = 1200000; // 1.2 MP
-            inputStream = getContentResolver().openInputStream(uri);
+    public abstract class MyTextWatcher implements TextWatcher {
+        boolean empty = true;
 
-            // Decode image size
-            BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inJustDecodeBounds = true;
-            BitmapFactory.decodeStream(inputStream,null,options);
-            inputStream.close();
+        public boolean nonEmpty() {
+            return !empty;
+        }
+    }
 
-            int scale = 1;
-            while ((options.outWidth * options.outHeight) * (1 / Math.pow(scale, 2)) > IMAGE_MAX_SIZE){
-                scale++;
+    /**
+     * class to perform communication with server and sending of data
+     * Params, the type of the parameters sent to the task upon execution.
+     * Here, three string variables are sent to the background task, so type is String.
+     * Progress, the type of the progress units published during the background computation.
+     * We are not using any progress units here, so type is Void.
+     * Result, the type of the result of the background computation.
+     * As we are not using the result, the type is Void.
+
+     */
+    private class HttpRequest extends AsyncTask<JSONObject, Void, Void> {
+        private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
+        long start;
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            dialog.setMessage("Please wait");
+            dialog.show();
+            start = System.currentTimeMillis();
+        }
+
+        @Override
+        protected Void doInBackground(JSONObject... arg) {
+            System.out.println("doInBackground");
+            try {
+                // Preparing multipart-form params
+                Iterator<String> keys = arg[0].keys();
+                List<Part> parts = new ArrayList<>();
+
+                String boundary = "-------------" + System.currentTimeMillis();
+                MultipartEntity partsBuilder = new MultipartEntity();
+                while (keys.hasNext()) {
+                    String name = keys.next();
+                    StringPart stringPart = new StringPart(name, arg[0].getString(name));
+                    parts.add(stringPart);
+                    partsBuilder.addPart(name, new StringBody(arg[0].getString(name)));
+                }
+
+                // setting image value
+                byte[] image = (byte[]) arg[1].get("image");
+                System.out.println("size: " + image.length);
+                partsBuilder.addPart("image", new ByteArrayBody(image, "image.png"));
+                /*FilePart filePart = new FilePart("image", new ByteArrayPartSource("afile", image));
+                parts.add(filePart);*/
+
+                HttpEntity entity = partsBuilder;
+                ServiceHandler serviceClient = new ServiceHandler();
+
+                HttpResponse httpResponse = null;
+                try {
+                    String html = ServiceHandler.responseToString(httpResponse = serviceClient.makeMultiPartPost(URL_TO_SEND_DATA,
+                            entity));
+                    /* For debugging */
+                    // System.out.println("html: " + html);
+                } catch (IllegalArgumentException e) {
+
+                }
+
+                if (httpResponse != null)
+                    statusCode = Integer.toString(httpResponse.getStatusLine().getStatusCode());
+                else
+                    statusCode = "Server Not Found!";
+
+                Log.i("Status", statusCode);
+
+                if (!statusCode.equals("") && !statusCode.matches("2\\d\\d"))
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Status: " + statusCode, Toast.LENGTH_LONG).show();
+                        }
+                    });
+                else
+                    MainActivity.this.runOnUiThread(new Runnable() {
+                        public void run() {
+                            Toast.makeText(MainActivity.this, "Okay", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+            } catch (JSONException | UnsupportedEncodingException e) {
+                e.printStackTrace();
             }
-            String msg = "scale = " + scale + ", original width: " + options.outWidth + "," +
-                    " original height: " + options.outHeight;
-            Log.d("",msg);
 
-            Bitmap bitmap;
-            inputStream = getContentResolver().openInputStream(uri);
-            if (scale > 1){
-                scale --;
-                // Scale to max possible inSampleSize that still yields an image larger than target
-                options = new BitmapFactory.Options();
-                options.inSampleSize = scale;
-                bitmap = BitmapFactory.decodeStream(inputStream,null,options);
+            long timeCost = System.currentTimeMillis() - start;
+            if (timeCost < 2000L) {
+                try {
+                    Thread.sleep(2000L - timeCost);
+                } catch (InterruptedException e) {
 
-                // resize to desired dimensions
-                int height = bitmap.getHeight();
-                int width = bitmap.getWidth();
-
-                double destHeight = Math.sqrt(IMAGE_MAX_SIZE/ ((double) width) / height);
-                double destWidth = (destHeight / height) * width;
-                Bitmap scaledBitmap = Bitmap.createScaledBitmap(bitmap, (int) destWidth, (int) destHeight, true);
-                bitmap.recycle();
-                bitmap = scaledBitmap;
-
-                System.gc();
-            } else {
-                bitmap = BitmapFactory.decodeStream(inputStream);
+                }
             }
-
-            inputStream.close();
-            msg = "Bitmap size - width: " + bitmap.getWidth() + ", height: " + bitmap.getHeight();
-            Log.d("",msg);
-            return  bitmap;
-        } catch (IOException err){
-            Log.e("IO Error",err.getMessage());
-            return null;
-        } catch (Exception ex){
-            Log.e("Exception",ex.getMessage());
             return null;
         }
+
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+            if (dialog.isShowing()) {
+                dialog.dismiss();
+            }
+        }
+    }
+
+    /**
+     * Method to called in LoginActivity to create Intent containing extra info as needed.
+     * Helps to hide MainActivity's needed extras
+     * @param packageContext current context of application
+     * @param first_name user's first name
+     * @param last_name user's last name
+     * @param reg_num user's registration number
+     * @return intent to be created
+     */
+    public static Intent newIntent(Context packageContext, String first_name, String last_name, String reg_num) {
+        Intent i = new Intent(packageContext, MainActivity.class);
+        i.putExtra(EXTRA_USER_FIRST_NAME, first_name);
+        i.putExtra(EXTRA_USER_LAST_NAME, last_name);
+        i.putExtra(EXTRA_USER_REG_NUM, reg_num);
+        return i;
     }
 }
