@@ -228,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 ArrayList<Double> location = mLocatingClass.findLocation();
+                Log.i(TAG,location.toString());
                 String phone = mLocatingClass.getPhone();
                 String time = mLocatingClass.getTime();
                 String latitude = "0";
@@ -429,6 +430,16 @@ public class MainActivity extends AppCompatActivity {
 
     private class HttpsRequest extends AsyncTask<String, Void, Void>{
 
+        ProgressDialog pDialog = new ProgressDialog(MainActivity.this);
+
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            pDialog.setMessage("Please wait");
+            pDialog.setIndeterminate(true);
+            pDialog.show();
+        }
+
         @Override
         protected Void doInBackground(String... jsonObjects) {
             String name = jsonObjects[0];
@@ -482,6 +493,14 @@ public class MainActivity extends AppCompatActivity {
             }
 
             return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
+            if (pDialog.isShowing()){
+                pDialog.cancel();
+            }
         }
     }
 
