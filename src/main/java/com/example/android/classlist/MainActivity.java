@@ -5,6 +5,7 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.FaceDetector;
 import android.net.Uri;
@@ -16,6 +17,7 @@ import android.provider.MediaStore;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
+import android.util.Base64;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -30,10 +32,13 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.NameValuePair;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -69,11 +74,22 @@ public class MainActivity extends AppCompatActivity {
     String mast;
     String statusCode;
 
+    private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
-    private static final String URL_TO_SEND_DATA = "192.168.43.77:5000/enternew";
+    private static final String URL_TO_SEND_DATA = "http://192.168.0.11:5000/enternew";
     private static final String EXTRA_USER_FIRST_NAME = "com.example.android.classlist.first_name";
     private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
+
+    private static final String NAME = "name";
+    private static final String REG_NO = "regno";
+    private static final String PIC = "picture";
+    private static final String TIME = "time";
+    //private static final String GPS = "gps";
+    private static final String LATITUDE = "latitude";
+    private static final String LONGITUDE = "longitude";
+    private static final String LAC = "lac";
+    private static final String CI = "ci";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -214,27 +230,36 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<Double> location = mLocatingClass.findLocation();
                 String phone = mLocatingClass.getPhone();
                 String time = mLocatingClass.getTime();
+                String latitude = "0";
+                String longitude = "0";
+                String lac = "0", ci = "0";
 
-                JSONObject param = new JSONObject();
-                JSONObject image = new JSONObject();
+                //JSONObject param = new JSONObject();
+                String name = full_name.getText().toString();
+                String regno = adm_num.getText().toString();
 
-                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                //photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+                byte[] byteArrayImage = baos.toByteArray();
+                String image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
 
-                try {
-                    image.put("picture", bos.toByteArray());
-                    param.put("name", full_name.getText().toString());
-                    param.put("regno", adm_num.getText().toString());
-                    param.put("time", time);
+                new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci);
+                //try {
+                    //image.put(PIC, bos.toByteArray());
+                    //param.put("name", full_name.getText().toString());
+                    //param.put("regno", adm_num.getText().toString());
+                    //param.put("time", timeIn);
                     /*param.put("latitude",location.get(0));
                     param.put("longitude", location.get(1));
                     param.put("altitude",location.get(2));
                     param.put("phone", phone);
                     param.put("mast", mast);*/
-                    new HttpRequest().execute(param,image);
-                } catch (JSONException ex){
+                    //new HttpRequest().execute(param,image);
+                /*} catch (JSONException ex){
                     Log.e(MainActivity.class.toString(), ex.getMessage());
-                }
+                }*/
             }
         });
 
@@ -402,6 +427,64 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private class HttpsRequest extends AsyncTask<String, Void, Void>{
+
+        @Override
+        protected Void doInBackground(String... jsonObjects) {
+            String name = jsonObjects[0];
+            String reg_no = jsonObjects[1];
+            String time = jsonObjects[2];
+            String pic = jsonObjects[3];
+            String latitude = jsonObjects[4];
+            String longitude = jsonObjects[5];
+            String lac = jsonObjects[6];
+            String ci = jsonObjects[7];
+
+            // preparing post params using namevalue pair
+            List<NameValuePair> params = new ArrayList<>();
+            params.add(new BasicNameValuePair(NAME,name));
+            params.add(new BasicNameValuePair(REG_NO,reg_no));
+            params.add(new BasicNameValuePair(TIME, time));
+            params.add(new BasicNameValuePair(PIC, pic));
+            params.add(new BasicNameValuePair(LATITUDE, latitude));
+            params.add(new BasicNameValuePair(LONGITUDE, longitude));
+            params.add(new BasicNameValuePair(LAC, lac));
+            params.add(new BasicNameValuePair(CI, ci));
+
+            ServiceHandler serviceClient = new ServiceHandler();
+
+            // create response
+            String json = serviceClient.makeServiceCall(URL_TO_SEND_DATA,ServiceHandler.POST,params);
+
+            Log.d("Create Request: ", "> " + json);
+            if (json != null) {
+                try {
+                    // convert string to json object
+                    Log.i(TAG, json);
+                    JSONObject jsonObj = new JSONObject(json);
+                    boolean error = jsonObj.getBoolean("error");
+                    // checking for error node in json
+                    if (!error) {
+                        // new category created successfully
+                        Log.e("ADDITION SUCCESS ",
+                                "> " + jsonObj.getString("message"));
+                    } else {
+                        Log.e("Add Prediction Error: ",
+                                "> " + jsonObj.getString("message"));
+                    }
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            } else {
+                Log.e("JSON Data", "JSON data error!");
+            }
+
+            return null;
+        }
+    }
+
     /**
      * class to perform communication with server and sending of data
      * Params, the type of the parameters sent to the task upon execution.
@@ -412,7 +495,7 @@ public class MainActivity extends AppCompatActivity {
      * As we are not using the result, the type is Void.
 
      */
-    private class HttpRequest extends AsyncTask<JSONObject, Void, Void> {
+    /*private class HttpRequest extends AsyncTask<JSONObject, Void, Void> {
         private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
         long start;
 
@@ -448,7 +531,7 @@ public class MainActivity extends AppCompatActivity {
                 /*FilePart filePart = new FilePart("image", new ByteArrayPartSource("afile", image));
                 parts.add(filePart);*/
 
-                HttpEntity entity = partsBuilder;
+                /*HttpEntity entity = partsBuilder;
                 ServiceHandler serviceClient = new ServiceHandler();
 
                 HttpResponse httpResponse = null;
@@ -457,7 +540,7 @@ public class MainActivity extends AppCompatActivity {
                             entity));
                     /* For debugging */
                     // System.out.println("html: " + html);
-                } catch (IllegalArgumentException e) {
+                /*} catch (IllegalArgumentException e) {
 
                 }
 
@@ -502,7 +585,7 @@ public class MainActivity extends AppCompatActivity {
                 dialog.dismiss();
             }
         }
-    }
+    }*/
 
     /**
      * Method to called in LoginActivity to create Intent containing extra info as needed.
