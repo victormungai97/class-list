@@ -35,15 +35,23 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
@@ -76,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
-    private static final String URL_TO_SEND_DATA = "http://192.168.0.11:5000/enternew";
+    private static final String URL_TO_SEND_DATA = "http://192.168.0.11:5000/fromapp/";
     private static final String EXTRA_USER_FIRST_NAME = "com.example.android.classlist.first_name";
     private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
@@ -234,6 +242,7 @@ public class MainActivity extends AppCompatActivity {
                 String latitude = "0";
                 String longitude = "0";
                 String lac = "0", ci = "0";
+                String image = "";
 
                 //JSONObject param = new JSONObject();
                 String name = full_name.getText().toString();
@@ -244,23 +253,9 @@ public class MainActivity extends AppCompatActivity {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
                 byte[] byteArrayImage = baos.toByteArray();
-                String image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
 
                 new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci);
-                //try {
-                    //image.put(PIC, bos.toByteArray());
-                    //param.put("name", full_name.getText().toString());
-                    //param.put("regno", adm_num.getText().toString());
-                    //param.put("time", timeIn);
-                    /*param.put("latitude",location.get(0));
-                    param.put("longitude", location.get(1));
-                    param.put("altitude",location.get(2));
-                    param.put("phone", phone);
-                    param.put("mast", mast);*/
-                    //new HttpRequest().execute(param,image);
-                /*} catch (JSONException ex){
-                    Log.e(MainActivity.class.toString(), ex.getMessage());
-                }*/
             }
         });
 
@@ -428,7 +423,97 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private class HttpsRequest extends AsyncTask<String, Void, Void>{
+    /**
+     * Open Http connection.
+     * Create HttpPOST object passing the url.
+     * Create Person object & convert it to JSON string.
+     * Add JSON to HttpPOST, set headers & send the POST request.
+     * Get the response Inputstream, convert it to String and return it.
+     * @param  url URL to send to
+     * @param message message to be sent
+     * @return response as String
+     */
+    public static String POST(String url, Message message){
+        InputStream inputStream = null;
+        String result = "";
+        try {
+
+            // 1. create HttpClient
+            HttpClient httpclient = new DefaultHttpClient();
+
+            // 2. make POST request to the given URL
+            HttpPost httpPost = new HttpPost(url);
+
+            String json = "";
+
+            // 3. build jsonObject
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.accumulate(NAME, message.getName());
+            jsonObject.accumulate(REG_NO, message.getReg_no());
+            jsonObject.accumulate(TIME, message.getTime());
+            jsonObject.accumulate(PIC, message.getPic());
+            jsonObject.accumulate(LATITUDE,message.getLatitude());
+            jsonObject.accumulate(LONGITUDE, message.getLongitude());
+            jsonObject.accumulate(LAC, message.getLac());
+            jsonObject.accumulate(CI, message.getCi());
+
+            // 4. convert JSONObject to JSON to String
+            json = jsonObject.toString();
+
+            // ** Alternative way to convert Message object to JSON string usin Jackson Lib
+            // ObjectMapper mapper = new ObjectMapper();
+            // json = mapper.writeValueAsString(person);
+
+            // 5. set json to StringEntity
+            StringEntity se = new StringEntity(json);
+
+            // 6. set httpPost Entity
+            httpPost.setEntity(se);
+
+            // 7. Set some headers to inform server about the type of the content
+            httpPost.setHeader("Accept", "application/json");
+            httpPost.setHeader("Content-type", "application/json");
+
+            // 8. Execute POST request to the given URL
+            HttpResponse httpResponse = httpclient.execute(httpPost);
+
+            // 9. receive response as inputStream
+            inputStream = httpResponse.getEntity().getContent();
+
+            // 10. convert inputstream to string
+            if(inputStream != null)
+                result = convertInputStreamToString(inputStream);
+            else
+                result = "Did not work!";
+
+        } catch (Exception e) {
+            Log.d("InputStream", e.getLocalizedMessage());
+        }
+
+        // 11. return result
+        return result;
+    }
+
+    /**
+     * Helper method to convert inputstream to String
+     * @param inputStream inputStream to be converted
+     * @return String
+     * @throws IOException
+     */
+
+    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
+        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
+        String line = "";
+        String result = "";
+        while((line = bufferedReader.readLine()) != null)
+            result += line;
+
+        inputStream.close();
+        return result;
+
+    }
+
+    private class HttpsRequest extends AsyncTask<String, Void, String>{
 
         ProgressDialog pDialog = new ProgressDialog(MainActivity.this);
 
@@ -441,7 +526,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected Void doInBackground(String... jsonObjects) {
+        protected String doInBackground(String... jsonObjects) {
             String name = jsonObjects[0];
             String reg_no = jsonObjects[1];
             String time = jsonObjects[2];
@@ -451,160 +536,18 @@ public class MainActivity extends AppCompatActivity {
             String lac = jsonObjects[6];
             String ci = jsonObjects[7];
 
-            // preparing post params using namevalue pair
-            List<NameValuePair> params = new ArrayList<>();
-            params.add(new BasicNameValuePair(NAME,name));
-            params.add(new BasicNameValuePair(REG_NO,reg_no));
-            params.add(new BasicNameValuePair(TIME, time));
-            params.add(new BasicNameValuePair(PIC, pic));
-            params.add(new BasicNameValuePair(LATITUDE, latitude));
-            params.add(new BasicNameValuePair(LONGITUDE, longitude));
-            params.add(new BasicNameValuePair(LAC, lac));
-            params.add(new BasicNameValuePair(CI, ci));
-
-            ServiceHandler serviceClient = new ServiceHandler();
-
-            // create response
-            String json = serviceClient.makeServiceCall(URL_TO_SEND_DATA,ServiceHandler.POST,params);
-
-            Log.d("Create Request: ", "> " + json);
-            if (json != null) {
-                try {
-                    // convert string to json object
-                    Log.i(TAG, json);
-                    JSONObject jsonObj = new JSONObject(json);
-                    boolean error = jsonObj.getBoolean("error");
-                    // checking for error node in json
-                    if (!error) {
-                        // new category created successfully
-                        Log.e("ADDITION SUCCESS ",
-                                "> " + jsonObj.getString("message"));
-                    } else {
-                        Log.e("Add Prediction Error: ",
-                                "> " + jsonObj.getString("message"));
-                    }
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-            } else {
-                Log.e("JSON Data", "JSON data error!");
-            }
-
-            return null;
+            Message message = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci);
+            return POST(URL_TO_SEND_DATA, message);
         }
 
         @Override
-        protected void onPostExecute(Void aVoid) {
+        protected void onPostExecute(String aVoid) {
             super.onPostExecute(aVoid);
             if (pDialog.isShowing()){
                 pDialog.cancel();
             }
         }
     }
-
-    /**
-     * class to perform communication with server and sending of data
-     * Params, the type of the parameters sent to the task upon execution.
-     * Here, three string variables are sent to the background task, so type is String.
-     * Progress, the type of the progress units published during the background computation.
-     * We are not using any progress units here, so type is Void.
-     * Result, the type of the result of the background computation.
-     * As we are not using the result, the type is Void.
-
-     */
-    /*private class HttpRequest extends AsyncTask<JSONObject, Void, Void> {
-        private ProgressDialog dialog = new ProgressDialog(MainActivity.this);
-        long start;
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            dialog.setMessage("Please wait");
-            dialog.show();
-            start = System.currentTimeMillis();
-        }
-
-        @Override
-        protected Void doInBackground(JSONObject... arg) {
-            System.out.println("doInBackground");
-            try {
-                // Preparing multipart-form params
-                Iterator<String> keys = arg[0].keys();
-                List<Part> parts = new ArrayList<>();
-
-                String boundary = "-------------" + System.currentTimeMillis();
-                MultipartEntity partsBuilder = new MultipartEntity();
-                while (keys.hasNext()) {
-                    String name = keys.next();
-                    StringPart stringPart = new StringPart(name, arg[0].getString(name));
-                    parts.add(stringPart);
-                    partsBuilder.addPart(name, new StringBody(arg[0].getString(name)));
-                }
-
-                // setting image value
-                byte[] image = (byte[]) arg[1].get("image");
-                System.out.println("size: " + image.length);
-                partsBuilder.addPart("image", new ByteArrayBody(image, "image.png"));
-                /*FilePart filePart = new FilePart("image", new ByteArrayPartSource("afile", image));
-                parts.add(filePart);*/
-
-                /*HttpEntity entity = partsBuilder;
-                ServiceHandler serviceClient = new ServiceHandler();
-
-                HttpResponse httpResponse = null;
-                try {
-                    String html = ServiceHandler.responseToString(httpResponse = serviceClient.makeMultiPartPost(URL_TO_SEND_DATA,
-                            entity));
-                    /* For debugging */
-                    // System.out.println("html: " + html);
-                /*} catch (IllegalArgumentException e) {
-
-                }
-
-                if (httpResponse != null)
-                    statusCode = Integer.toString(httpResponse.getStatusLine().getStatusCode());
-                else
-                    statusCode = "Server Not Found!";
-
-                Log.i("Status", statusCode);
-
-                if (!statusCode.equals("") && !statusCode.matches("2\\d\\d"))
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Status: " + statusCode, Toast.LENGTH_LONG).show();
-                        }
-                    });
-                else
-                    MainActivity.this.runOnUiThread(new Runnable() {
-                        public void run() {
-                            Toast.makeText(MainActivity.this, "Okay", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-            } catch (JSONException | UnsupportedEncodingException e) {
-                e.printStackTrace();
-            }
-
-            long timeCost = System.currentTimeMillis() - start;
-            if (timeCost < 2000L) {
-                try {
-                    Thread.sleep(2000L - timeCost);
-                } catch (InterruptedException e) {
-
-                }
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(Void result) {
-            super.onPostExecute(result);
-            if (dialog.isShowing()) {
-                dialog.dismiss();
-            }
-        }
-    }*/
 
     /**
      * Method to called in LoginActivity to create Intent containing extra info as needed.
