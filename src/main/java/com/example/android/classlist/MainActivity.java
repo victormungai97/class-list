@@ -235,12 +235,12 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<Double> location = mLocatingClass.findLocation();
+                ArrayList<Double> location = mLocatingClass.getLocation();
                 Log.i(TAG,location.toString());
                 String phone = mLocatingClass.getPhone();
                 String time = mLocatingClass.getTime();
-                String latitude = "0";
-                String longitude = "0";
+                String latitude = location.get(0).toString();
+                String longitude = location.get(1).toString();
                 String lac = "0", ci = "0";
                 String image = "";
 
