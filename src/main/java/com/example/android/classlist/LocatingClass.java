@@ -57,6 +57,7 @@ class LocatingClass {
     private double mLatitude;
     private double mLongitude;
     private double mAltitude;
+    private ArrayList<Double> locate = new ArrayList<>();
 
     public double getLatitude() {
         return mLatitude;
@@ -100,7 +101,7 @@ class LocatingClass {
     /**
      * Method builds location request to get a location fix
      */
-    Void findLocation(){
+    ArrayList<Double> findLocation(){
         turnGPSOn();
         LocationRequest locationRequest = LocationRequest.create();
         // set priority between battery life and accuracy
@@ -133,6 +134,9 @@ class LocatingClass {
                                     + "\nPhone: " + phone
                                     + "\nMast: " + mast;
                             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
+                            LocatingClass.this.mLatitude = latitude;
+                            LocatingClass.this.mLongitude = longitude;
+                            LocatingClass.this.mAltitude = altitude;
                             setLatitude(latitude);
                             setLongitude(longitude);
                             setAltitude(altitude);
@@ -142,7 +146,7 @@ class LocatingClass {
             Log.e(TAG,"Error connecting to location.\n"+ex.getMessage());
         }
 
-        return null;
+        return locate;
     }
 
     String getPhone(){
@@ -199,8 +203,9 @@ class LocatingClass {
      * @return status of connection
      */
     private static boolean isConnectedMobile(Context context) {
-        return ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
-                .getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN;
+//        return ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+//                .getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        return true;
     }
 
     /**

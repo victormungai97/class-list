@@ -13,8 +13,10 @@ public class Message {
     private String longitude="";
     private String lac="";
     private String ci="";
+    private String phone="";
 
-    public Message(String name, String reg_no, String time, String pic, String latitude, String longitude, String lac, String ci) {
+    public Message(String name, String reg_no, String time, String pic, String latitude,
+                   String longitude, String lac, String ci, String phone) {
         this.name = name;
         this.reg_no = reg_no;
         this.time = time;
@@ -23,6 +25,7 @@ public class Message {
         this.longitude = longitude;
         this.lac = lac;
         this.ci = ci;
+        this.phone = phone;
     }
 
     public String getName() {
@@ -87,5 +90,13 @@ public class Message {
 
     public void setCi(String ci) {
         this.ci = ci;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 }

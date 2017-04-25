@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 from flask import Flask,render_template,request,url_for,jsonify
 from flask_sqlalchemy import SQLAlchemy
@@ -22,8 +23,9 @@ class Test(db.Model):
 	ci = db.Column('ci',db.Float)
 	pic_url = db.Column('picture_url',db.String(60))
 	time = db.Column('time',db.Unicode(60))
+	source = db.Column('source',db.Unicode(60))
 
-	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, time = None):
+	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, source, time = None):
 		self.name = name
 		self.reg_no = reg_no
 		if not time:
@@ -35,12 +37,15 @@ class Test(db.Model):
 		self.lac = lac
 		self.ci = ci
 		self.pic_url = pic_url
+		self.source = source
 
 	def __repr__(self):
 		return "<Student %r>" % self.name
 
 # This is the path to the upload directory
-app.config['UPLOAD_FOLDER'] = 'static/uploads/'
+print (os.path.abspath(os.curdir))
+new_folder = os.path.join("static/uploads/")
+app.config['UPLOAD_FOLDER'] = new_folder
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg'])
 
@@ -108,12 +113,13 @@ def from_app():
 		img_data=json['picture']
 		img_data=img_data.encode('UTF-8','strict')
 		import base64
-		pic_name = regno + ".jpg"
+		pic_name = name + ".jpg"
 		with open(pic_name, 'wb') as fh:
 			fh.write(base64.b64decode(img_data))
 		pic = pic_name
+		phone=json['phone']
 		
-		(message, status) = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'fromapp')
+		(message, status) = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'fromapp',phone)
 		if not status:
 			error=str(False)
 		else:
@@ -121,8 +127,16 @@ def from_app():
 	result = "{message : %s, error=%s}" % (message, error)
 	return result
 	
-def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method):
+def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
 	pic_url=''
+	match = re.search("/[\S]+/",regno)
+	if match:
+		paths = regno.split('/')
+		print (regno)
+		course_code = paths[0]
+		year_of_study = paths[2]
+		app.config['UPLOAD_FOLDER'] = "/".join([app.config.get('UPLOAD_FOLDER'),course_code,year_of_study,'/'])
+		regno = paths[1]
   # Check if the file is one of the allowed types/extensions
 	if method == "record":
 		if pic and allowed_file(pic.filename):
@@ -139,7 +153,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method):
 	# if student not in db, enter into db
 	if not data:
 		#(self, name, reg_no, time=None, gps, lac, ci, pic_url)
-		test = Test(name, regno, latitude, longitude, lac, ci, pic_url, time)
+		test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time)
 		# for successful connection
 		try:
 			# add new row to db
@@ -155,6 +169,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method):
 	else:
 		message = "Student is in database"
 		status = 2
+	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
 	
 @app.route('/record/',methods=['POST', 'GET'])

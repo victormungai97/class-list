@@ -84,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
-    private static final String URL_TO_SEND_DATA = "http://192.168.0.11:5000/fromapp/";
+    private static final String URL_TO_SEND_DATA = "http://192.168.43.229:5000/fromapp/";
     private static final String EXTRA_USER_FIRST_NAME = "com.example.android.classlist.first_name";
     private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private static final String LONGITUDE = "longitude";
     private static final String LAC = "lac";
     private static final String CI = "ci";
+    private static final String PHONE = "phone";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -235,27 +236,34 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ArrayList<Double> location = mLocatingClass.getLocation();
-                Log.i(TAG,location.toString());
-                String phone = mLocatingClass.getPhone();
-                String time = mLocatingClass.getTime();
-                String latitude = location.get(0).toString();
-                String longitude = location.get(1).toString();
-                String lac = "0", ci = "0";
-                String image = "";
+                try {
+//                    mLocatingClass.findLocation();
+                    ArrayList<Double> location = mLocatingClass.findLocation();
+                    Log.i(TAG, location.toString());
+                    String phone = mLocatingClass.getPhone();
+                    String time = mLocatingClass.getTime();
+                    String latitude = String.valueOf(mLocatingClass.getLatitude());
+                    String longitude = String.valueOf(mLocatingClass.getLongitude());
+                    JSONObject jsonObject = (JSONObject) LocatingClass.getCellInfo(MainActivity.this).get("primary");
+                    String lac = String.valueOf(jsonObject.getInt("LAC")), ci = "0";
+                    String image = "";
 
-                //JSONObject param = new JSONObject();
-                String name = full_name.getText().toString();
-                String regno = adm_num.getText().toString();
+                    //JSONObject param = new JSONObject();
+                    String name = full_name.getText().toString();
+                    String regno = adm_num.getText().toString();
 
-                //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                //photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
-                byte[] byteArrayImage = baos.toByteArray();
-                image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                    //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    //photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                    photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+                    byte[] byteArrayImage = baos.toByteArray();
+                    image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                    String url = mServerUrl.getText().toString();
 
-                new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci);
+                    new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci, url, phone);
+                } catch (JSONException ex){
+                    Log.e(TAG, "Error reading cell info "+ex.getMessage());
+                }
             }
         });
 
@@ -456,6 +464,7 @@ public class MainActivity extends AppCompatActivity {
             jsonObject.accumulate(LONGITUDE, message.getLongitude());
             jsonObject.accumulate(LAC, message.getLac());
             jsonObject.accumulate(CI, message.getCi());
+            jsonObject.accumulate(PHONE, message.getPhone());
 
             // 4. convert JSONObject to JSON to String
             json = jsonObject.toString();
@@ -535,9 +544,11 @@ public class MainActivity extends AppCompatActivity {
             String longitude = jsonObjects[5];
             String lac = jsonObjects[6];
             String ci = jsonObjects[7];
+            String url = jsonObjects[8];
+            String phone = jsonObjects[9];
 
-            Message message = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci);
-            return POST(URL_TO_SEND_DATA, message);
+            Message message = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci, phone);
+            return POST(url, message);
         }
 
         @Override
