@@ -234,7 +234,7 @@ class LocatingClass {
                 primaryCellInfo.put("type", tel.getNetworkType());
                 primaryCellInfo.put("Operator", tel.getNetworkOperator());
                 primaryCellInfo.put("LAC", ((GsmCellLocation) cellLocation).getLac());
-                primaryCellInfo.put("CID", ((GsmCellLocation) cellLocation).getCid() % 0x10000);
+                primaryCellInfo.put("CID", ((GsmCellLocation) cellLocation).getCid() % 0xffff);
             } catch (Exception e) {
                 Log.e("Network error", e.getMessage());
             }

@@ -5,7 +5,6 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.FaceDetector;
 import android.net.Uri;
@@ -26,23 +25,14 @@ import android.widget.ImageView;
 import android.widget.Toast;
 import android.text.TextWatcher;
 
-import com.android.internal.http.multipart.Part;
-import com.android.internal.http.multipart.StringPart;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.NameValuePair;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.entity.mime.MultipartEntity;
-import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -52,12 +42,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Iterator;
-import java.util.List;
 
 import static com.example.android.classlist.R.id.ur_name;
 
@@ -72,15 +59,16 @@ public class MainActivity extends AppCompatActivity {
     private EditText mServerUrl;
     String name;
     String reg_no;
+    int status = 0;
+    String message;
 
     LocatingClass mLocatingClass; // instance of locating class
-    GoogleApiClient mClient;
+    GoogleApiClient mClient; // Google Play Services instance
     Bitmap photo = null;
     MyTextWatcher urlTextWatcher;
     MyTextWatcher nameWatcher;
     MyTextWatcher regWatcher;
     String mast;
-    String statusCode;
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
@@ -89,11 +77,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
 
+    // json keys
     private static final String NAME = "name";
     private static final String REG_NO = "regno";
     private static final String PIC = "picture";
     private static final String TIME = "time";
-    //private static final String GPS = "gps";
     private static final String LATITUDE = "latitude";
     private static final String LONGITUDE = "longitude";
     private static final String LAC = "lac";
@@ -142,11 +130,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().length() == 0) {
-                    empty = true;
-                } else {
-                    empty = false;
-                }
+                empty = editable.toString().length() == 0;
                 updateSubmitButtonState();
             }
         };
@@ -164,11 +148,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        if (editable.toString().length() == 0) {
-                            empty = true;
-                        } else {
-                            empty = false;
-                        }
+                        empty = editable.toString().length() == 0;
                         updateSubmitButtonState();
                     }
                 };
@@ -186,11 +166,7 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void afterTextChanged(Editable editable) {
-                        if (editable.toString().length() == 0) {
-                            empty = true;
-                        } else {
-                            empty = false;
-                        }
+                        empty = editable.toString().length() == 0;
                         updateSubmitButtonState();
                     }
                 };
@@ -245,8 +221,7 @@ public class MainActivity extends AppCompatActivity {
                     String latitude = String.valueOf(mLocatingClass.getLatitude());
                     String longitude = String.valueOf(mLocatingClass.getLongitude());
                     JSONObject jsonObject = (JSONObject) LocatingClass.getCellInfo(MainActivity.this).get("primary");
-                    String lac = String.valueOf(jsonObject.getInt("LAC")), ci = "0";
-                    String image = "";
+                    String lac = String.valueOf(jsonObject.getInt("LAC")), ci = String.valueOf(jsonObject.getInt("CID"));
 
                     //JSONObject param = new JSONObject();
                     String name = full_name.getText().toString();
@@ -257,10 +232,15 @@ public class MainActivity extends AppCompatActivity {
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
                     photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
                     byte[] byteArrayImage = baos.toByteArray();
-                    image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                    String image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
                     String url = mServerUrl.getText().toString();
 
                     new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci, url, phone);
+                    if (status == 0){
+                        Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                    }
                 } catch (JSONException ex){
                     Log.e(TAG, "Error reading cell info "+ex.getMessage());
                 }
@@ -393,7 +373,12 @@ public class MainActivity extends AppCompatActivity {
         File externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = externalFilesDir.getAbsolutePath();
+        try {
+            assert externalFilesDir != null;
+            mCurrentPhotoPath = externalFilesDir.getAbsolutePath();
+        } catch (NullPointerException ex){
+            Log.e(TAG, ex.getMessage());
+        }
 
         return new File(externalFilesDir, getPhotoFilename());
     }
@@ -423,10 +408,10 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Checks whether field is empty
      */
-    public abstract class MyTextWatcher implements TextWatcher {
+    abstract class MyTextWatcher implements TextWatcher {
         boolean empty = true;
 
-        public boolean nonEmpty() {
+        boolean nonEmpty() {
             return !empty;
         }
     }
@@ -442,7 +427,7 @@ public class MainActivity extends AppCompatActivity {
      * @return response as String
      */
     public static String POST(String url, Message message){
-        InputStream inputStream = null;
+        InputStream inputStream;
         String result = "";
         try {
 
@@ -452,7 +437,7 @@ public class MainActivity extends AppCompatActivity {
             // 2. make POST request to the given URL
             HttpPost httpPost = new HttpPost(url);
 
-            String json = "";
+            String json;
 
             // 3. build jsonObject
             JSONObject jsonObject = new JSONObject();
@@ -504,15 +489,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Helper method to convert inputstream to String
+     * Helper method to convert input stream to String
      * @param inputStream inputStream to be converted
      * @return String
-     * @throws IOException
+     * @throws IOException exception opening reader
      */
 
     private static String convertInputStreamToString(InputStream inputStream) throws IOException {
         BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line = "";
+        String line;
         String result = "";
         while((line = bufferedReader.readLine()) != null)
             result += line;
@@ -522,7 +507,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private class HttpsRequest extends AsyncTask<String, Void, String>{
+    private class HttpsRequest extends AsyncTask<String, Void, Void>{
 
         ProgressDialog pDialog = new ProgressDialog(MainActivity.this);
 
@@ -535,7 +520,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         @Override
-        protected String doInBackground(String... jsonObjects) {
+        protected Void doInBackground(String... jsonObjects) {
             String name = jsonObjects[0];
             String reg_no = jsonObjects[1];
             String time = jsonObjects[2];
@@ -548,11 +533,54 @@ public class MainActivity extends AppCompatActivity {
             String phone = jsonObjects[9];
 
             Message message = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci, phone);
-            return POST(url, message);
+
+            processResults(POST(url,message));
+            return null;
+        }
+
+        /**
+         * Method to process response from server
+         * @param response Message from server
+         * @return status of connection
+         */
+        void processResults(String response){
+            // status code;
+            Log.d("Create Request: ", "> " + response);
+
+            if (response != null) {
+                try {
+                    // convert string to json object
+                    JSONObject jsonObj = new JSONObject(response);
+                    boolean error = jsonObj.getBoolean("error");
+                    // checking for error node in json
+                    if (!error) {
+                        // new category created successfully
+                        status = 0;
+                        Log.i("ADDITION SUCCESS ",
+                                "> " + jsonObj.getString("message"));
+                        message = jsonObj.getString("message");
+                    } else {
+                        status = 1;
+                        Log.e("Signing in Error: ",
+                                "> " + jsonObj.getString("message"));
+                        message = jsonObj.getString("message");
+                    }
+
+                } catch (JSONException e) {
+                    status = 2;
+                    e.printStackTrace();
+                    message = "Error sending data";
+                }
+
+            } else {
+                status = 3;
+                Log.e("JSON Data", "JSON data error!");
+                message = "Error sending data";
+            }
         }
 
         @Override
-        protected void onPostExecute(String aVoid) {
+        protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             if (pDialog.isShowing()){
                 pDialog.cancel();

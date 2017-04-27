@@ -9,10 +9,11 @@ import pymysql as mysql
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = '''mysql+pymysql://myuser:xxxx@localhost/test'''
-db = SQLAlchemy(app)
+db = SQLAlchemy(app) # db instance variable
 
 class Test(db.Model):
-	__tablename__ = 'students'
+	'''Class that models students table'''
+	__tablename__ = 'students' # set table name
 	id = db.Column('id', db.Integer, primary_key=True)
 	name = db.Column('name',db.String(60),unique=True)
 	reg_no = db.Column('regno',db.Unicode(60),unique=True)
@@ -26,12 +27,12 @@ class Test(db.Model):
 	source = db.Column('source',db.Unicode(60))
 
 	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, source, time = None):
+		'''Function initializes class and is used to add user to db'''
 		self.name = name
 		self.reg_no = reg_no
 		if not time:
 			time = strftime("%b %d, %Y %H:%M:%S")
 		self.time = time
-		#self.gps = gps
 		self.latitude = lat
 		self.longitude = longi
 		self.lac = lac
@@ -43,30 +44,35 @@ class Test(db.Model):
 		return "<Student %r>" % self.name
 
 # This is the path to the upload directory
-print (os.path.abspath(os.curdir))
+print ("Current path is", os.path.abspath(os.curdir))
 new_folder = os.path.join("static/uploads/")
 app.config['UPLOAD_FOLDER'] = new_folder
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg'])
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
+	'''Checks whether file is allowed based on filename extension'''
+	return '.' in filename and filename.rsplit('.', 1)[1] in app.config['ALLOWED_EXTENSIONS']
 
 def create_database():
+	'''Function creates table where not created'''
 	db.create_all()
 
 #home page
 @app.route('/')
 def home():
+	'''Defines home page'''
 	create_database()
 	return render_template('home.html')
 
 #add student page
 @app.route('/enternew/')
 def new_student():
-    return render_template('add.html')
+	'''Function to enable one to enter information into db'''
+	return render_template('add.html')
 	
 def get_url(pic,regno,method):
+	'''Function stores and returns url for image'''
 	# Move the file form the temporal folder to the upload folder
 	if not os.path.isdir(app.config['UPLOAD_FOLDER']):
 		os.makedirs(app.config['UPLOAD_FOLDER'])
@@ -85,9 +91,7 @@ def get_url(pic,regno,method):
 	#get path to source of uploaded file
 	source=app.config['UPLOAD_FOLDER']+filename
 
-	#get path to destination of uploaded file
-	##regno=re.findall(r'/([\w^/]+)/',regno)
-	##regno=str(regno[0]) 
+	#get path to destination of uploaded file 
 	destination=app.config['UPLOAD_FOLDER']+regno+'.'+extension
 
 	#rename file
@@ -97,11 +101,15 @@ def get_url(pic,regno,method):
 	
 @app.route('/fromapp/',methods=['POST','GET'])
 def from_app():
+	'''Function to take data from app'''
 	create_database()
+	# user details
 	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
 	message = ""; error = ""
 	if request.method == 'POST':
+		# receive json sent
 		json = request.get_json(force=True)
+		# get received user details
 		regno = json['regno']
 		name=json['name']
 		time=json['time']
@@ -114,6 +122,7 @@ def from_app():
 		img_data=img_data.encode('UTF-8','strict')
 		import base64
 		pic_name = name + ".jpg"
+		# decode image string and write into file
 		with open(pic_name, 'wb') as fh:
 			fh.write(base64.b64decode(img_data))
 		pic = pic_name
@@ -124,17 +133,23 @@ def from_app():
 			error=str(False)
 		else:
 			error=str(True)
-	result = "{message : %s, error=%s}" % (message, error)
+	result = '{"message": "%s", "error": "%s"}' % (message, error)
 	return result
 	
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
-	pic_url=''
+	'''Function to save given user data into db'''
+	pic_url='' # url of picture
+	# check for '/' in regno
 	match = re.search("/[\S]+/",regno)
+	# if '/' found
 	if match:
 		paths = regno.split('/')
 		print (regno)
+		# get course code
 		course_code = paths[0]
+		# get year of study
 		year_of_study = paths[2]
+		# create new path
 		app.config['UPLOAD_FOLDER'] = "/".join([app.config.get('UPLOAD_FOLDER'),course_code,year_of_study,'/'])
 		regno = paths[1]
   # Check if the file is one of the allowed types/extensions
@@ -146,7 +161,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 			pic_url = get_url(pic,regno,method)
 		
 	# Get student with specific regno
-	data = Test.query.filter_by(reg_no=regno).first()
+	data = Test.query.filter((Test.reg_no==regno)|(Test.name==name)).first()
 	
 	status = 0
 	message = ''
@@ -161,7 +176,9 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 			# save changes
 			db.session.commit()
 			message = "Record successfully added"
+		# for unsuccessful connection
 		except:
+			# undo changes
 			db.session.rollback()
 			message = "Record not added. Connection unsuccessful"
 			status = 1
@@ -174,24 +191,25 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	
 @app.route('/record/',methods=['POST', 'GET'])
 def record():
+	'''Function to take data from website'''
 	create_database()
-	#fh = open('imageToSave.jpg',"wb")
 	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
 	if request.method == 'POST':
-
+		# receive details from website
 		regno=request.form['regno']
 		name=request.form['name']
 		time=request.form['time']
-		#gps=request.files['gps']
 		#lac=request.files['lac']
 		#ci=request.files['ci']        
 		pic=request.files['picture']
 
+		# get results from insertion into db
 		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record')
 		return render_template("result.html",msg=message,sts=status)
 	#fh.close()
 	
 def get_contents():
+	'''Function to get data from db'''
 	# open db connection
 	host = 'localhost' # host
 	userName = 'myuser' # user
@@ -208,6 +226,7 @@ def get_contents():
 	
 @app.route('/list/')
 def list():
+	'''Function to print contents of db to webpage'''
 	# select all from database
 	#rows = Test.query.all()
 	rows = get_contents()
