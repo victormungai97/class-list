@@ -54,6 +54,35 @@ class LocatingClass {
     private LocationManager locationManager;
     private boolean isConnected = false;
 
+    private double mLatitude;
+    private double mLongitude;
+    private double mAltitude;
+    private ArrayList<Double> locate = new ArrayList<>();
+
+    public double getLatitude() {
+        return mLatitude;
+    }
+
+    public void setLatitude(double latitude) {
+        mLatitude = latitude;
+    }
+
+    public double getLongitude() {
+        return mLongitude;
+    }
+
+    public void setLongitude(double longitude) {
+        mLongitude = longitude;
+    }
+
+    public double getAltitude() {
+        return mAltitude;
+    }
+
+    public void setAltitude(double altitude) {
+        mAltitude = altitude;
+    }
+
     LocatingClass(Context context, GoogleApiClient googleApiClient) {
         this.mContext = context;
         this.mClient = googleApiClient;
@@ -73,7 +102,6 @@ class LocatingClass {
      * Method builds location request to get a location fix
      */
     ArrayList<Double> findLocation(){
-        final ArrayList<Double> locate = new ArrayList<>();
         turnGPSOn();
         LocationRequest locationRequest = LocationRequest.create();
         // set priority between battery life and accuracy
@@ -106,9 +134,12 @@ class LocatingClass {
                                     + "\nPhone: " + phone
                                     + "\nMast: " + mast;
                             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
-                            locate.add(latitude);
-                            locate.add(longitude);
-                            locate.add(altitude);
+                            LocatingClass.this.mLatitude = latitude;
+                            LocatingClass.this.mLongitude = longitude;
+                            LocatingClass.this.mAltitude = altitude;
+                            setLatitude(latitude);
+                            setLongitude(longitude);
+                            setAltitude(altitude);
                         }
                     });
         } catch (SecurityException ex){
@@ -126,6 +157,15 @@ class LocatingClass {
         DateFormat df = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
         return df.format(calendar.getTime());
+    }
+
+    ArrayList<Double> getLocation(){
+        ArrayList<Double> location = new ArrayList<>();
+        location.add(getLatitude());
+        location.add(getLongitude());
+        location.add(getAltitude());
+
+        return location;
     }
 
     public void showSettingsAlert() {
@@ -163,8 +203,9 @@ class LocatingClass {
      * @return status of connection
      */
     private static boolean isConnectedMobile(Context context) {
-        return ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
-                .getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN;
+//        return ((TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE))
+//                .getNetworkType() != TelephonyManager.NETWORK_TYPE_UNKNOWN;
+        return true;
     }
 
     /**
@@ -193,7 +234,7 @@ class LocatingClass {
                 primaryCellInfo.put("type", tel.getNetworkType());
                 primaryCellInfo.put("Operator", tel.getNetworkOperator());
                 primaryCellInfo.put("LAC", ((GsmCellLocation) cellLocation).getLac());
-                primaryCellInfo.put("CID", ((GsmCellLocation) cellLocation).getCid() % 0x10000);
+                primaryCellInfo.put("CID", ((GsmCellLocation) cellLocation).getCid() % 0xffff);
             } catch (Exception e) {
                 Log.e("Network error", e.getMessage());
             }
