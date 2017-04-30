@@ -28,25 +28,17 @@ import android.text.TextWatcher;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationServices;
 
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-import static com.example.android.classlist.R.id.ur_name;
+import static com.example.android.classlist.Post.POST;
+import static com.example.android.classlist.Post.processResults;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -73,20 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
     private static final String URL_TO_SEND_DATA = "http://192.168.43.229:5000/fromapp/";
-    private static final String EXTRA_USER_FIRST_NAME = "com.example.android.classlist.first_name";
-    private static final String EXTRA_USER_LAST_NAME = "com.example.android.classlist.last_name";
+    private static final String EXTRA_USER_FULL_NAME = "com.example.android.classlist.full_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
-
-    // json keys
-    private static final String NAME = "name";
-    private static final String REG_NO = "regno";
-    private static final String PIC = "picture";
-    private static final String TIME = "time";
-    private static final String LATITUDE = "latitude";
-    private static final String LONGITUDE = "longitude";
-    private static final String LAC = "lac";
-    private static final String CI = "ci";
-    private static final String PHONE = "phone";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -105,7 +85,7 @@ public class MainActivity extends AppCompatActivity {
         mButton = (Button) findViewById(R.id.submit_btn);
         full_name = (EditText) findViewById(R.id.full_name);
         adm_num = (EditText) findViewById(R.id.admission_num);
-        mServerUrl = (EditText) findViewById(ur_name);
+        mServerUrl = (EditText) findViewById(R.id.ur_name_main);
         try {
             mast = LocatingClass.getCellInfo(this).get("name").toString();
         } catch (JSONException ex){
@@ -113,8 +93,7 @@ public class MainActivity extends AppCompatActivity {
         }
 
         // get passed extras
-        name = getIntent().getStringExtra(EXTRA_USER_FIRST_NAME) + " " +
-                getIntent().getStringExtra(EXTRA_USER_LAST_NAME);
+        name = getIntent().getStringExtra(EXTRA_USER_FULL_NAME);
         reg_no = getIntent().getStringExtra(EXTRA_USER_REG_NUM);
 
         urlTextWatcher = new MyTextWatcher() {
@@ -178,6 +157,15 @@ public class MainActivity extends AppCompatActivity {
         mServerUrl.setText(URL_TO_SEND_DATA);
         full_name.setText(name);
         adm_num.setText(reg_no);
+
+        //prevent edition
+        if (name != null){
+            full_name.setEnabled(false);
+        }
+
+        if (reg_no != null){
+            adm_num.setEnabled(false);
+        }
 
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -416,97 +404,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Open Http connection.
-     * Create HttpPOST object passing the url.
-     * Create Person object & convert it to JSON string.
-     * Add JSON to HttpPOST, set headers & send the POST request.
-     * Get the response Inputstream, convert it to String and return it.
-     * @param  url URL to send to
-     * @param message message to be sent
-     * @return response as String
-     */
-    public static String POST(String url, Message message){
-        InputStream inputStream;
-        String result = "";
-        try {
-
-            // 1. create HttpClient
-            HttpClient httpclient = new DefaultHttpClient();
-
-            // 2. make POST request to the given URL
-            HttpPost httpPost = new HttpPost(url);
-
-            String json;
-
-            // 3. build jsonObject
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.accumulate(NAME, message.getName());
-            jsonObject.accumulate(REG_NO, message.getReg_no());
-            jsonObject.accumulate(TIME, message.getTime());
-            jsonObject.accumulate(PIC, message.getPic());
-            jsonObject.accumulate(LATITUDE,message.getLatitude());
-            jsonObject.accumulate(LONGITUDE, message.getLongitude());
-            jsonObject.accumulate(LAC, message.getLac());
-            jsonObject.accumulate(CI, message.getCi());
-            jsonObject.accumulate(PHONE, message.getPhone());
-
-            // 4. convert JSONObject to JSON to String
-            json = jsonObject.toString();
-
-            // ** Alternative way to convert Message object to JSON string usin Jackson Lib
-            // ObjectMapper mapper = new ObjectMapper();
-            // json = mapper.writeValueAsString(person);
-
-            // 5. set json to StringEntity
-            StringEntity se = new StringEntity(json);
-
-            // 6. set httpPost Entity
-            httpPost.setEntity(se);
-
-            // 7. Set some headers to inform server about the type of the content
-            httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");
-
-            // 8. Execute POST request to the given URL
-            HttpResponse httpResponse = httpclient.execute(httpPost);
-
-            // 9. receive response as inputStream
-            inputStream = httpResponse.getEntity().getContent();
-
-            // 10. convert inputstream to string
-            if(inputStream != null)
-                result = convertInputStreamToString(inputStream);
-            else
-                result = "Did not work!";
-
-        } catch (Exception e) {
-            Log.d("InputStream", e.getLocalizedMessage());
-        }
-
-        // 11. return result
-        return result;
-    }
-
-    /**
-     * Helper method to convert input stream to String
-     * @param inputStream inputStream to be converted
-     * @return String
-     * @throws IOException exception opening reader
-     */
-
-    private static String convertInputStreamToString(InputStream inputStream) throws IOException {
-        BufferedReader bufferedReader = new BufferedReader( new InputStreamReader(inputStream));
-        String line;
-        String result = "";
-        while((line = bufferedReader.readLine()) != null)
-            result += line;
-
-        inputStream.close();
-        return result;
-
-    }
-
     private class HttpsRequest extends AsyncTask<String, Void, Void>{
 
         ProgressDialog pDialog = new ProgressDialog(MainActivity.this);
@@ -532,51 +429,17 @@ public class MainActivity extends AppCompatActivity {
             String url = jsonObjects[8];
             String phone = jsonObjects[9];
 
-            Message message = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci, phone);
-
-            processResults(POST(url,message));
-            return null;
-        }
-
-        /**
-         * Method to process response from server
-         * @param response Message from server
-         * @return status of connection
-         */
-        void processResults(String response){
-            // status code;
-            Log.d("Create Request: ", "> " + response);
-
-            if (response != null) {
-                try {
-                    // convert string to json object
-                    JSONObject jsonObj = new JSONObject(response);
-                    boolean error = jsonObj.getBoolean("error");
-                    // checking for error node in json
-                    if (!error) {
-                        // new category created successfully
-                        status = 0;
-                        Log.i("ADDITION SUCCESS ",
-                                "> " + jsonObj.getString("message"));
-                        message = jsonObj.getString("message");
-                    } else {
-                        status = 1;
-                        Log.e("Signing in Error: ",
-                                "> " + jsonObj.getString("message"));
-                        message = jsonObj.getString("message");
-                    }
-
-                } catch (JSONException e) {
-                    status = 2;
-                    e.printStackTrace();
-                    message = "Error sending data";
-                }
-
-            } else {
-                status = 3;
-                Log.e("JSON Data", "JSON data error!");
-                message = "Error sending data";
+            Message msg = new Message(name, reg_no, time, pic, latitude, longitude, lac, ci, phone);
+            String TAG = "SIGNING IN SUCCESS ", ERROR = "Signing in Error: ";
+            JSONObject jsonObject;
+            jsonObject = processResults(TAG, POST(url,msg), ERROR);
+            try {
+                status = jsonObject.getInt("STATUS");
+                message = jsonObject.getString("MESSAGE");
+            } catch (JSONException ex){
+                Log.e("JSON error", "Error sending data "+ex.getMessage());
             }
+            return null;
         }
 
         @Override
@@ -589,18 +452,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Method to called in LoginActivity to create Intent containing extra info as needed.
+     * Method to called in RegisterActivity to create Intent containing extra info as needed.
      * Helps to hide MainActivity's needed extras
      * @param packageContext current context of application
-     * @param first_name user's first name
-     * @param last_name user's last name
+     * @param full_name user's full name
      * @param reg_num user's registration number
      * @return intent to be created
      */
-    public static Intent newIntent(Context packageContext, String first_name, String last_name, String reg_num) {
+    public static Intent newIntent(Context packageContext, String full_name, String reg_num) {
         Intent i = new Intent(packageContext, MainActivity.class);
-        i.putExtra(EXTRA_USER_FIRST_NAME, first_name);
-        i.putExtra(EXTRA_USER_LAST_NAME, last_name);
+        i.putExtra(EXTRA_USER_FULL_NAME, full_name);
         i.putExtra(EXTRA_USER_REG_NUM, reg_num);
         return i;
     }

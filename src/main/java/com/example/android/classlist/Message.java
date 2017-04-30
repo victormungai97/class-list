@@ -5,6 +5,11 @@ package com.example.android.classlist;
  */
 
 public class Message {
+
+    /**
+     * Class to package information to be sent to server as message
+     */
+
     private String name="";
     private String reg_no="";
     private String time="";
@@ -14,6 +19,15 @@ public class Message {
     private String lac="";
     private String ci="";
     private String phone="";
+
+    public Message(String name, String reg_no) {
+        this.name = name;
+        this.reg_no = reg_no;
+    }
+
+    public Message(String reg_no) {
+        this.reg_no = reg_no;
+    }
 
     public Message(String name, String reg_no, String time, String pic, String latitude,
                    String longitude, String lac, String ci, String phone) {

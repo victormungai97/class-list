@@ -16,23 +16,16 @@
         <caption>LIST OF STUDENTS</caption>
         <thead>
         <tr>
-            <th>ID</th><th>Reg No.</th><th>Name</th><th>Time</th><th>Latitude</th><th>Longitude</th><th>LAC_Coords</th><th>CI_Coords</th><th>Picture</th><th>Source</th><th></th>
+            <th>ID</th><th>Reg No.</th><th>Name</th>
         </tr>
         </thead>
         <tbody>
-        {%  for row in rows %}
+        {%  for row in res %}
         <tr>
-            <td>{{row[0]}}</td>
-            <td>{{row[2]}}</td>
-            <td> {{row[1]}}</td>
-            <td>{{row[8]}}</td>
-            <td>{{row[3]}}</td>
-            <td> {{row[4]}}</td>
-            <td>{{row[5]}}</td>
-			<td>{{row[6]}}</td>
-            <td><img class="img-circle" src="{{row[7]}}" alt="{{row[1]}}" style="width:100px;height:100px"></td>
-			<td> {{row[9]}}</td>
-            <td><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row[0]}}' name='id'><button id ='button'>Delete</button></form></td>
+            <td> {{ row.id }} </td>
+			<td> {{ row.reg_no }} </td>
+			<td> {{ row.name }} </td>
+            <td><form action ="{{url_for('blist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
            
         </tr>
         {% endfor %}

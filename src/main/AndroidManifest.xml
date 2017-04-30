@@ -41,7 +41,7 @@
         <activity android:name=".MainActivity">
         </activity>
         <activity
-            android:name=".LoginActivity"
+            android:name=".RegisterActivity"
             android:noHistory="true">
         </activity>
         <activity
@@ -53,8 +53,12 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".SuggestionActivity"
-                  android:parentActivityName=".LoginActivity"
+        <activity
+            android:name=".SuggestionActivity"
+            android:noHistory="true"
+            android:parentActivityName=".RegisterActivity">
+        </activity>
+        <activity android:name=".LoginActivity"
             android:noHistory="true">
         </activity>
     </application>

@@ -8,7 +8,9 @@
     <string name="last_name">Last Name</string>
     <string name="submit_button">Submit</string>
     <string name="url_name">Url Address</string>
+    <string name="register_btn">REGISTER</string>
     <string name="sign_in">SIGN IN</string>
+    <string name="link_to_login">Not registered? Register here</string>
     <string name="suggestions">SUGGESTIONS</string>
     <string name="suggestion_prompt">Choose A Suggestion</string>
     <string-array name="Type_of_suggestion">
