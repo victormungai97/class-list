@@ -4,6 +4,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -40,6 +41,14 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        /*
+        This is called before initializing the camera because the camera needs permissions(the cause of the crash)
+        Also checks for other dangerous permissions like location and phone network
+        */
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP ) {
+            Permissions.checkPermission(LoginActivity.this, LoginActivity.this);
+        }
 
         login_link = (TextView) findViewById(R.id.login_text);
         signInBtn = (Button) findViewById(R.id.sign_in_btn);

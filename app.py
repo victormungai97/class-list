@@ -36,7 +36,7 @@ class Test(db.Model):
 	longitude = db.Column('longitude',db.Float)
 	lac = db.Column('lac',db.Float)
 	ci = db.Column('ci',db.Float)
-	pic_url = db.Column('picture_url',db.String(60))
+	pic_url = db.Column('picture_url',db.String(100))
 	time = db.Column('time',db.Unicode(60))
 	source = db.Column('source',db.Unicode(60))
 
@@ -105,13 +105,18 @@ def get_url(pic,regno,method):
 	#get path to source of uploaded file
 	source=app.config['UPLOAD_FOLDER']+filename
 
+	#delete existing file
+	file = app.config['UPLOAD_FOLDER'] + regno + "." + extension
+	if os.path.isfile(file):
+		os.remove(file)
+	
 	#get path to destination of uploaded file 
 	destination=app.config['UPLOAD_FOLDER']+regno+'.'+extension
 
 	#rename file
 	os.rename(source,destination)
 	pic_url ='uploads\\'+regno+'.'+extension
-	return os.path.abspath(pic_url)
+	return os.path.abspath(destination)
 	
 @app.route('/registration/',methods=['POST','GET'])
 def register():
@@ -142,7 +147,9 @@ def register():
 			db.session.commit()
 			message = "Record successfully added"
 		# for unsuccessful connection
-		except:
+		except Exception as err:
+			# display error
+			print (err)
 			# undo changes
 			db.session.rollback()
 			message = "Record not added. Connection unsuccessful"
@@ -258,7 +265,9 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 		db.session.commit()
 		message = "Record successfully added"
 	# for unsuccessful connection
-	except:
+	except Exception as err:
+		# display error
+		print (err)
 		# undo changes
 		db.session.rollback()
 		message = "Record not added. Connection unsuccessful"
@@ -335,7 +344,7 @@ def delete():
 # delete row in db
 @app.route('/blist/delete/',methods =['POST'])	
 def blist_delete():
-	"""Function to delete row in db"""
+	"""Function to delete row in details table"""
 	# create query for deletion
 	delete = Table.query.filter(Table.id==request.form['id']).first()
 	# carry out deletion
@@ -344,16 +353,16 @@ def blist_delete():
 	db.session.commit()
 	
 	# select all from database
-	rows = Test.query.all()
+	rows = Table.query.all()
 	# update db after command execution 
 	db.session.commit()
 	#print contents
-	return render_template("list.html",res=rows)
+	return render_template("blist.html",res=rows)
 
 # delete row in db
 @app.route('/delete/',methods =['POST'])	
 def delete():
-	"""Function to delete row in db"""
+	"""Function to delete row in students table"""
 	# create query for deletion
 	delete = Test.query.filter(Test.id==request.form['id']).first()
 	# carry out deletion

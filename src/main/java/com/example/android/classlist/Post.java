@@ -76,7 +76,7 @@ public class Post {
 
             // ** Alternative way to convert Message object to JSON string usin Jackson Lib
             // ObjectMapper mapper = new ObjectMapper();
-            // json = mapper.writeValueAsString(person);
+            // json = mapper.writeValueAsString(message);
 
             // set json to StringEntity
             StringEntity se = new StringEntity(json);
