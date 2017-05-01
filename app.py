@@ -115,8 +115,8 @@ def get_url(pic,regno,method):
 
 	#rename file
 	os.rename(source,destination)
-	pic_url ='uploads\\'+regno+'.'+extension
-	return os.path.abspath(destination)
+	pic_url = destination
+	return pic_url
 	
 @app.route('/registration/',methods=['POST','GET'])
 def register():

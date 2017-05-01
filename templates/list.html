@@ -30,7 +30,7 @@
             <td> {{row[4]}}</td>
             <td>{{row[5]}}</td>
 			<td>{{row[6]}}</td>
-            <td><img class="img-circle" src="{{row[7]}}" alt="{{row[1]}}" style="width:100px;height:100px"></td>
+            <td><img class="img-circle" src="../{{row[7]}}" alt="{{row[1]}}" style="width:100px;height:100px"></td>
 			<td> {{row[9]}}</td>
             <td><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row[0]}}' name='id'><button id ='button'>Delete</button></form></td>
            
