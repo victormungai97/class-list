@@ -52,7 +52,7 @@ class LocatingClass {
 
     private String mast;
     private LocationManager locationManager;
-    private boolean isConnected = false;
+    private boolean mIsConnected = false;
 
     private double mLatitude;
     private double mLongitude;
@@ -90,9 +90,12 @@ class LocatingClass {
         turnGPSOn();
     }
 
+    /**
+     * Method to check whether GPS is on
+     */
     private void turnGPSOn(){
-        isConnected = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!isConnected){
+        mIsConnected = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!mIsConnected){
             Toast.makeText(mContext,"This app needs GPS. Please turn on",Toast.LENGTH_SHORT).show();
             //showSettingsAlert();
         }
@@ -134,12 +137,9 @@ class LocatingClass {
                                     + "\nPhone: " + phone
                                     + "\nMast: " + mast;
                             Toast.makeText(mContext, message, Toast.LENGTH_SHORT).show();
-                            LocatingClass.this.mLatitude = latitude;
-                            LocatingClass.this.mLongitude = longitude;
-                            LocatingClass.this.mAltitude = altitude;
-                            setLatitude(latitude);
-                            setLongitude(longitude);
-                            setAltitude(altitude);
+                            LocatingClass.this.setLatitude(latitude);
+                            LocatingClass.this.setLongitude(longitude);
+                            LocatingClass.this.setAltitude(altitude);
                         }
                     });
         } catch (SecurityException ex){
@@ -149,23 +149,22 @@ class LocatingClass {
         return locate;
     }
 
+    /**
+     * Method to return details of the phone
+     * @return String containing phone manufacturer, model and IMEI
+     */
     String getPhone(){
-        return Build.MANUFACTURER + " " + Build.MODEL + " " + Build.PRODUCT;
+        // used to get IMEI
+        TelephonyManager telephonyManager = (TelephonyManager) mContext
+                .getSystemService(Context.TELEPHONY_SERVICE);
+        return Build.MANUFACTURER + " " + Build.MODEL + " " + Build.PRODUCT  + " "
+                + telephonyManager.getDeviceId();
     }
 
     String getTime(){
         DateFormat df = DateFormat.getDateTimeInstance();
         Calendar calendar = Calendar.getInstance();
         return df.format(calendar.getTime());
-    }
-
-    ArrayList<Double> getLocation(){
-        ArrayList<Double> location = new ArrayList<>();
-        location.add(getLatitude());
-        location.add(getLongitude());
-        location.add(getAltitude());
-
-        return location;
     }
 
     public void showSettingsAlert() {

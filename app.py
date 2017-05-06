@@ -17,6 +17,10 @@ class Table(db.Model):
 	id = db.Column('id', db.Integer, primary_key=True)
 	name = db.Column('name', db.String(60), unique=True)
 	reg_no = db.Column('regno', db.Unicode(60), unique=True)
+	# 1. Point to Test class and load multiple tests
+	# 2. backref creates a virtual property in Test class that can be used to access student's details
+	# 3. lazy defines how to load data 
+	reg_nos = db.relationship('Test',backref='details',lazy='dynamic')
 	
 	def __init__(self, name, reg_no):
 		'''Function that adds basic details of students to table'''
@@ -31,14 +35,15 @@ class Test(db.Model):
 	__tablename__ = 'students' # set table name
 	id = db.Column('id', db.Integer, primary_key=True)
 	name = db.Column('name',db.String(60))
-	reg_no = db.Column('regno',db.Unicode(60))
+	# create foreign key pointing to details table
+	reg_no = db.Column('regno',db.Unicode(60),db.ForeignKey('Details.regno'))
 	latitude = db.Column('latitude',db.Float)
 	longitude = db.Column('longitude',db.Float)
 	lac = db.Column('lac',db.Float)
 	ci = db.Column('ci',db.Float)
 	pic_url = db.Column('picture_url',db.String(100))
 	time = db.Column('time',db.Unicode(60))
-	source = db.Column('source',db.Unicode(60))
+	source = db.Column('source',db.Unicode(100))
 
 	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, source, time = None):
 		'''Function initializes class and is used to add user to db'''
