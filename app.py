@@ -279,24 +279,32 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	
 	status = 0
 	message = ''
+	regno = '/'.join(paths)
 	test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time)
 	basic = Basic(name, regno, pic_url)
-	# for successful connection
-	try:
-		# add new row to dbs
-		db.session.add(test)
-		db.session.add(basic)
-		# save changes
-		db.session.commit()
-		message = "Record successfully added"
-	# for unsuccessful connection
-	except Exception as err:
-		# display error
-		print (err)
-		# undo changes
-		db.session.rollback()
-		message = "Record not added. Connection unsuccessful"
+	data = Table.query.filter((Table.reg_no==regno)).first()
+	
+	# Incorrect name for reg_no given
+	if data.name != name:
+		message = "Name not registered. Connection unsuccessful"
 		status = 1
+	else:
+		# for successful connection
+		try:
+			# add new row to dbs
+			db.session.add(test)
+			db.session.add(basic)
+			# save changes
+			db.session.commit()
+			message = "Record successfully added"
+		# for unsuccessful connection
+		except Exception as err:
+			# display error
+			print (err)
+			# undo changes
+			db.session.rollback()
+			message = "Record not added. Connection unsuccessful"
+			status = 2
 
 	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
@@ -344,7 +352,7 @@ def list():
 	#print contents
 	return render_template("list.html",rows=rows)
 	
-@app.route('/blist/')
+@app.route('/basic/')
 def blist():
 	'''Function to print contents of db to webpage'''
 	# select all from database
