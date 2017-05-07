@@ -282,6 +282,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	regno = '/'.join(paths)
 	test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time)
 	basic = Basic(name, regno, pic_url)
+	# get details for given reg_no
 	data = Table.query.filter((Table.reg_no==regno)).first()
 	
 	# Incorrect name for reg_no given
@@ -398,7 +399,7 @@ def rlist_delete():
 	# update db after command execution 
 	db.session.commit()
 	#print contents
-	return render_template("blist.html",res=rows)
+	return render_template("rlist.html",res=rows)
 
 # delete row in db
 @app.route('/delete/',methods =['POST'])	
