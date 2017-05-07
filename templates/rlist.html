@@ -16,17 +16,16 @@
         <caption>LIST OF STUDENTS</caption>
         <thead>
         <tr>
-            <th>ID</th><th>Reg No.</th><th>Name</th><th>Picture</th>
+            <th>ID</th><th>Reg No.</th><th>Name</th>
         </tr>
         </thead>
         <tbody>
-        {%  for row in rows %}
+        {%  for row in res %}
         <tr>
-            <td>{{row[0]}}</td>
-            <td>{{row[2]}}</td>
-            <td> {{row[1]}}</td>
-            <td><img class="img-circle" src="../{{row[3]}}" alt="{{row[1]}}" style="width:100px;height:100px"></td>
-			
+            <td> {{ row.id }} </td>
+			<td> {{ row.reg_no }} </td>
+			<td> {{ row.name }} </td>
+            <td><form action ="{{url_for('rlist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
            
         </tr>
         {% endfor %}
