@@ -17,10 +17,11 @@ class Table(db.Model):
 	id = db.Column('id', db.Integer, primary_key=True)
 	name = db.Column('name', db.String(60), unique=True)
 	reg_no = db.Column('regno', db.Unicode(60), unique=True)
-	# 1. Point to Test class and load multiple tests
+	# 1. Point to Test and Basic classes and load multiple tests and basics
 	# 2. backref creates a virtual property in Test class that can be used to access student's details
 	# 3. lazy defines how to load data 
 	reg_nos = db.relationship('Test',backref='details',lazy='dynamic')
+	reg_nos1 = db.relationship('Basic',backref='basic',lazy='dynamic')
 	
 	def __init__(self, name, reg_no):
 		'''Function that adds basic details of students to table'''
@@ -28,8 +29,25 @@ class Table(db.Model):
 		self.reg_no = reg_no
 		
 	def __repr__(self):
-		return ",Student %r>" % self.name
+		return "<Student %r>" % self.name
 
+class Basic(db.Model):
+	'''Class that contains basic sign in details'''
+	__tablename__= "Basic_Details"
+	id = db.Column('id', db.Integer, primary_key=True)
+	name = db.Column('name',db.String(60))
+	reg_no = db.Column('regno',db.Unicode(60),db.ForeignKey('Details.regno'))
+	pic_url = db.Column('picture_url',db.String(100))
+	
+	def __init__(self, name, reg_no, pic_url):
+		'''Function that adds basic sign in details of students to table'''
+		self.name = name
+		self.reg_no = reg_no
+		self.pic_url = pic_url
+		
+	def __repr__(self):
+		return "<Student %r>" % self.name
+		
 class Test(db.Model):
 	'''Class that models students table'''
 	__tablename__ = 'students' # set table name
@@ -196,7 +214,7 @@ def get_students():
 		res = Table.query.all()
 		#for person in res:
 		#	print (person.name,'\n',person.reg_no)
-		return render_template('blist.html', res=res)
+		return render_template('rlist.html', res=res)
 	
 @app.route('/fromapp/',methods=['POST','GET'])
 def from_app():
@@ -262,10 +280,12 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	status = 0
 	message = ''
 	test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time)
+	basic = Basic(name, regno, pic_url)
 	# for successful connection
 	try:
-		# add new row to db
+		# add new row to dbs
 		db.session.add(test)
+		db.session.add(basic)
 		# save changes
 		db.session.commit()
 		message = "Record successfully added"
@@ -298,9 +318,8 @@ def record():
 		# get results from insertion into db
 		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record')
 		return render_template("result.html",msg=message,sts=status)
-	#fh.close()
 	
-def get_contents():
+def get_contents(table):
 	'''Function to get data from db'''
 	# open db connection
 	host = 'localhost' # host
@@ -312,7 +331,7 @@ def get_contents():
 	#define cursor for traversal
 	cursor = conn.cursor()
 	#execute query for all items
-	cursor.execute("SELECT * FROM students")
+	cursor.execute("SELECT * FROM {}".format(table))
 	#retrieve results
 	return cursor.fetchall()
 	
@@ -321,9 +340,18 @@ def list():
 	'''Function to print contents of db to webpage'''
 	# select all from database
 	#rows = Test.query.all()
-	rows = get_contents()
+	rows = get_contents('students')
 	#print contents
 	return render_template("list.html",rows=rows)
+	
+@app.route('/blist/')
+def blist():
+	'''Function to print contents of db to webpage'''
+	# select all from database
+	#rows = Test.query.all()
+	rows = get_contents('Basic_Details')
+	#print contents
+	return render_template("blist.html",rows=rows)
 	
 #delete row in db
 '''
@@ -347,8 +375,8 @@ def delete():
 '''
 	
 # delete row in db
-@app.route('/blist/delete/',methods =['POST'])	
-def blist_delete():
+@app.route('/rlist/delete/',methods =['POST'])	
+def rlist_delete():
 	"""Function to delete row in details table"""
 	# create query for deletion
 	delete = Table.query.filter(Table.id==request.form['id']).first()
