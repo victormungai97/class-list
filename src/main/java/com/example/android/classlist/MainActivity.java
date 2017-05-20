@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.location.LocationManager;
 import android.media.FaceDetector;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -34,8 +35,11 @@ import org.json.JSONObject;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
@@ -49,6 +53,10 @@ public class MainActivity extends AppCompatActivity {
     private EditText full_name;
     private EditText adm_num;
     private EditText mServerUrl;
+
+    private LocationManager locationManager;
+
+    boolean mIsConnected = false;
     String name;
     String reg_no;
     int status = 0;
@@ -61,12 +69,15 @@ public class MainActivity extends AppCompatActivity {
     MyTextWatcher nameWatcher;
     MyTextWatcher regWatcher;
     String mast;
+    File directory;
+    Context mContext;
 
     private static final String TAG = "MainActivity";
     private static final int REQUEST_PHOTO = 1;
     private static final String URL_TO_SEND_DATA = "http://192.168.43.229:5000/fromapp/";
     private static final String EXTRA_USER_FULL_NAME = "com.example.android.classlist.full_name";
     private static final String EXTRA_USER_REG_NUM = "com.example.android.classlist.reg_num";
+    private static final String EXTRA_USER_DIR = "com.example.android.classlist.directory";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +97,10 @@ public class MainActivity extends AppCompatActivity {
         full_name = (EditText) findViewById(R.id.full_name);
         adm_num = (EditText) findViewById(R.id.admission_num);
         mServerUrl = (EditText) findViewById(R.id.ur_name_main);
+        mContext = MainActivity.this;
+        locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        mIsConnected = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
         try {
             mast = LocatingClass.getCellInfo(this).get("name").toString();
         } catch (JSONException ex){
@@ -95,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
         // get passed extras
         name = getIntent().getStringExtra(EXTRA_USER_FULL_NAME);
         reg_no = getIntent().getStringExtra(EXTRA_USER_REG_NUM);
+        directory = new File(getIntent().getStringExtra(EXTRA_USER_DIR));
 
         urlTextWatcher = new MyTextWatcher() {
             @Override
@@ -167,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
             adm_num.setEnabled(false);
         }
 
+        turnGPSOn();
+
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -200,37 +218,41 @@ public class MainActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                try {
+                if (!mIsConnected) {
+                    turnGPSOn();
+                } else {
+                    try {
 //                    mLocatingClass.findLocation();
-                    ArrayList<Double> location = mLocatingClass.findLocation();
-                    Log.i(TAG, location.toString());
-                    String phone = mLocatingClass.getPhone();
-                    String time = mLocatingClass.getTime();
-                    String latitude = String.valueOf(mLocatingClass.getLatitude());
-                    String longitude = String.valueOf(mLocatingClass.getLongitude());
-                    JSONObject jsonObject = (JSONObject) LocatingClass.getCellInfo(MainActivity.this).get("primary");
-                    String lac = String.valueOf(jsonObject.getInt("LAC")), ci = String.valueOf(jsonObject.getInt("CID"));
+                        ArrayList<Double> location = mLocatingClass.findLocation();
+                        Log.i(TAG, location.toString());
+                        String phone = mLocatingClass.getPhone();
+                        String time = mLocatingClass.getTime();
+                        String latitude = String.valueOf(mLocatingClass.getLatitude());
+                        String longitude = String.valueOf(mLocatingClass.getLongitude());
+                        JSONObject jsonObject = (JSONObject) LocatingClass.getCellInfo(MainActivity.this).get("primary");
+                        String lac = String.valueOf(jsonObject.getInt("LAC")), ci = String.valueOf(jsonObject.getInt("CID"));
 
-                    //JSONObject param = new JSONObject();
-                    String name = full_name.getText().toString();
-                    String regno = adm_num.getText().toString();
+                        //JSONObject param = new JSONObject();
+                        String name = full_name.getText().toString();
+                        String regno = adm_num.getText().toString();
 
-                    //ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    //photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
-                    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                    photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
-                    byte[] byteArrayImage = baos.toByteArray();
-                    String image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
-                    String url = mServerUrl.getText().toString();
+                        //ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                        //photo.compress(Bitmap.CompressFormat.PNG, 0 /*ignored for PNG*/, bos);
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        photo.compress(Bitmap.CompressFormat.JPEG, 100, baos); //bm is the bitmap object
+                        byte[] byteArrayImage = baos.toByteArray();
+                        String image = Base64.encodeToString(byteArrayImage, Base64.DEFAULT);
+                        String url = mServerUrl.getText().toString();
 
-                    new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci, url, phone);
-                    if (status == 0){
-                        Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(MainActivity.this,message,Toast.LENGTH_SHORT).show();
+                        new HttpsRequest().execute(name, regno, time, image, latitude, longitude, lac, ci, url, phone);
+                        if (status == 0) {
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
+                        }
+                    } catch (JSONException ex) {
+                        Log.e(TAG, "Error reading cell info " + ex.getMessage());
                     }
-                } catch (JSONException ex){
-                    Log.e(TAG, "Error reading cell info "+ex.getMessage());
                 }
             }
         });
@@ -325,6 +347,7 @@ public class MainActivity extends AppCompatActivity {
                     photo = PictureUtilities.getScaledBitmap(imageForUpload.getPath(),MainActivity.this);
 
                     if (photo != null) {
+                        // detect only one face to set to image view
                         FaceDetector faceDet = new FaceDetector(photo.getWidth(), photo.getHeight(), 2);
                         int faces = faceDet.findFaces(photo.copy(Bitmap.Config.RGB_565, false), new FaceDetector.Face[2]);
                         if (faces == 0) {
@@ -357,8 +380,14 @@ public class MainActivity extends AppCompatActivity {
      * @return photo file
      */
     public File getPhotoFile() {
-        // create file that saves in default images directory
-        File externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File externalFilesDir;
+        if (directory != null){
+            // create file that saves in created app directory
+            externalFilesDir = directory;
+        } else {
+            // create file that saves in default images directory
+            externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        }
 
         // Save a file: path for use with ACTION_VIEW intents
         try {
@@ -376,7 +405,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public String getPhotoFilename() {
         // get current time and set as file name
-        DateFormat df = DateFormat.getDateTimeInstance();
+        DateFormat df = DateFormat.getTimeInstance();
         Calendar calendar = Calendar.getInstance();
         String time = df.format(calendar.getTime());
         return "IMG_" + time + ".jpg";
@@ -459,10 +488,23 @@ public class MainActivity extends AppCompatActivity {
      * @param reg_num user's registration number
      * @return intent to be created
      */
-    public static Intent newIntent(Context packageContext, String full_name, String reg_num) {
+    public static Intent newIntent(Context packageContext, String full_name, String reg_num,
+                                   String dir) {
         Intent i = new Intent(packageContext, MainActivity.class);
         i.putExtra(EXTRA_USER_FULL_NAME, full_name);
         i.putExtra(EXTRA_USER_REG_NUM, reg_num);
+        i.putExtra(EXTRA_USER_DIR, dir);
         return i;
+    }
+
+    /**
+     * Method to check whether GPS is on
+     */
+    private void turnGPSOn(){
+        mIsConnected = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        if (!mIsConnected){
+            //Toast.makeText(mContext,"This app needs GPS. Please turn on",Toast.LENGTH_SHORT).show();
+            new Permissions().showSettingsAlert(mContext);
+        }
     }
 }

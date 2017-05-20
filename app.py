@@ -211,10 +211,10 @@ def get_students():
 		return '{"message" : "%s", "error" : "%s"}' % (message, error)
 	
 	if request.method == 'GET':
-		res = Table.query.all()
+		result = Table.query.all()
 		#for person in res:
 		#	print (person.name,'\n',person.reg_no)
-		return render_template('rlist.html', res=res)
+		return render_template('rlist.html', res=result)
 	
 @app.route('/fromapp/',methods=['POST','GET'])
 def from_app():
