@@ -22,17 +22,17 @@
         <tbody>
         {%  for row in rows %}
         <tr>
-            <td>{{row[0]}}</td>
-            <td>{{row[2]}}</td>
-            <td> {{row[1]}}</td>
-            <td>{{row[8]}}</td>
-            <td>{{row[3]}}</td>
-            <td> {{row[4]}}</td>
-            <td>{{row[5]}}</td>
-			<td>{{row[6]}}</td>
-            <td><img class="img-circle" src="source({{row[7]}})" alt="{{row[1]}}" style="width:100px;height:100px"></td>
-			<td> {{row[9]}}</td>
-            <td><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row[0]}}' name='id'><button id ='button'>Delete</button></form></td>
+            <td>{{row.id}}</td>
+            <td>{{row.reg_no}}</td>
+            <td> {{row.name}}</td>
+            <td>{{row.time}}</td>
+            <td>{{row.latitude}}</td>
+            <td> {{row.longitude}}</td>
+            <td>{{row.lac}}</td>
+			<td>{{row.ci}}</td>
+            <td><img class="img-circle" src="..{{row.pic_url}}" align="center" alt="{{row.name}}" style="width:100px;height:100px"></td>
+			<td> {{row.source}}</td>
+            <td><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
            
         </tr>
         {% endfor %}
@@ -45,7 +45,6 @@
             </div>
 
 
-			<script  src="../static/javascript/image.js">
-			</script>
+			
 </body>
 </html>
