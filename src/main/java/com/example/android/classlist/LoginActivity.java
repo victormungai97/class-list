@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Environment;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -20,6 +21,8 @@ import android.widget.Toast;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
 
@@ -31,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
     FloatingActionButton mFloatingActionButton;
     MyTextWatcher regWatcher;
     EditText mServerUrl;
+    File directory;
 
     int status = 0;
     String message;
@@ -41,6 +45,18 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        if (!Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            Log.e("FOLDER CREATION ERROR","No SDCARD");
+        } else {
+            directory = new File(Environment.getExternalStorageDirectory() + File.separator
+                + "ClassList" + File.separator + "Pictures");
+            // if directory does not exist
+            if (!directory.isDirectory()) {
+                directory.mkdirs(); // create directory and any immediate required directories
+            }
+            Log.e("Directory:",""+directory.getAbsolutePath());
+        }
 
         /*
         This is called before initializing the camera because the camera needs permissions(the cause of the crash)
@@ -159,12 +175,13 @@ public class LoginActivity extends AppCompatActivity {
     public void moveToScreen(String ...args){
         String full_name = args[0];
         String reg_no = args[1];
-        Intent intent = MainActivity.newIntent(LoginActivity.this, full_name, reg_no);
+        String dir = args[2];
+        Intent intent = MainActivity.newIntent(LoginActivity.this, full_name, reg_no,dir);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 
-    public class SignIn extends AsyncTask<String, Void, Void> {
+    private class SignIn extends AsyncTask<String, Void, Void> {
 
         ProgressDialog progressDialog = new ProgressDialog(LoginActivity.this);
 
@@ -195,7 +212,7 @@ public class LoginActivity extends AppCompatActivity {
             }
 
             if (status == 0){
-                moveToScreen(message, reg_no);
+                moveToScreen(message, reg_no,directory.getAbsolutePath());
             }
 
             return null;

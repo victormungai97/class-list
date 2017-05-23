@@ -1,13 +1,8 @@
 package com.example.android.classlist;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.telephony.CellIdentityCdma;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
@@ -47,12 +42,8 @@ class LocatingClass {
     private final Context mContext;
     private final GoogleApiClient mClient;
     private static final String TAG = "LocationActivity";
-    private static final String allow_message = "ALLOW";
-    private static final String deny_message = "DENY";
 
     private String mast;
-    private LocationManager locationManager;
-    private boolean mIsConnected = false;
 
     private double mLatitude;
     private double mLongitude;
@@ -86,26 +77,15 @@ class LocatingClass {
     LocatingClass(Context context, GoogleApiClient googleApiClient) {
         this.mContext = context;
         this.mClient = googleApiClient;
-        locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
-        turnGPSOn();
-    }
-
-    /**
-     * Method to check whether GPS is on
-     */
-    private void turnGPSOn(){
-        mIsConnected = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-        if (!mIsConnected){
-            Toast.makeText(mContext,"This app needs GPS. Please turn on",Toast.LENGTH_SHORT).show();
-            //showSettingsAlert();
-        }
+        //locationManager = (LocationManager) mContext.getSystemService(Context.LOCATION_SERVICE);
+        //turnGPSOn();
     }
 
     /**
      * Method builds location request to get a location fix
      */
     ArrayList<Double> findLocation(){
-        turnGPSOn();
+        //turnGPSOn();
         LocationRequest locationRequest = LocationRequest.create();
         // set priority between battery life and accuracy
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -167,35 +147,6 @@ class LocatingClass {
         return df.format(calendar.getTime());
     }
 
-    public void showSettingsAlert() {
-        // create dialog
-        AlertDialog.Builder alertDialog = new AlertDialog.Builder(mContext);
-
-        // title of dialog
-        alertDialog.setTitle("Missing GPS");
-        // description of dialog
-        alertDialog.setMessage("This app needs access to GPS");
-
-        // if user clicks allow
-        alertDialog.setPositiveButton(allow_message, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // Redirect to settings
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                mContext.startActivity(intent);
-            }
-        });
-
-        // if user clicks deny
-        alertDialog.setNegativeButton(deny_message, new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                // close dialog
-                dialog.cancel();
-            }
-        });
-
-        alertDialog.show();
-    }
-
     /**
      * Checks whether mobile network is connected
      * @param context Context of app
@@ -248,6 +199,7 @@ class LocatingClass {
             }
         } else if (cellLocation == null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                assert cellInfos != null;
                 for (CellInfo cellInfo : cellInfos) {
                     if (cellInfo instanceof CellInfoLte) {
                         CellIdentityLte lte = ((CellInfoLte) cellInfo).getCellIdentity();
@@ -266,6 +218,7 @@ class LocatingClass {
 
         // Getting secondary info
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            assert cellInfos != null;
             for (CellInfo cellInfo : cellInfos) {
                 JSONObject secondaryCellInfo = new JSONObject();
                 if (cellInfo instanceof CellInfoLte) {

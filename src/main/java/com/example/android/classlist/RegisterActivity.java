@@ -28,7 +28,7 @@ public class RegisterActivity extends AppCompatActivity {
     private EditText admission_num;
     private Button mSignInButton;
     EditText mServerUrl;
-    private FloatingActionButton fab;
+    FloatingActionButton fab;
 
     private static final String URL_TO_SEND_DATA = "http://192.168.0.11:5000/registration/";
 
@@ -177,10 +177,10 @@ public class RegisterActivity extends AppCompatActivity {
     /**
      * Checks whether field is empty
      */
-    public abstract class MyTextWatcher implements TextWatcher {
+    abstract class MyTextWatcher implements TextWatcher {
         boolean empty = true;
 
-        public boolean nonEmpty() {
+        boolean nonEmpty() {
             return !empty;
         }
     }
@@ -196,7 +196,7 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-    public class SignIn extends AsyncTask<String, Void, Void>{
+    private class SignIn extends AsyncTask<String, Void, Void>{
 
         ProgressDialog progressDialog = new ProgressDialog(RegisterActivity.this);
 
