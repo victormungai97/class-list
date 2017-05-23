@@ -165,22 +165,6 @@ def get_contents(table):
 		return Basic.query.all()
 	elif table == 'Test':
 		return Test.query.all()
-	'''
-	# open db connection
-	host = 'localhost' # host
-	userName = 'myuser' # user
-	password = 'xxxx' # password
-	db = 'test' # user
-	#create connection
-	conn = mysql.connect(host, userName, password, db)
-	#define cursor for traversal
-	cursor = conn.cursor()
-	#execute query for all items
-	cursor.execute("SELECT * FROM {}".format(table))
-	#retrieve results
-	return cursor.fetchall()
-	'''
-	
 #delete row in db
 '''
 @app.route('/delete/',methods =['POST'])
