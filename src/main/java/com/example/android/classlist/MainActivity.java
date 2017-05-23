@@ -38,7 +38,6 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 
 import static com.example.android.classlist.Post.POST;
@@ -222,7 +221,6 @@ public class MainActivity extends AppCompatActivity {
                     turnGPSOn();
                 } else {
                     try {
-//                    mLocatingClass.findLocation();
                         ArrayList<Double> location = mLocatingClass.findLocation();
                         Log.i(TAG, location.toString());
                         String phone = mLocatingClass.getPhone();
@@ -326,6 +324,7 @@ public class MainActivity extends AppCompatActivity {
                 intent.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
                 imageForUpload = Uri.fromFile(photoFile);
                 startActivityForResult(intent, REQUEST_PHOTO);
+                photoFile.renameTo(new File(directory, getPhotoFilename()));
             }
         }
     }
@@ -381,13 +380,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public File getPhotoFile() {
         File externalFilesDir;
-        if (directory != null){
-            // create file that saves in created app directory
-            externalFilesDir = directory;
-        } else {
-            // create file that saves in default images directory
-            externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-        }
+        externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
 
         // Save a file: path for use with ACTION_VIEW intents
         try {
@@ -405,7 +398,7 @@ public class MainActivity extends AppCompatActivity {
      */
     public String getPhotoFilename() {
         // get current time and set as file name
-        DateFormat df = DateFormat.getTimeInstance();
+        DateFormat df = new SimpleDateFormat("ddMMyyyy_hhmmssSSS", Locale.ROOT);
         Calendar calendar = Calendar.getInstance();
         String time = df.format(calendar.getTime());
         return "IMG_" + time + ".jpg";

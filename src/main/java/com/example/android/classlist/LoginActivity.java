@@ -55,6 +55,8 @@ public class LoginActivity extends AppCompatActivity {
             if (!directory.isDirectory()) {
                 directory.mkdirs(); // create directory and any immediate required directories
             }
+
+            Log.e("Directory:",""+directory.getAbsolutePath());
         }
 
         /*

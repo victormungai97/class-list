@@ -1,7 +1,7 @@
 import os
 import re
 import shutil
-from flask import Flask,render_template,request,url_for,jsonify
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
 import pymysql as mysql
@@ -23,7 +23,7 @@ from .models import *
 
 # This is the path to the upload directory
 print ("Current path is", os.path.abspath(os.curdir))
-new_folder = os.path.join("static/uploads/")
+new_folder = os.path.join("app/static/uploads/")
 app.config['UPLOAD_FOLDER'] = new_folder
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg'])
@@ -35,20 +35,6 @@ def allowed_file(filename):
 def create_database():
 	'''Function creates table where not created'''
 	db.create_all()
-
-#home page
-@app.route('/')
-def home():
-	'''Defines home page'''
-	create_database()
-	return render_template('home.html')
-
-#add student page
-@app.route('/enternew/')
-def new_student():
-	'''Function to enable one to enter information into db'''
-	create_database()
-	return render_template('add.html')
 	
 def get_url(pic,regno,method):
 	'''Function stores and returns url for image'''
@@ -82,118 +68,6 @@ def get_url(pic,regno,method):
 	os.rename(source,destination)
 	pic_url = destination
 	return pic_url
-	
-@app.route('/registration/',methods=['POST','GET'])
-def register():
-	'''Function to register new students'''
-	create_database()
-	# user details
-	name=''; regno=''; error=''
-	if request.method == 'POST':
-		# receive json
-		json = request.get_json(force=True)
-		# get user details
-		regno = json['regno']
-		name = json['name']
-		
-	# Get student with specific regno or name
-	data = Table.query.filter((Table.reg_no==regno)|(Table.name==name)).first()
-	
-	status = 0
-	message = ''
-	# if student not in db, enter into db
-	if not data:
-		test = Table(name, regno)
-		# for successful connection
-		try:
-			# add new row to db
-			db.session.add(test)
-			# save changes
-			db.session.commit()
-			message = "Record successfully added"
-		# for unsuccessful connection
-		except Exception as err:
-			# display error
-			print (err)
-			# undo changes
-			db.session.rollback()
-			message = "Record not added. Connection unsuccessful"
-			status = 1
-	# if user in db
-	else:
-		message = "Student is in database"
-		status = 2
-	if not status:
-		error = str(False)
-	else:
-		error = str(True)
-	result = '{"message": "%s", "error": "%s"}' % (message, error)
-	return result
-	
-@app.route('/getstudent/',methods=['POST','GET'])
-def get_students():
-	'''Function to check registered students'''
-	message=''; regno=''; status=0; error=''
-	if request.method == 'POST':
-		json = request.get_json(force=True)
-		regno = json['regno']
-	
-		# check whether student is registered
-		data = Table.query.filter(Table.reg_no==regno).first()
-		
-		if data:
-			message = data.name
-		else:
-			status = 1
-			message = "Student not registered. Please register"
-		if not status:
-			error = str(False)
-		else:
-			error = str(True)
-		return '{"message" : "%s", "error" : "%s"}' % (message, error)
-	
-	if request.method == 'GET':
-		result = Table.query.all()
-		#for person in res:
-		#	print (person.name,'\n',person.reg_no)
-		return render_template('rlist.html', res=result)
-	
-@app.route('/fromapp/',methods=['POST','GET'])
-def from_app():
-	'''Function to take data from app'''
-	create_database()
-	# user details
-	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
-	message = ""; error = ""
-	if request.method == 'POST':
-		# receive json sent
-		json = request.get_json(force=True)
-		# get received user details
-		regno = json['regno']
-		name=json['name']
-		time=json['time']
-		#gps=float(json['gps'])
-		latitude=float(json['latitude'])
-		longitude=float(json['longitude'])
-		lac=float(json['lac'])
-		ci=float(json['ci'])
-		img_data=json['picture']
-		img_data=img_data.encode('UTF-8','strict')
-		import base64
-		pic_name = name + ".jpg"
-		# decode image string and write into file
-		with open(pic_name, 'wb') as fh:
-			fh.write(base64.b64decode(img_data))
-		pic = pic_name
-		phone=json['phone']
-		
-		(message, status) = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'fromapp',phone)
-		if not status:
-			error=str(False)
-		else:
-			error=str(True)
-	result = '{"message": "%s", "error": "%s"}' % (message, error)
-	return result
 	
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
 	'''Function to save given user data into db'''
@@ -252,23 +126,36 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
 	
-@app.route('/record/',methods=['POST', 'GET'])
-def record():
-	'''Function to take data from website'''
-	create_database()
-	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
-	if request.method == 'POST':
-		# receive details from website
-		regno=request.form['regno']
-		name=request.form['name']
-		time=request.form['time']
-		#lac=request.files['lac']
-		#ci=request.files['ci']        
-		pic=request.files['picture']
-
-		# get results from insertion into db
-		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record')
-		return render_template("result.html",msg=message,sts=status)
+def register_db(reg_no, name):
+	'''Function to save registered new students into db'''
+	# Get student with specific regno or name
+	data = Table.query.filter((Table.reg_no==reg_no)|(Table.name==name)).first()
+	
+	status = 0
+	message = ''
+	# if student not in db, enter into db
+	if not data:
+		test = Table(name, reg_no)
+		# for successful connection
+		try:
+			# add new row to db
+			db.session.add(test)
+			# save changes
+			db.session.commit()
+			message = "Record successfully added"
+		# for unsuccessful connection
+		except Exception as err:
+			# display error
+			print (err)
+			# undo changes
+			db.session.rollback()
+			message = "Record not added. Connection unsuccessful"
+			status = 1
+	# if user in db
+	else:
+		message = "Student is in database"
+		status = 2
+	return (message, status)
 	
 def get_contents(table):
 	'''Function to get data from db'''
@@ -285,24 +172,6 @@ def get_contents(table):
 	cursor.execute("SELECT * FROM {}".format(table))
 	#retrieve results
 	return cursor.fetchall()
-	
-@app.route('/list/')
-def list():
-	'''Function to print contents of db to webpage'''
-	# select all from database
-	#rows = Test.query.all()
-	rows = get_contents('students')
-	#print contents
-	return render_template("list.html",rows=rows)
-	
-@app.route('/basic/')
-def blist():
-	'''Function to print contents of db to webpage'''
-	# select all from database
-	#rows = Test.query.all()
-	rows = get_contents('Basic_Details')
-	#print contents
-	return render_template("blist.html",rows=rows)
 	
 #delete row in db
 '''
@@ -323,47 +192,6 @@ def delete():
     #retrive query n initualite it
     rows=cursor.fetchall()
     return render_template("list.html",rows=rows)
-'''
+'''	
 	
-# delete row in db
-@app.route('/rlist/delete/',methods =['POST'])	
-def rlist_delete():
-	"""Function to delete row in details table"""
-	# create query for deletion
-	delete = Table.query.filter(Table.id==request.form['id']).first()
-	# carry out deletion
-	db.session.delete(delete)
-	# save changes
-	db.session.commit()
-	
-	# select all from database
-	rows = Table.query.all()
-	# update db after command execution 
-	db.session.commit()
-	#print contents
-	return render_template("rlist.html",res=rows)
-
-# delete row in db
-@app.route('/delete/',methods =['POST'])	
-def delete():
-	"""Function to delete row in students table"""
-	# create query for deletion
-	delete = Test.query.filter(Test.id==request.form['id']).first()
-	# carry out deletion
-	db.session.delete(delete)
-	# save changes
-	db.session.commit()
-	
-	# select all from database
-	#rows = Test.query.all()
-	rows = get_contents()
-	# update db after command execution 
-	db.session.commit()
-	#print contents
-	return render_template("list.html",rows=rows)
-
-	
-#if __name__=='__main__':
-	# start app
-	#app.run(debug=True)
-	
+from app import views

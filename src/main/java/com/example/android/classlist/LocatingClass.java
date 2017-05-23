@@ -1,13 +1,8 @@
 package com.example.android.classlist;
 
 import android.content.Context;
-import android.content.DialogInterface;
-import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Build;
-import android.provider.Settings;
-import android.support.v7.app.AlertDialog;
 import android.telephony.CellIdentityCdma;
 import android.telephony.CellIdentityGsm;
 import android.telephony.CellIdentityLte;
