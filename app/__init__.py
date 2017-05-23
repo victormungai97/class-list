@@ -66,7 +66,7 @@ def get_url(pic,regno,method):
 
 	#rename file
 	os.rename(source,destination)
-	pic_url = destination
+	pic_url = destination.replace("app","")
 	return pic_url
 	
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
@@ -159,20 +159,12 @@ def register_db(reg_no, name):
 	
 def get_contents(table):
 	'''Function to get data from db'''
-	# open db connection
-	host = 'localhost' # host
-	userName = 'myuser' # user
-	password = 'xxxx' # password
-	db = 'test' # user
-	#create connection
-	conn = mysql.connect(host, userName, password, db)
-	#define cursor for traversal
-	cursor = conn.cursor()
-	#execute query for all items
-	cursor.execute("SELECT * FROM {}".format(table))
-	#retrieve results
-	return cursor.fetchall()
-	
+	if table == 'Table':
+		return Table.query.all()
+	elif table == 'Basic':
+		return Basic.query.all()
+	elif table == 'Test':
+		return Test.query.all()
 #delete row in db
 '''
 @app.route('/delete/',methods =['POST'])

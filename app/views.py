@@ -82,9 +82,7 @@ def get_students():
 		return '{"message" : "%s", "error" : "%s"}' % (message, error)
 	
 	if request.method == 'GET':
-		result = Table.query.all()
-		#for person in res:
-		#	print (person.name,'\n',person.reg_no)
+		result = get_contents ('Table')
 		return render_template('rlist.html', res=result)
 		
 @app.route('/fromapp/',methods=['POST','GET'])
@@ -146,8 +144,7 @@ def record():
 def list():
 	'''Function to print contents of db to webpage'''
 	# select all from database
-	#rows = Test.query.all()
-	rows = get_contents('students')
+	rows = get_contents('Test')
 	#print contents
 	return render_template("list.html",rows=rows)
 	
@@ -155,8 +152,7 @@ def list():
 def blist():
 	'''Function to print contents of db to webpage'''
 	# select all from database
-	#rows = Test.query.all()
-	rows = get_contents('Basic_Details')
+	rows = get_contents("Basic")
 	#print contents
 	return render_template("blist.html",rows=rows)
 	
