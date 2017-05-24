@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=divice-width, intial-scale=1.0">
-            <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-            <style>body{background: #fff8dc}</style>
-</head>
-
-<body>
+{% extends "base.htm" %}
+{% block body %}
 <form action="{{ url_for('register2') }}" method="POST" enctype="multipart/form-data" role="form" class="form-horizontal">
 		<h2 >Registration</h2>
         <div class="form-group">
@@ -28,7 +19,4 @@
         </div>
 	</form>
 
-	<script src="../../static/javascript/location.js">
-	</script>
-</body>
-</html>
+{% endblock %}

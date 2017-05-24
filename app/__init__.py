@@ -4,7 +4,6 @@ import shutil
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
-import pymysql as mysql
 
 from config import app_config
 
@@ -165,25 +164,5 @@ def get_contents(table):
 		return Basic.query.all()
 	elif table == 'Test':
 		return Test.query.all()
-#delete row in db
-'''
-@app.route('/delete/',methods =['POST'])
-def delete():
-    #capture reference to mysql connection
-    conn = mysql.connect()
-    #initiate cursor
-    cursor = conn.cursor()
-    #delete from students table
-    cursor.callproc("delete_entry",[request.form['id']]) 
-    #update db after command execution using connection captured earlier
-    conn.commit()
-
-    cursor.execute("SELECT * FROM Basic_Details") 
-    #update db after command execution using connection captured earlier
-    conn.commit()
-    #retrive query n initualite it
-    rows=cursor.fetchall()
-    return render_template("list.html",rows=rows)
-'''	
 	
 from app import views

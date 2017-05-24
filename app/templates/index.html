@@ -1,10 +1,35 @@
-<!-- index.html-->
+<!DOCTYPE html>
 
-{% extends "base.html" %}
-{% block title %}Home{% endblock %}
-{% block body %}
-<div class="jumbotron">
-  <h1>Flask Is Awesome</h1>
-  <p class="lead">And I'm glad to be learning so much about it!</p>
-</div>
-{% endblock %}
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=divice-width, intial-scale=1.0">
+            <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+            <style>body{background: #fff8dc}</style>
+</head>
+
+<body>
+<div class="container">
+                <div class="row">
+                    <div class="col-lg-12 col-sm-12 col-md-12">
+        <table class="table table-bordered table-striped table-responsive">
+        <caption>LIST OF STUDENTS</caption>
+        <thead>
+        <tr>
+            {% block heading %}{% endblock %}
+        </tr>
+        </thead>
+        <tbody>
+        {% block records %}{% endblock %}
+        </tbody>
+    </table>
+
+                    </div>
+                </div>
+
+            </div>
+
+
+			
+</body>
+</html>
