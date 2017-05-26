@@ -1,13 +1,15 @@
 {% extends "index.html" %}
-	{% block title %} STUDENTS {% endblock %}
+	{% block title %} SUGGESTIONS {% endblock %}
         {% block heading %}
 			</th><th>Title</th><th>Message</th>
 		{% endblock %}
         {% block records %}
+		{% for row in rows %}
 		<tr>
-            <td>{{ rows.choice }}</td>
-            <td>{{ rows.message }}</td>
+            <td>{{ row.choice }}</td>
+            <td>{{ row.message }}</td>
 			
 		</tr>
 		
+		{% endfor %}
 		{% endblock %}
