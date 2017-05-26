@@ -19,6 +19,11 @@ public class Message {
     private String lac="";
     private String ci="";
     private String phone="";
+    private String message="";
+    private String choice="";
+
+    public Message() {
+    }
 
     public Message(String name, String reg_no) {
         this.name = name;
@@ -112,5 +117,21 @@ public class Message {
 
     public void setPhone(String phone) {
         this.phone = phone;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public String getChoice() {
+        return choice;
+    }
+
+    public void setChoice(String choice) {
+        this.choice = choice;
     }
 }

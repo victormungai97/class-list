@@ -8,7 +8,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -21,7 +20,7 @@ import org.json.JSONObject;
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends AppCompatActivity implements Extras{
 
     private EditText first_name;
     private EditText last_name;
@@ -174,16 +173,7 @@ public class RegisterActivity extends AppCompatActivity {
         mServerUrl.setText(savedInstanceState.getString("URL"));
     }
 
-    /**
-     * Checks whether field is empty
-     */
-    abstract class MyTextWatcher implements TextWatcher {
-        boolean empty = true;
 
-        boolean nonEmpty() {
-            return !empty;
-        }
-    }
 
     /**
      * Method checks whether information has been entered before submission
@@ -245,7 +235,8 @@ public class RegisterActivity extends AppCompatActivity {
         }
     }
 
-   void moveToScreen() {
+    @Override
+    public void moveToScreen(String ...args) {
         Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

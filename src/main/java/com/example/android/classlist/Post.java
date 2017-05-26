@@ -35,6 +35,8 @@ public class Post {
     private static final String LAC = "lac";
     private static final String CI = "ci";
     private static final String PHONE = "phone";
+    private static final String SUGGESTION = "suggestion";
+    private static final String CHOICE = "choice";
 
     /**
      * Open Http connection.
@@ -70,6 +72,8 @@ public class Post {
             jsonObject.accumulate(LAC, message.getLac());
             jsonObject.accumulate(CI, message.getCi());
             jsonObject.accumulate(PHONE, message.getPhone());
+            jsonObject.accumulate(SUGGESTION,message.getMessage());
+            jsonObject.accumulate(CHOICE, message.getChoice());
 
             // convert JSONObject to JSON to String
             json = jsonObject.toString();

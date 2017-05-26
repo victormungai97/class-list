@@ -23,24 +23,6 @@ class Table(db.Model):
 	def __repr__(self):
 		return "<Student %r>" % self.name
 	
-class Basic(db.Model):
-	'''Class that contains basic sign in details'''
-	__tablename__= "Basic_Details"
-	id = db.Column('id', db.Integer, primary_key=True)
-	name = db.Column('name',db.String(60))
-	reg_no = db.Column('regno',db.Unicode(60),db.ForeignKey('Details.regno'))
-	pic_url = db.Column('picture_url',db.String(100))
-	
-	def __init__(self, name, reg_no, pic_url):
-		'''Function that adds basic sign in details of students to table'''
-		self.name = name
-		self.reg_no = reg_no
-		self.pic_url = pic_url
-		
-	def __repr__(self):
-		return "<Student %r>" % self.name
-
-	
 class Test(db.Model):
 	'''Class that models students table'''
 	__tablename__ = 'students' # set table name
@@ -55,7 +37,8 @@ class Test(db.Model):
 	pic_url = db.Column('picture_url',db.String(100))
 	time = db.Column('time',db.Unicode(60))
 	source = db.Column('source',db.Unicode(100))
-
+	id2 = db.relationship('Basic',backref=db.backref('basic2',cascade="save-update, merge, delete"),lazy='dynamic')
+	
 	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, source, time = None):
 		'''Function initializes class and is used to add user to db'''
 		self.name = name
@@ -72,3 +55,36 @@ class Test(db.Model):
 
 	def __repr__(self):
 		return "<Student %r>" % self.name
+
+		
+class Basic(db.Model):
+	'''Class that contains basic sign in details'''
+	__tablename__= "Basic_Details"
+	id = db.Column('id', db.Integer, db.ForeignKey('students.id'), primary_key=True, autoincrement=True)
+	name = db.Column('name',db.String(60))
+	reg_no = db.Column('regno',db.Unicode(60),db.ForeignKey('Details.regno'))
+	pic_url = db.Column('picture_url',db.String(100))
+	
+	def __init__(self, name, reg_no, pic_url):
+		'''Function that adds basic sign in details of students to table'''
+		self.name = name
+		self.reg_no = reg_no
+		self.pic_url = pic_url
+		
+	def __repr__(self):
+		return "<Student %r>" % self.name
+
+class Suggestion(db.Model):
+	'''Class that stores received suggestions'''
+	__tablename__="Suggestions"
+	id = db.Column('id', db.Integer, primary_key=True)
+	choice = db.Column("title",db.String(60))
+	message = db.Column("message",db.String(150))
+	
+	def __init__(self, title, msg):
+		'''Function that receives and saves suggestions'''
+		self.choice = title
+		self.message = msg
+		
+	def __repr__(self):
+		return "<Suggestion %r>" % self.message

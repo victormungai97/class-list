@@ -1,6 +1,6 @@
 from flask import render_template, request
 
-from app import app, db, create_database, insert_db, get_contents, register_db
+from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion
 from .models import Table, Test
 
 #home page
@@ -156,30 +156,6 @@ def blist():
 	#print contents
 	return render_template("blist.html",rows=rows)
 	
-def general_delete(tablename="",id=""):
-	"""Function to delete row from passed table"""
-	delete = ""
-	# create query for deletion
-	if tablename == "Table":
-		delete = Table.query.filter(Table.id==id).first()
-	elif tablename == 'Test':
-		delete = Test.query.filter(Test.id==id).first()
-	# carry out deletion
-	db.session.delete(delete)
-	# save changes
-	db.session.commit()
-	
-	rows = ""
-	# select all from database
-	if tablename == "Table":
-		rows = Table.query.all()
-	elif tablename == 'Test':
-		rows = Test.query.all()
-	# update db after command execution 
-	db.session.commit()
-	# return results
-	return rows
-	
 # delete row in db
 @app.route('/rlist/delete/',methods =['POST'])	
 def rlist_delete():
@@ -195,3 +171,20 @@ def delete():
 	rows = general_delete("Test",id=request.form['id'])
 	#print contents
 	return render_template("list.html",rows=rows)
+	
+@app.route('/suggestions/',methods =['POST','GET'])
+def suggestions():
+	if request.method == 'POST':
+		json = request.get_json(force=True)
+		suggestion = json['suggestion']
+		choice = json['choice']
+		(message, status) = insert_suggestion(choice, suggestion)
+		if not status:
+			error=str(False)
+		else:
+			error=str(True)
+		result = '{"message": "%s", "error": "%s"}' % (message, error)
+		return result
+	elif request.method == "GET":
+		rows = get_contents("Suggestion")
+		return render_template("suggestions.html",rows=rows)
