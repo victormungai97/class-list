@@ -183,6 +183,8 @@ public class MainActivity extends AppCompatActivity {
         }
 
         turnGPSOn();
+        takePicture();
+        galleryAddPic();
 
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override

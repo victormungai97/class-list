@@ -10,7 +10,6 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,7 +25,7 @@ import java.io.File;
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends AppCompatActivity implements Extras{
 
     Button signInBtn;
     EditText adm_num;
@@ -55,7 +54,6 @@ public class LoginActivity extends AppCompatActivity {
             if (!directory.isDirectory()) {
                 directory.mkdirs(); // create directory and any immediate required directories
             }
-
             Log.e("Directory:",""+directory.getAbsolutePath());
         }
 
@@ -149,17 +147,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Checks whether field is empty
-     */
-    abstract class MyTextWatcher implements TextWatcher {
-        boolean empty = true;
-
-        boolean nonEmpty() {
-            return !empty;
-        }
-    }
-
-    /**
      * Method checks whether information has been entered before submission
      */
     public void updateSubmitButtonState() {
@@ -170,9 +157,7 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Method that connects to next activity
-     */
+    @Override
     public void moveToScreen(String ...args){
         String full_name = args[0];
         String reg_no = args[1];

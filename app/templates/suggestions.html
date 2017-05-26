@@ -1,0 +1,13 @@
+{% extends "index.html" %}
+	{% block title %} STUDENTS {% endblock %}
+        {% block heading %}
+			</th><th>Title</th><th>Message</th>
+		{% endblock %}
+        {% block records %}
+		<tr>
+            <td>{{ rows.choice }}</td>
+            <td>{{ rows.message }}</td>
+			
+		</tr>
+		
+		{% endblock %}

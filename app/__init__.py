@@ -124,7 +124,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 
 	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
-	
+
 def register_db(reg_no, name):
 	'''Function to save registered new students into db'''
 	# Get student with specific regno or name
@@ -156,6 +156,24 @@ def register_db(reg_no, name):
 		status = 2
 	return (message, status)
 	
+def insert_suggestion(choice, msg):
+	'''Function to save suggestions'''
+	status = 0; message = ""
+	suggestion = Suggestion(choice, msg)
+	
+	try:
+		db.session.add(suggestion)
+		db.session.commit()
+		message = "Suggestion received"
+	except Exception as err:
+		print (err)
+		db.session.rollback()
+		message = "Connection unsuccessful. Suggestion not sent"
+		status = 1
+		
+	return (message, status)
+	
+	
 def get_contents(table):
 	'''Function to get data from db'''
 	if table == 'Table':
@@ -164,5 +182,31 @@ def get_contents(table):
 		return Basic.query.all()
 	elif table == 'Test':
 		return Test.query.all()
+	elif table == "Suggestion":
+		return Suggestion.query.all()
+	
+def general_delete(tablename="",id=""):
+	"""Function to delete row from passed table"""
+	delete = ""
+	# create query for deletion
+	if tablename == "Table":
+		delete = Table.query.filter(Table.id==id).first()
+	elif tablename == 'Test':
+		delete = Test.query.filter(Test.id==id).first()
+	# carry out deletion
+	db.session.delete(delete)
+	# save changes
+	db.session.commit()
+	
+	rows = ""
+	# select all from database
+	if tablename == "Table":
+		rows = Table.query.all()
+	elif tablename == 'Test':
+		rows = Test.query.all()
+	# update db after command execution 
+	db.session.commit()
+	# return results
+	return rows
 	
 from app import views
