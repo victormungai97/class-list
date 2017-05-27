@@ -168,6 +168,7 @@ def rlist_delete():
 @app.route('/delete/',methods =['POST'])	
 def delete():
 	"""Function to delete row in students table"""
+	general_delete("Basic",id=request.form['id'])
 	rows = general_delete("Test",id=request.form['id'])
 	#print contents
 	return render_template("list.html",rows=rows)

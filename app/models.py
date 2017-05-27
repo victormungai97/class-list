@@ -37,7 +37,6 @@ class Test(db.Model):
 	pic_url = db.Column('picture_url',db.String(100))
 	time = db.Column('time',db.Unicode(60))
 	source = db.Column('source',db.Unicode(100))
-	id2 = db.relationship('Basic',backref=db.backref('basic2',cascade="save-update, merge, delete"),lazy='dynamic')
 	
 	def __init__(self, name, reg_no, lat, longi, lac, ci, pic_url, source, time = None):
 		'''Function initializes class and is used to add user to db'''
@@ -60,7 +59,7 @@ class Test(db.Model):
 class Basic(db.Model):
 	'''Class that contains basic sign in details'''
 	__tablename__= "Basic_Details"
-	id = db.Column('id', db.Integer, db.ForeignKey('students.id'), primary_key=True, autoincrement=True)
+	id = db.Column('id', db.Integer, primary_key=True, autoincrement=True)
 	name = db.Column('name',db.String(60))
 	reg_no = db.Column('regno',db.Unicode(60),db.ForeignKey('Details.regno'))
 	pic_url = db.Column('picture_url',db.String(100))
