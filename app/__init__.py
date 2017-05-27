@@ -195,6 +195,8 @@ def general_delete(tablename="",id=""):
 		delete = Table.query.filter(Table.id==id).first()
 	elif tablename == 'Test':
 		delete = Test.query.filter(Test.id==id).first()
+	elif tablename == 'Basic':
+		delete = Basic.query.filter(Basic.id==id).first()
 	# carry out deletion
 	db.session.delete(delete)
 	# save changes
@@ -206,6 +208,8 @@ def general_delete(tablename="",id=""):
 		rows = Table.query.all()
 	elif tablename == 'Test':
 		rows = Test.query.all()
+	elif tablename == 'Basic':
+		rows = Basic.query.all()
 	# update db after command execution 
 	db.session.commit()
 	# return results
