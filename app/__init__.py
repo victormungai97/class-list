@@ -51,7 +51,7 @@ def get_url(pic,regno,method):
 		pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 	#get file extension
 	extension=filename.split(".")
-	extension=str(extension[1])
+	extension=str(extension[len(extension) - 1])
 	#get path to source of uploaded file
 	source=app.config['UPLOAD_FOLDER']+filename
 
