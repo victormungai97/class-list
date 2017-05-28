@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 	{% block title %} STUDENTS {% endblock %}
         {% block heading %}
-            <th>ID</th><th>Reg No.</th><th>Name</th><th>Picture</th>
+            <th>ID</th><th>Reg No.</th><th>Name</th><th>Course</th><th>Picture</th>
         {% endblock %}
         {% block records %}
         {%  for row in rows %}
@@ -9,6 +9,7 @@
             <td>{{ row.id }}</td>
             <td>{{ row.reg_no }}</td>
             <td> {{ row.name }}</td>
+			<td> {{ row.course }} </td>
             <td><img class="img-circle" src="..{{ row.pic_url }}" alt="{{ row.name }}" align="center" style="width:100px;height:100px"></td>
 			
            

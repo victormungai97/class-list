@@ -1,7 +1,7 @@
 {% extends "index.html" %}
 	{% block title %} STUDENTS {% endblock %}
 		{% block heading %}
-            <th>ID</th><th>Reg No.</th><th>Name</th>
+            <th>ID</th><th>Reg No.</th><th>Name</th><th>Course</th>
         {% endblock %}
 		{% block records %}
         {%  for row in res %}
@@ -9,6 +9,7 @@
             <td> {{ row.id }} </td>
 			<td> {{ row.reg_no }} </td>
 			<td> {{ row.name }} </td>
+			<td> {{ row.course }} </td>
             <td><form action ="{{url_for('rlist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
            
         </tr>
