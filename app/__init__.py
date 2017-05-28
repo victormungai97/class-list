@@ -5,7 +5,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
 
-from config import app_config
+from config import app_config, courses
 
 db = SQLAlchemy() # db instance variable
 app = Flask(__name__, instance_relative_config=True)
@@ -73,6 +73,7 @@ def get_url(pic,regno,method):
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
 	'''Function to save given user data into db'''
 	pic_url='' # url of picture
+	course_code=""
 	# check for '/' in regno
 	match = re.search("/[\S]+/",regno)
 	# if '/' found
@@ -97,8 +98,8 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	status = 0
 	message = ''
 	regno = '/'.join(paths)
-	test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time)
-	basic = Basic(name, regno, pic_url)
+	test = Test(name, regno, latitude, longitude, lac, ci, pic_url, source, time=time, course=courses.get(course_code))
+	basic = Basic(name, regno, pic_url, courses.get(course_code))
 	# get details for given reg_no
 	data = Table.query.filter((Table.reg_no==regno)).first()
 	
@@ -132,11 +133,16 @@ def register_db(reg_no, name):
 	# Get student with specific regno or name
 	data = Table.query.filter((Table.reg_no==reg_no)|(Table.name==name)).first()
 	
+	# check course code
+	course_name = reg_no[:3]
+	if course_name not in courses.keys():
+		return ("Incorrect course code", 3)
+	
 	status = 0
 	message = ''
 	# if student not in db, enter into db
 	if not data:
-		test = Table(name, reg_no)
+		test = Table(name, reg_no, courses.get(course_name))
 		# for successful connection
 		try:
 			# add new row to db

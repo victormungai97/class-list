@@ -21,3 +21,8 @@ app_config = {
 	'development':DevelopmentConfig,
 	'production':ProductionConfig
 }
+
+courses = {
+	'F17':"Electrical Engineering",
+	'F16':"Civil Engineering"
+}
