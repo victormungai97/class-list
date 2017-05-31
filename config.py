@@ -26,3 +26,19 @@ courses = {
 	'F17':"Electrical Engineering",
 	'F16':"Civil Engineering"
 }
+
+def myHelper(filename, message):
+	'''Function to write into database'''
+	import sqlite3
+	conn = sqlite3.connect(filename)
+	cursor = conn.cursor()
+	create = "CREATE TABLE IF NOT EXISTS Logs (Time varchar(60), Message varchar(60))"
+	cursor.execute(create)
+	conn.commit()
+	from datetime import datetime
+	current_time = datetime.now().strftime('%Y-%m-%d %H-%M-%S') # current time
+	query = "INSERT INTO Logs VALUES ('{0}','{1}')".format(current_time, message)
+	cursor.execute(query)
+	conn.commit()
+	cursor.close()
+	conn.close()
