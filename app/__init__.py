@@ -1,3 +1,4 @@
+# app/__init__.py
 import os
 import re
 import shutil
@@ -5,7 +6,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
 
-from config import app_config, courses
+from config import app_config, courses, myHelper
 
 db = SQLAlchemy() # db instance variable
 app = Flask(__name__, instance_relative_config=True)
@@ -26,6 +27,8 @@ from .models import *
 print ("Current path is", os.path.abspath(os.curdir))
 new_folder = os.path.join("app/static/uploads/")
 app.config['UPLOAD_FOLDER'] = new_folder
+# folder for log files 
+app.config['LOG_FOLDER'] = os.path.join("app/logs/")
 # These are the extension that we are accepting to be uploaded
 app.config['ALLOWED_EXTENSIONS'] = set(['png', 'jpg', 'jpeg'])
 
@@ -35,6 +38,8 @@ def allowed_file(filename):
 
 def create_database():
 	'''Function creates table where not created'''
+	if not os.path.isdir(app.config['LOG_FOLDER']):
+		os.makedirs(app.config['LOG_FOLDER'])
 	db.create_all()
 	
 def get_url(pic,regno,method):
@@ -67,11 +72,14 @@ def get_url(pic,regno,method):
 
 	#rename file
 	os.rename(source,destination)
+	log_file = os.path.join(app.config['LOG_FOLDER'],"insert_log.db")
+	myHelper(log_file, "Picture saved")
 	pic_url = destination.replace("app","")
 	return pic_url
 	
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
 	'''Function to save given user data into db'''
+	log_file = os.path.join(app.config['LOG_FOLDER'],'insert_log.db')
 	pic_url='' # url of picture
 	course_code=""
 	# check for '/' in regno
@@ -106,6 +114,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	# Incorrect name for reg_no given
 	if data.name != name:
 		message = "Name not registered. Connection unsuccessful"
+		myHelper(log_file, message)
 		status = 1
 	else:
 		# for successful connection
@@ -116,13 +125,15 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 			# save changes
 			db.session.commit()
 			message = "Record successfully added"
+			myHelper(log_file, message + ". Student: " + regno)
 		# for unsuccessful connection
 		except Exception as err:
 			# display error
 			print (err)
 			# undo changes
 			db.session.rollback()
-			message = "Record not added. Connection unsuccessful"
+			message = "Record not added. Connection unsuccessful."
+			myHelper(log_file, message + " " + err)
 			status = 2
 
 	app.config['UPLOAD_FOLDER'] = new_folder
@@ -130,12 +141,14 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 
 def register_db(reg_no, name):
 	'''Function to save registered new students into db'''
+	log_file = os.path.join(app.config['LOG_FOLDER'],"register_log.db")
 	# Get student with specific regno or name
 	data = Table.query.filter((Table.reg_no==reg_no)|(Table.name==name)).first()
 	
 	# check course code
 	course_name = reg_no[:3]
 	if course_name not in courses.keys():
+		myHelper(log_file, "Incorrect course code")
 		return ("Incorrect course code", 3)
 	
 	status = 0
@@ -149,7 +162,8 @@ def register_db(reg_no, name):
 			db.session.add(test)
 			# save changes
 			db.session.commit()
-			message = "Record successfully added"
+			message = "Record successfully added."
+			myHelper(log_file, message + " Student: " + reg_no)
 		# for unsuccessful connection
 		except Exception as err:
 			# display error
@@ -157,15 +171,18 @@ def register_db(reg_no, name):
 			# undo changes
 			db.session.rollback()
 			message = "Record not added. Connection unsuccessful"
+			myHelper(log_file, message + ". " + err)
 			status = 1
 	# if user in db
 	else:
 		message = "Student is in database"
+		myHelper(log_file, message)
 		status = 2
 	return (message, status)
 	
 def insert_suggestion(choice, msg):
 	'''Function to save suggestions'''
+	log_file = os.path.join(app.config['LOG_FOLDER'],"suggestion_log.db")
 	status = 0; message = ""
 	suggestion = Suggestion(choice, msg)
 	
@@ -173,10 +190,12 @@ def insert_suggestion(choice, msg):
 		db.session.add(suggestion)
 		db.session.commit()
 		message = "Suggestion received"
+		myHelper(log_file, message)
 	except Exception as err:
 		print (err)
 		db.session.rollback()
 		message = "Connection unsuccessful. Suggestion not sent"
+		myHelper(log_file, message)
 		status = 1
 		
 	return (message, status)
@@ -184,18 +203,24 @@ def insert_suggestion(choice, msg):
 	
 def get_contents(table):
 	'''Function to get data from db'''
+	rows = "";log_file = os.path.join(app.config['LOG_FOLDER'],"insert_log.db")
+	myHelper(log_file, "Retrieving items from "+table)
 	if table == 'Table':
-		return Table.query.all()
+		rows = Table.query.all()
 	elif table == 'Basic':
-		return Basic.query.all()
+		rows = Basic.query.all()
 	elif table == 'Test':
-		return Test.query.all()
+		rows = Test.query.all()
 	elif table == "Suggestion":
-		return Suggestion.query.all()
+		rows = Suggestion.query.all()
+	myHelper(log_file, "Items retrieved")
+	return rows
 	
 def general_delete(tablename="",id=""):
 	"""Function to delete row from passed table"""
 	delete = ""
+	log_file = os.path.join(app.config['LOG_FOLDER'],"delete_log.db")
+	myHelper(log_file, "Deleting item from "+tablename)
 	# create query for deletion
 	if tablename == "Table":
 		delete = Table.query.filter(Table.id==id).first()
@@ -207,17 +232,9 @@ def general_delete(tablename="",id=""):
 	db.session.delete(delete)
 	# save changes
 	db.session.commit()
+	myHelper(log_file,"Item deleted")
 	
-	rows = ""
-	# select all from database
-	if tablename == "Table":
-		rows = Table.query.all()
-	elif tablename == 'Test':
-		rows = Test.query.all()
-	elif tablename == 'Basic':
-		rows = Basic.query.all()
-	# update db after command execution 
-	db.session.commit()
+	rows = get_contents(tablename)
 	# return results
 	return rows
 	

@@ -1,3 +1,4 @@
+# app/views.py
 from flask import render_template, request
 
 from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion
@@ -135,9 +136,11 @@ def record():
 		#lac=request.files['lac']
 		#ci=request.files['ci']        
 		pic=request.files['picture']
+		agent = request.user_agent
+		source = " ".join([agent.platform.title(), agent.browser.title(), agent.version])
 
 		# get results from insertion into db
-		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record')
+		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record',source)
 		return render_template("result.html",msg=message,sts=status)
 		
 @app.route('/list/')
