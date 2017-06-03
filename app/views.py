@@ -1,8 +1,10 @@
 # app/views.py
+import os
 from flask import render_template, request
 
 from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion
 from .models import Table, Test
+from config import myHelper
 
 #home page
 @app.route('/')
@@ -64,9 +66,13 @@ def register():
 def get_students():
 	'''Function to check registered students'''
 	message=''; regno=''; status=0; error=''
+	# file to save signing in from phone
+	log_file = os.path.join(app.config['LOG_FOLDER'],"signin_log.db")
 	if request.method == 'POST':
 		json = request.get_json(force=True)
 		regno = json['regno']
+		# save attempt to sign in
+		myHelper(log_file, "Student: "+regno+" attempting to sign in")
 	
 		# check whether student is registered
 		data = Table.query.filter(Table.reg_no==regno).first()
@@ -76,10 +82,16 @@ def get_students():
 		else:
 			status = 1
 			message = "Student not registered. Please register"
+		
 		if not status:
 			error = str(False)
+			# save successful signing in
+			myHelper(log_file, "Student: "+regno+" logged in successfully")
 		else:
 			error = str(True)
+			# save unsuccessful signing in
+			myHelper(log_file, "Unsuccessful signing in")
+		
 		return '{"message" : "%s", "error" : "%s"}' % (message, error)
 	
 	if request.method == 'GET':

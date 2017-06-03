@@ -38,7 +38,7 @@
             android:text="@string/admission_number"
             android:textAppearance="?android:textAppearanceLarge"/>
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/admissionNum2"
             android:layout_width="0dp"
             android:layout_weight="1"
