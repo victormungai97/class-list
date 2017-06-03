@@ -1,7 +1,10 @@
 package com.example.android.classlist;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -12,15 +15,23 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.android.classlist.database.SignBaseHelper;
+import com.example.android.classlist.database.SignInCursorWrapper;
+import com.example.android.classlist.database.SignInDbSchema.SignInTable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
@@ -28,12 +39,13 @@ import static com.example.android.classlist.Post.processResults;
 public class LoginActivity extends AppCompatActivity implements Extras{
 
     Button signInBtn;
-    EditText adm_num;
+    AutoCompleteTextView adm_num;
     TextView login_link;
     FloatingActionButton mFloatingActionButton;
     MyTextWatcher regWatcher;
     EditText mServerUrl;
     File directory;
+    SQLiteDatabase mDatabase;
 
     int status = 0;
     String message;
@@ -67,9 +79,14 @@ public class LoginActivity extends AppCompatActivity implements Extras{
 
         login_link = (TextView) findViewById(R.id.login_text);
         signInBtn = (Button) findViewById(R.id.sign_in_btn);
-        adm_num = (EditText) findViewById(R.id.admissionNum2);
         mFloatingActionButton = (FloatingActionButton) findViewById(R.id.fab_signin);
         mServerUrl = (EditText) findViewById(R.id.ur_name);
+        mDatabase = new SignBaseHelper(getApplicationContext()).getWritableDatabase();
+
+        adm_num = (AutoCompleteTextView) findViewById(R.id.admissionNum2);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
+                android.R.layout.simple_dropdown_item_1line, getCrimes());
+        adm_num.setAdapter(adapter);
 
         login_link.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,11 +174,58 @@ public class LoginActivity extends AppCompatActivity implements Extras{
         }
     }
 
+    private static ContentValues getContentValues(String reg_no, String name) {
+        ContentValues values = new ContentValues();
+        values.put(SignInTable.Cols.REG_NO, reg_no);
+        values.put(SignInTable.Cols.NAME, name);
+        return values;
+    }
+
+    /**
+     * Gets list of registration numbers for auto completion
+     * @return list of registration numbers
+     */
+    public List<String> getCrimes() {
+        List<String> reg_nos = new ArrayList<>();
+        SignInCursorWrapper cursor = queryRegno(null, null);
+        try {
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                reg_nos.add(cursor.getRegNo());
+                cursor.moveToNext();
+            }
+        } finally {
+            cursor.close();
+        }
+        return reg_nos;
+    }
+
+    /**
+     * Creates the query for retrieving registration numbers
+     * @param whereClause where statement
+     * @param whereArgs condition(s)
+     * @return instance of cursor wrapper
+     */
+    private SignInCursorWrapper queryRegno(String whereClause, String[] whereArgs) {
+        Cursor cursor = mDatabase.query(
+                SignInTable.NAME, // Table
+                new String[]{ SignInTable.Cols.REG_NO }, // Columns - null selects all columns
+                whereClause, // WHERE
+                whereArgs, // Conditions to be met
+                null, // groupBy
+                null, // having
+                null // orderBy
+        );
+        return new SignInCursorWrapper(cursor);
+    }
+
     @Override
     public void moveToScreen(String ...args){
         String full_name = args[0];
         String reg_no = args[1];
         String dir = args[2];
+        ContentValues values = getContentValues(reg_no,full_name);
+        mDatabase.insert(SignInTable.NAME, null, values); // insert(table_name, null, contentValues)
         Intent intent = MainActivity.newIntent(LoginActivity.this, full_name, reg_no,dir);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
