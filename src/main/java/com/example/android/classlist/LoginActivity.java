@@ -31,7 +31,6 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
@@ -85,7 +84,7 @@ public class LoginActivity extends AppCompatActivity implements Extras{
 
         adm_num = (AutoCompleteTextView) findViewById(R.id.admissionNum2);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this,
-                android.R.layout.simple_dropdown_item_1line, getCrimes());
+                android.R.layout.simple_dropdown_item_1line, getRegnos());
         adm_num.setAdapter(adapter);
 
         login_link.setOnClickListener(new View.OnClickListener() {
@@ -182,11 +181,11 @@ public class LoginActivity extends AppCompatActivity implements Extras{
     }
 
     /**
-     * Gets list of registration numbers for auto completion
+     * Gets list of registration numbers for auto completion from database
      * @return list of registration numbers
      */
-    public List<String> getCrimes() {
-        List<String> reg_nos = new ArrayList<>();
+    public ArrayList<String> getRegnos() {
+        ArrayList<String> reg_nos = new ArrayList<>();
         SignInCursorWrapper cursor = queryRegno(null, null);
         try {
             cursor.moveToFirst();
