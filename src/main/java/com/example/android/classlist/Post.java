@@ -1,6 +1,9 @@
 package com.example.android.classlist;
 
+import android.content.ContentValues;
 import android.util.Log;
+
+import com.example.android.classlist.database.SignInDbSchema.SignInTable;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
@@ -17,9 +20,10 @@ import java.io.InputStreamReader;
 
 /**
  * Created by User on 4/28/2017.
+ * Class contains methods for connection to database
  */
 
-public class Post {
+class Post {
 
     /**
      * Class with two static methods to do post to server and process results
@@ -48,7 +52,7 @@ public class Post {
      * @param message message to be sent
      * @return response as String
      */
-    public static String POST(String url, Message message){
+    static String POST(String url, Message message){
         InputStream inputStream;
         String result = "";
         try {
@@ -186,5 +190,18 @@ public class Post {
         }
 
         return jsonObject;
+    }
+
+    /**
+     * Method that maps student's details to their respective columns
+     * @param reg_no Student's registration number
+     * @param name Student's name
+     * @return content value containing column names and their values
+     */
+    static ContentValues getContentValues(String reg_no, String name) {
+        ContentValues values = new ContentValues();
+        values.put(SignInTable.Cols.REG_NO, reg_no);
+        values.put(SignInTable.Cols.NAME, name);
+        return values;
     }
 }

@@ -33,6 +33,7 @@ import java.io.File;
 import java.util.ArrayList;
 
 import static com.example.android.classlist.Post.POST;
+import static com.example.android.classlist.Post.getContentValues;
 import static com.example.android.classlist.Post.processResults;
 
 public class LoginActivity extends AppCompatActivity implements Extras{
@@ -173,13 +174,6 @@ public class LoginActivity extends AppCompatActivity implements Extras{
         }
     }
 
-    private static ContentValues getContentValues(String reg_no, String name) {
-        ContentValues values = new ContentValues();
-        values.put(SignInTable.Cols.REG_NO, reg_no);
-        values.put(SignInTable.Cols.NAME, name);
-        return values;
-    }
-
     /**
      * Gets list of registration numbers for auto completion from database
      * @return list of registration numbers
@@ -223,8 +217,11 @@ public class LoginActivity extends AppCompatActivity implements Extras{
         String full_name = args[0];
         String reg_no = args[1];
         String dir = args[2];
+
+        // save data to SQLite database
         ContentValues values = getContentValues(reg_no,full_name);
         mDatabase.insert(SignInTable.NAME, null, values); // insert(table_name, null, contentValues)
+
         Intent intent = MainActivity.newIntent(LoginActivity.this, full_name, reg_no,dir);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);

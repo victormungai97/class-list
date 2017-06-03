@@ -1,7 +1,9 @@
 package com.example.android.classlist;
 
 import android.app.ProgressDialog;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.design.widget.FloatingActionButton;
@@ -14,10 +16,14 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.android.classlist.database.SignBaseHelper;
+import com.example.android.classlist.database.SignInDbSchema.SignInTable;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import static com.example.android.classlist.Post.POST;
+import static com.example.android.classlist.Post.getContentValues;
 import static com.example.android.classlist.Post.processResults;
 
 public class RegisterActivity extends AppCompatActivity implements Extras{
@@ -37,6 +43,7 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
 
     int status = 0;
     String message;
+    SQLiteDatabase mDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +60,7 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
         mSignInButton = (Button) findViewById(R.id.register_btn);
         fab = (FloatingActionButton) findViewById(R.id.fab);
         mServerUrl = (EditText) findViewById(R.id.ur_name_register);
+        mDatabase = new SignBaseHelper(getApplicationContext()).getWritableDatabase();
 
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -75,11 +83,7 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().length() == 0) {
-                    empty = true;
-                } else {
-                    empty = false;
-                }
+                empty = editable.toString().length() == 0;
                 updateSubmitButtonState();
             }
         };
@@ -97,11 +101,7 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().length() == 0) {
-                    empty = true;
-                } else {
-                    empty = false;
-                }
+                empty = editable.toString().length() == 0;
                 updateSubmitButtonState();
             }
         };
@@ -119,11 +119,7 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
 
             @Override
             public void afterTextChanged(Editable editable) {
-                if (editable.toString().length() == 0) {
-                    empty = true;
-                } else {
-                    empty = false;
-                }
+                empty = editable.toString().length() == 0;
                 updateSubmitButtonState();
             }
         };
@@ -220,6 +216,8 @@ public class RegisterActivity extends AppCompatActivity implements Extras{
             }
 
             if (status == 0){
+                ContentValues values = getContentValues(reg_no,name);
+                mDatabase.insert(SignInTable.NAME, null, values);
                 moveToScreen();
             }
 
