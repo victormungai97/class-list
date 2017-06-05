@@ -27,6 +27,7 @@ from .models import *
 print ("Current path is", os.path.abspath(os.curdir))
 new_folder = os.path.join("app/static/uploads/")
 app.config['UPLOAD_FOLDER'] = new_folder
+app.config['REGISTER_FOLDER'] = os.path.join("app/static/register/")
 # folder for log files 
 app.config['LOG_FOLDER'] = os.path.join("app/logs/")
 # These are the extension that we are accepting to be uploaded
@@ -47,11 +48,17 @@ def get_url(pic,regno,method):
 	# Move the file form the temporal folder to the upload folder
 	if not os.path.isdir(app.config['UPLOAD_FOLDER']):
 		os.makedirs(app.config['UPLOAD_FOLDER'])
+	if not os.path.isdir(app.config['REGISTER_FOLDER']):
+		os.makedirs(app.config['REGISTER_FOLDER'])
 	filename = ''
 	#get name of the source file + Make the filename safe, remove unsupported chars
 	if method == "fromapp":
 		filename = str(secure_filename(pic))
 		route = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+		shutil.move(pic, route)
+	if method == "register":
+		filename = str(secure_filename(pic))
+		route = os.path.join(app.config['REGISTER_FOLDER'], filename)
 		shutil.move(pic, route)
 	if method == "record":
 		filename = str(secure_filename(pic.filename))
@@ -60,15 +67,21 @@ def get_url(pic,regno,method):
 	extension=filename.split(".")
 	extension=str(extension[len(extension) - 1])
 	#get path to source of uploaded file
-	source=app.config['UPLOAD_FOLDER']+filename
+	source = ''
+	if method == 'register': source=app.config['REGISTER_FOLDER']+filename
+	else: source=app.config['UPLOAD_FOLDER']+filename
 
 	#delete existing file
-	file = app.config['UPLOAD_FOLDER'] + regno + "." + extension
+	file = ''
+	if method == 'register': file = app.config['REGISTER_FOLDER'] + regno + "." + extension
+	else: file = app.config['UPLOAD_FOLDER'] + regno + "." + extension
 	if os.path.isfile(file):
 		os.remove(file)
 	
 	#get path to destination of uploaded file 
-	destination=app.config['UPLOAD_FOLDER']+regno+'.'+extension
+	destination = ''
+	if method == 'register': destination=app.config['REGISTER_FOLDER']+regno+'.'+extension
+	else: destination=app.config['UPLOAD_FOLDER']+regno+'.'+extension
 
 	#rename file
 	os.rename(source,destination)
@@ -139,9 +152,29 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
 
-def register_db(reg_no, name):
+def register_db(reg_no, name, pic=""):
 	'''Function to save registered new students into db'''
 	log_file = os.path.join(app.config['LOG_FOLDER'],"register_log.db")
+	pic_url='' # url of picture
+	regno=""
+	course_code=""
+	# check for '/' in regno
+	match = re.search("/[\S]+/",reg_no)
+	# if '/' found
+	if match:
+		print (reg_no)
+		paths = reg_no.split('/')
+		# get course code
+		course_code = paths[0]
+		# get year of study
+		year_of_study = paths[2]
+		# create new path
+		app.config['REGISTER_FOLDER'] = "/".join([app.config.get('REGISTER_FOLDER'),course_code,year_of_study,'/'])
+		regno = paths[1]
+	# Check if the file is one of the allowed types/extensions
+	if pic and allowed_file(pic):
+		pic_url = get_url(pic,regno,"register")
+
 	# Get student with specific regno or name
 	data = Table.query.filter((Table.reg_no==reg_no)|(Table.name==name)).first()
 	
@@ -155,7 +188,7 @@ def register_db(reg_no, name):
 	message = ''
 	# if student not in db, enter into db
 	if not data:
-		test = Table(name, reg_no, courses.get(course_name))
+		test = Table(name, reg_no, courses.get(course_name),pic_url)
 		# for successful connection
 		try:
 			# add new row to db
@@ -200,6 +233,15 @@ def insert_suggestion(choice, msg):
 		
 	return (message, status)
 	
+def decode_image(data, name):
+	'''Function to decode string to image'''
+	img_data=data.encode('UTF-8','strict')
+	import base64
+	pic_name = name + ".jpg"
+	# decode image string and write into file
+	with open(pic_name, 'wb') as fh:
+		fh.write(base64.b64decode(img_data))
+	return pic_name
 	
 def get_contents(table):
 	'''Function to get data from db'''
