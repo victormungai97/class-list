@@ -11,17 +11,19 @@ class Table(db.Model):
 	name = db.Column('name', db.String(60), unique=True)
 	reg_no = db.Column('regno', db.Unicode(60), unique=True)
 	course = db.Column('course', db.String(60))
+	pic_url = db.Column('picture_url',db.String(100))
 	# 1. Point to Test and Basic classes and load multiple tests and basics
 	# 2. backref creates a virtual property in Test class that can be used to access student's details
 	# 3. lazy defines how to load data 
 	reg_nos = db.relationship('Test',backref='details',lazy='dynamic')
 	reg_nos1 = db.relationship('Basic',backref='basic',lazy='dynamic')
 	
-	def __init__(self, name, reg_no, course):
+	def __init__(self, name, reg_no, course, pic=""):
 		'''Function that adds basic details of students to table'''
 		self.name = name
 		self.reg_no = reg_no
 		self.course = course
+		self.pic_url = pic
 		
 	def __repr__(self):
 		return "<Student %r>" % self.name

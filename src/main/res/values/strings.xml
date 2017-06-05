@@ -20,4 +20,6 @@
         <item>Commendations</item>
     </string-array>
     <string name="suggestion_text">Enter your suggestion</string>
+    <string name="content_button">Button to take picture for registration</string>
+    <string name="content_view">Image for registration</string>
 </resources>

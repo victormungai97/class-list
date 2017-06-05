@@ -2,7 +2,7 @@
 import os
 from flask import render_template, request
 
-from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion
+from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image
 from .models import Table, Test
 from config import myHelper
 
@@ -43,7 +43,7 @@ def register2():
 	
 @app.route('/registration/',methods=['POST','GET'])
 def register():
-	'''Function to register new students'''
+	'''Function to take data from app'''
 	create_database()
 	# user details
 	name=''; regno=''; error=''
@@ -53,8 +53,9 @@ def register():
 		# get user details
 		regno = json['regno']
 		name = json['name']
+		pic = decode_image(json['picture'], name)
 		
-	message, status = register_db(regno, name)
+	message, status = register_db(regno, name, pic)
 	if not status:
 		error = str(False)
 	else:
@@ -117,14 +118,7 @@ def from_app():
 		longitude=float(json['longitude'])
 		lac=float(json['lac'])
 		ci=float(json['ci'])
-		img_data=json['picture']
-		img_data=img_data.encode('UTF-8','strict')
-		import base64
-		pic_name = name + ".jpg"
-		# decode image string and write into file
-		with open(pic_name, 'wb') as fh:
-			fh.write(base64.b64decode(img_data))
-		pic = pic_name
+		pic = decode_image(json['picture'], name)
 		phone=json['phone']
 		
 		(message, status) = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'fromapp',phone)

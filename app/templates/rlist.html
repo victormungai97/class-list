@@ -10,6 +10,7 @@
 			<td> {{ row.reg_no }} </td>
 			<td> {{ row.name }} </td>
 			<td> {{ row.course }} </td>
+			<td><img class="img-circle" src="..{{ row.pic_url }}" alt="{{ row.name }}" align="center" style="width:100px;height:100px"></td>
             <td><form action ="{{url_for('rlist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
            
         </tr>

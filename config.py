@@ -23,8 +23,15 @@ app_config = {
 }
 
 courses = {
-	'F17':"Electrical Engineering",
-	'F16':"Civil Engineering"
+	'F17':"B.sc. ( Electrical And Electronic Engineering)",
+	'F16':"B.sc. (Civil Engineering)",
+	'F18':"B.sc. (Mechanical Engineering)",
+	'F19':"B.sc. (Geospatial Engineering)",
+	'F21':"B.sc. (Environmental and Biosystems Engineering)",
+	'B04':"Bachelor of Real Estate",
+	'B66':"Bachelor Of Quantity Surveying",
+	'B76':"Bachelor Of Construction Management",
+	'B65':"B.A. (urban & Regional Planning)"
 }
 
 def myHelper(filename, message):
