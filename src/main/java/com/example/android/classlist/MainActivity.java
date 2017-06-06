@@ -5,16 +5,11 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.location.LocationManager;
-import android.media.FaceDetector;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
-import android.provider.MediaStore;
-import android.support.v4.content.FileProvider;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
 import android.util.Base64;
@@ -34,19 +29,17 @@ import org.json.JSONObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Locale;
 
+import static com.example.android.classlist.PictureUtilities.galleryAddPic;
+import static com.example.android.classlist.PictureUtilities.recogniseFace;
+import static com.example.android.classlist.PictureUtilities.takePicture;
 import static com.example.android.classlist.Post.POST;
 import static com.example.android.classlist.Post.processResults;
 
 public class MainActivity extends AppCompatActivity {
 
     private ImageView mImageView;
-    private String mCurrentPhotoPath;
     private Uri imageForUpload;
     private Button mButton;
     private EditText full_name;
@@ -183,14 +176,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         turnGPSOn();
-        takePicture();
-        galleryAddPic();
+        imageForUpload = takePicture(MainActivity.this, TAG);
+        galleryAddPic(MainActivity.this);
 
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                takePicture();
-                galleryAddPic();
+                imageForUpload = takePicture(MainActivity.this, TAG);
+                galleryAddPic(MainActivity.this);
             }
         });
 
@@ -301,37 +294,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     /**
-     * Method invokes intent to take picture
-     */
-    private void takePicture(){
-
-        // call phone's camera
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // resolveActivity returns first activity component that can handle intent, preventing crash
-        if (intent.resolveActivity(getPackageManager()) != null){
-            // Create file where image should go
-            File photoFile;
-
-            try{
-                photoFile = getPhotoFile();
-            } catch (Exception ex){
-                Log.e("Image error","Error saving image");
-                return;
-            }
-
-            // continue only if File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,"com.example.android.fileprovider",
-                        photoFile);
-                intent.putExtra(MediaStore.EXTRA_OUTPUT,photoURI);
-                imageForUpload = Uri.fromFile(photoFile);
-                startActivityForResult(intent, REQUEST_PHOTO);
-                photoFile.renameTo(new File(directory, getPhotoFilename()));
-            }
-        }
-    }
-
-    /**
      * Method retrieves image sent by return intent as small Bitmap in extras with data as key
      * and displays to ImageView
      * @param requestCode request that was received from take picture
@@ -343,30 +305,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             if (requestCode == REQUEST_PHOTO && resultCode == Activity.RESULT_OK) {
                 if (imageForUpload != null) {
-                    Uri selectedImage = imageForUpload;
-                    getContentResolver().notifyChange(selectedImage,null);
-                    photo = PictureUtilities.getScaledBitmap(imageForUpload.getPath(),MainActivity.this);
-
-                    if (photo != null) {
-                        // detect only one face to set to image view
-                        FaceDetector faceDet = new FaceDetector(photo.getWidth(), photo.getHeight(), 2);
-                        int faces = faceDet.findFaces(photo.copy(Bitmap.Config.RGB_565, false), new FaceDetector.Face[2]);
-                        if (faces == 0) {
-                            Toast.makeText(this, "No face Detected.", Toast.LENGTH_SHORT).show();
-                            mImageView.setImageResource(android.R.drawable.ic_menu_camera);
-                            photo = null;
-                        } else if (faces > 1) {
-                            Toast.makeText(this, "Detected more than one face.", Toast.LENGTH_SHORT).show();
-                            mImageView.setImageResource(android.R.drawable.ic_menu_camera);
-                            photo = null;
-                        }
-                        BitmapDrawable ob = new BitmapDrawable(getResources(),photo);
-                        mImageView.setImageDrawable(ob);
-                        updateSubmitButtonState();
-                    } else {
-                        mImageView.setImageResource(android.R.drawable.ic_menu_camera);
-                        Toast.makeText(this,"Error1 while capturing image",Toast.LENGTH_SHORT).show();
-                    }
+                    photo = recogniseFace(imageForUpload, mImageView, MainActivity.this);
+                    updateSubmitButtonState();
                 } else {
                     Toast.makeText(this,"Error2 while capturing image",Toast.LENGTH_SHORT).show();
                 }
@@ -376,46 +316,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * Method returns the file containing the photo
-     * @return photo file
-     */
-    public File getPhotoFile() {
-        File externalFilesDir;
-        externalFilesDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-
-        // Save a file: path for use with ACTION_VIEW intents
-        try {
-            assert externalFilesDir != null;
-            mCurrentPhotoPath = externalFilesDir.getAbsolutePath();
-        } catch (NullPointerException ex){
-            Log.e(TAG, ex.getMessage());
-        }
-
-        return new File(externalFilesDir, getPhotoFilename());
-    }
-
-    /**
-     * Method return file name using the time that it was taken
-     */
-    public String getPhotoFilename() {
-        // get current time and set as file name
-        DateFormat df = new SimpleDateFormat("ddMMyyyy_hhmmssSSS", Locale.ROOT);
-        Calendar calendar = Calendar.getInstance();
-        String time = df.format(calendar.getTime());
-        return "IMG_" + time + ".jpg";
-    }
-
-    /**
-     * Method makes file available for viewing from system's Media Provider
-     */
-    private void galleryAddPic() {
-        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-        File f = new File(mCurrentPhotoPath);
-        Uri contentUri = Uri.fromFile(f);
-        mediaScanIntent.setData(contentUri);
-        this.sendBroadcast(mediaScanIntent);
-    }
 
     /**
      * Checks whether field is empty
