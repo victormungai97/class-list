@@ -4,6 +4,7 @@ from flask import render_template, request
 
 from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image
 from .models import Table, Test
+from .forms import RegisterForm, SignInForm
 from config import myHelper
 
 #home page
@@ -18,28 +19,35 @@ def home():
 def new_student():
 	'''Function to enable one to enter information into db'''
 	create_database()
-	return render_template('add.html')
+	form = SignInForm()
+	return render_template('add.html',form=form)
 	
 #register student
 @app.route('/register/')
 def register_student():
 	'''Function to register new students'''
 	create_database()
-	return render_template('register.html')
+	form = RegisterForm() # web form
+	return render_template('register.html',form=form)
 	
 @app.route('/registration2/',methods=['POST', 'GET'])
-def register2():
+def register_web():
 	'''Function to take data from website'''
 	create_database()
-	name=''; regno=''; error=''
+	name=''; regno=''; error=''; form = RegisterForm()
 	if request.method == 'POST':
-		# receive details from website
-		regno=request.form['regno']
-		name=request.form['name']
+		#check if form has been presented to user and filled accordingly
+		if form.validate_on_submit():
+			# receive details from website
+			regno=request.form['regno']
+			name=request.form['name']
+			pic=form.picture.data
 
-		# get results from insertion into db
-		message, status = register_db(regno, name)
-		return render_template("result.html",msg=message,sts=status)
+			# get results from insertion into db
+			message, status = register_db(regno, name, pic, "register2")
+			return render_template("result.html",msg=message,sts=status)
+		else:
+			return render_template('register.html',form=form)
 	
 @app.route('/registration/',methods=['POST','GET'])
 def register():
@@ -55,7 +63,7 @@ def register():
 		name = json['name']
 		pic = decode_image(json['picture'], name)
 		
-	message, status = register_db(regno, name, pic)
+	message, status = register_db(regno, name, pic, "register")
 	if not status:
 		error = str(False)
 	else:
@@ -134,21 +142,24 @@ def record():
 	'''Function to take data from website'''
 	create_database()
 	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
+	form = SignInForm()
 	if request.method == 'POST':
-		# receive details from website
-		regno=request.form['regno']
-		name=request.form['name']
-		time=request.form['time']
-		#lac=request.files['lac']
-		#ci=request.files['ci']        
-		pic=request.files['picture']
-		agent = request.user_agent
-		source = " ".join([agent.platform.title(), agent.browser.title(), agent.version])
+		if form.validate_on_submit():
+			# receive details from website
+			regno=request.form['regno']
+			name=request.form['name']
+			time=request.form['time']
+			#lac=request.files['lac']
+			#ci=request.files['ci']        
+			pic=request.files['picture']
+			agent = request.user_agent
+			source = " ".join([agent.platform.title(), agent.browser.title(), agent.version])
 
-		# get results from insertion into db
-		message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record',source)
-		return render_template("result.html",msg=message,sts=status)
-		
+			# get results from insertion into db
+			message, status = insert_db(name,regno,time,latitude,longitude,lac,ci,pic,'record',source)
+			return render_template("result.html",msg=message,sts=status)
+		else:
+			return render_template('add.html',form=form)
 @app.route('/list/')
 def list():
 	'''Function to print contents of db to webpage'''

@@ -56,11 +56,14 @@ def get_url(pic,regno,method):
 		filename = str(secure_filename(pic))
 		route = os.path.join(app.config['UPLOAD_FOLDER'], filename)
 		shutil.move(pic, route)
-	if method == "register":
+	elif method == "register":
 		filename = str(secure_filename(pic))
 		route = os.path.join(app.config['REGISTER_FOLDER'], filename)
 		shutil.move(pic, route)
-	if method == "record":
+	elif method == "register2":
+		filename = str(secure_filename(pic.filename))
+		pic.save(os.path.join(app.config['REGISTER_FOLDER'], filename))
+	elif method == "record":
 		filename = str(secure_filename(pic.filename))
 		pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 	#get file extension
@@ -68,19 +71,22 @@ def get_url(pic,regno,method):
 	extension=str(extension[len(extension) - 1])
 	#get path to source of uploaded file
 	source = ''
-	if method == 'register': source=app.config['REGISTER_FOLDER']+filename
+	if method == 'register' or method == 'register2':
+		source=app.config['REGISTER_FOLDER']+filename
 	else: source=app.config['UPLOAD_FOLDER']+filename
 
 	#delete existing file
 	file = ''
-	if method == 'register': file = app.config['REGISTER_FOLDER'] + regno + "." + extension
+	if method == 'register' or method == 'register2':
+		file = app.config['REGISTER_FOLDER'] + regno + "." + extension
 	else: file = app.config['UPLOAD_FOLDER'] + regno + "." + extension
 	if os.path.isfile(file):
 		os.remove(file)
 	
 	#get path to destination of uploaded file 
 	destination = ''
-	if method == 'register': destination=app.config['REGISTER_FOLDER']+regno+'.'+extension
+	if method == 'register' or method == 'register2':
+		destination=app.config['REGISTER_FOLDER']+regno+'.'+extension
 	else: destination=app.config['UPLOAD_FOLDER']+regno+'.'+extension
 
 	#rename file
@@ -152,7 +158,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	app.config['UPLOAD_FOLDER'] = new_folder
 	return (message, status)
 
-def register_db(reg_no, name, pic=""):
+def register_db(reg_no, name, pic="",method="register"):
 	'''Function to save registered new students into db'''
 	log_file = os.path.join(app.config['LOG_FOLDER'],"register_log.db")
 	pic_url='' # url of picture
@@ -172,8 +178,14 @@ def register_db(reg_no, name, pic=""):
 		app.config['REGISTER_FOLDER'] = "/".join([app.config.get('REGISTER_FOLDER'),course_code,year_of_study,'/'])
 		regno = paths[1]
 	# Check if the file is one of the allowed types/extensions
-	if pic and allowed_file(pic):
-		pic_url = get_url(pic,regno,"register")
+	if pic:
+		if method == 'register':
+			if allowed_file(pic):
+				pic_url = get_url(pic,regno,method)
+		elif method == "register2":
+			if allowed_file(pic.filename):
+				pic_url = get_url(pic,regno,method)
+		
 
 	# Get student with specific regno or name
 	data = Table.query.filter((Table.reg_no==reg_no)|(Table.name==name)).first()

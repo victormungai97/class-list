@@ -1,12 +1,11 @@
 {% extends "index.html" %}
 	{% block title %} STUDENTS {% endblock %}
         {% block heading %}
-            <th>ID</th><th>Reg No.</th><th>Name</th><th>Course</th><th>Picture</th>
+            <th>Reg No.</th><th>Name</th><th>Course</th><th>Picture</th>
         {% endblock %}
         {% block records %}
         {%  for row in rows %}
         <tr>
-            <td>{{ row.id }}</td>
             <td>{{ row.reg_no }}</td>
             <td> {{ row.name }}</td>
 			<td> {{ row.course }} </td>
