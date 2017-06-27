@@ -1,4 +1,4 @@
-'''Module that creates web form usinf FLASK-WTF'''
+'''Module that creates web form using FLASK-WTF'''
 # app/forms.py
 
 from flask_wtf import FlaskForm
