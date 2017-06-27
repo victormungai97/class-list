@@ -1,13 +1,15 @@
 # config.py
-# courtesy of mbithe nzomo(scotch.io/@mbithenzomo)
 
 class Config(object):
 	"""Common configurations"""
 	#Put any configurations common across all environments
+	SESSION_COOKIE_NAME="session"
+	TESTING=False
 	
 class DevelopmentConfig(Config):
 	"""Development configurations"""
 	
+	TESTING=True
 	DEBUG=True # activates debug mode on app
 	SQLALCHEMY_ECHO=True # allows SQLAlchemy to log errors
 	SQLALCHEMY_TRACK_MODIFICATIONS=True # allows SQLAlchemy to track changes while running
