@@ -26,8 +26,9 @@ from .models import *
 # This is the path to the upload directory
 print ("Current path is", os.path.abspath(os.curdir))
 new_folder = os.path.join("app/static/uploads/")
+register_folder = os.path.join("app/static/register/")
 app.config['UPLOAD_FOLDER'] = new_folder
-app.config['REGISTER_FOLDER'] = os.path.join("app/static/register/")
+app.config['REGISTER_FOLDER'] = register_folder
 # folder for log files 
 app.config['LOG_FOLDER'] = os.path.join("app/logs/")
 # These are the extension that we are accepting to be uploaded
@@ -43,7 +44,18 @@ def create_database():
 		os.makedirs(app.config['LOG_FOLDER'])
 	db.create_all()
 	
-def get_url(pic,regno,method):
+def save_picture(pic,method,folder):
+	if method == 'fromapp' or method == 'register':
+		filename = str(secure_filename(pic))
+		route = os.path.join(folder, filename)
+		shutil.move(pic, route)
+		return filename
+	if method == 'record' or method == 'register2':
+		filename = str(secure_filename(pic.filename))
+		pic.save(os.path.join(folder, filename))
+		return filename
+	
+def get_url(pic,regno,method,folder):
 	'''Function stores and returns url for image'''
 	# Move the file form the temporal folder to the upload folder
 	if not os.path.isdir(app.config['UPLOAD_FOLDER']):
@@ -52,20 +64,7 @@ def get_url(pic,regno,method):
 		os.makedirs(app.config['REGISTER_FOLDER'])
 	filename = ''
 	#get name of the source file + Make the filename safe, remove unsupported chars
-	if method == "fromapp":
-		filename = str(secure_filename(pic))
-		route = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-		shutil.move(pic, route)
-	elif method == "register":
-		filename = str(secure_filename(pic))
-		route = os.path.join(app.config['REGISTER_FOLDER'], filename)
-		shutil.move(pic, route)
-	elif method == "register2":
-		filename = str(secure_filename(pic.filename))
-		pic.save(os.path.join(app.config['REGISTER_FOLDER'], filename))
-	elif method == "record":
-		filename = str(secure_filename(pic.filename))
-		pic.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+	filename = save_picture(pic,method,folder)
 	#get file extension
 	extension=filename.split(".")
 	extension=str(extension[len(extension) - 1])
@@ -117,10 +116,10 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
   # Check if the file is one of the allowed types/extensions
 	if method == "record":
 		if pic and allowed_file(pic.filename):
-			pic_url = get_url(pic,regno,method)
+			pic_url = get_url(pic,regno,method,app.config['UPLOAD_FOLDER'])
 	elif method == "fromapp":
 		if pic and allowed_file(pic):
-			pic_url = get_url(pic,regno,method)
+			pic_url = get_url(pic,regno,method,app.config['UPLOAD_FOLDER'])
 	
 	status = 0
 	message = ''
@@ -181,10 +180,10 @@ def register_db(reg_no, name, pic="",method="register"):
 	if pic:
 		if method == 'register':
 			if allowed_file(pic):
-				pic_url = get_url(pic,regno,method)
+				pic_url = get_url(pic,regno,method,app.config['REGISTER_FOLDER'])
 		elif method == "register2":
 			if allowed_file(pic.filename):
-				pic_url = get_url(pic,regno,method)
+				pic_url = get_url(pic,regno,method,app.config['REGISTER_FOLDER'])
 		
 
 	# Get student with specific regno or name
@@ -223,6 +222,8 @@ def register_db(reg_no, name, pic="",method="register"):
 		message = "Student is in database"
 		myHelper(log_file, message)
 		status = 2
+		
+	app.config['REGISTER_FOLDER'] = register_folder
 	return (message, status)
 	
 def insert_suggestion(choice, msg):
@@ -270,7 +271,10 @@ def get_contents(table):
 	myHelper(log_file, "Items retrieved")
 	return rows
 	
-def general_delete(tablename="",id=""):
+def get_regno(id):
+	return Table.query.filter_by(id=id).first()
+	
+def general_delete(tablename="",id="",reg_no=""):
 	"""Function to delete row from passed table"""
 	delete = ""
 	log_file = os.path.join(app.config['LOG_FOLDER'],"delete_log.db")
@@ -278,12 +282,18 @@ def general_delete(tablename="",id=""):
 	# create query for deletion
 	if tablename == "Table":
 		delete = Table.query.filter(Table.id==id).first()
+		# carry out deletion
+		db.session.delete(delete)
 	elif tablename == 'Test':
-		delete = Test.query.filter(Test.id==id).first()
+		if id: 
+			Test.query.filter(Test.id==id).delete()
+		elif reg_no: 
+			Test.query.filter(Test.reg_no==reg_no).delete()
 	elif tablename == 'Basic':
-		delete = Basic.query.filter(Basic.id==id).first()
-	# carry out deletion
-	db.session.delete(delete)
+		if id: 
+			Basic.query.filter(Basic.id==id).delete()
+		elif reg_no and not id: 
+			Basic.query.filter(Basic.reg_no==reg_no).delete()
 	# save changes
 	db.session.commit()
 	myHelper(log_file,"Item deleted")
