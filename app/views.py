@@ -2,9 +2,9 @@
 import os
 from flask import render_template, request
 
-from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image
+from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno
 from .models import Table, Test
-from .forms import RegisterForm, SignInForm
+from .forms import RegisterForm
 from config import myHelper
 
 #home page
@@ -19,7 +19,7 @@ def home():
 def new_student():
 	'''Function to enable one to enter information into db'''
 	create_database()
-	form = SignInForm()
+	form = RegisterForm()
 	return render_template('add.html',form=form)
 	
 #register student
@@ -142,13 +142,13 @@ def record():
 	'''Function to take data from website'''
 	create_database()
 	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
-	form = SignInForm()
+	form = RegisterForm()
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			# receive details from website
 			regno=request.form['regno']
 			name=request.form['name']
-			time=request.form['time']
+			#time=request.form['time']
 			#lac=request.files['lac']
 			#ci=request.files['ci']        
 			pic=request.files['picture']
@@ -180,6 +180,10 @@ def blist():
 @app.route('/rlist/delete/',methods =['POST'])	
 def rlist_delete():
 	"""Function to delete row in details table"""
+	row = get_regno(request.form['id'])
+	print (row.reg_no)
+	general_delete("Basic",reg_no=row.reg_no)
+	general_delete("Test",reg_no=row.reg_no)
 	rows = general_delete("Table",id=request.form['id'])
 	#print contents
 	return render_template("rlist.html",res=rows)
