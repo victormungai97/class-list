@@ -1,0 +1,18 @@
+{% macro render_field(field,label = field.label) %}
+<p>
+<!-- label of field -->
+{% if label %}
+  <label class="col-sm-2 control-label">{{ field.label }}</label><br>
+{% endif %}
+
+<!-- accept keyword args to be passed as HTML attributes -->
+{{ field(**kwargs)|safe }}
+
+{% if field.errors %}
+  <!-- display error message if field fails validation -->
+	{% for error in field.errors %}
+		<span style="color:red;">[{{ error }}]</span>
+	{% endfor %}
+{% endif %}
+</p>
+{% endmacro %}
