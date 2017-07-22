@@ -4,12 +4,10 @@
 			</th><th>Title</th><th>Message</th>
 		{% endblock %}
         {% block records %}
-		{% for row in rows %}
-		<tr>
-            <td>{{ row.choice }}</td>
-            <td>{{ row.message }}</td>
-			
-		</tr>
-		
-		{% endfor %}
-		{% endblock %}
+		  {% for row in rows %}
+		    <tr>
+              <td>{{ row.choice }}</td>
+              <td>{{ row.message }}</td>
+		    </tr>
+		  {% endfor %}
+    {% endblock %}

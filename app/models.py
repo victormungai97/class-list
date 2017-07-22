@@ -1,4 +1,5 @@
 # app/models.py
+
 from time import *
 from app import db
 
@@ -26,7 +27,7 @@ class Table(db.Model):
 		self.pic_url = pic
 		
 	def __repr__(self):
-		return "<Student %r>" % self.name
+		return "<Student {}>".format(self.name)
 	
 class Test(db.Model):
 	'''Class that models students table'''
@@ -60,7 +61,7 @@ class Test(db.Model):
 		self.source = source
 
 	def __repr__(self):
-		return "<Student %r>" % self.name
+		return "<Student {}>".format(self.name)
 
 		
 class Basic(db.Model):
@@ -80,7 +81,7 @@ class Basic(db.Model):
 		self.course = course
 		
 	def __repr__(self):
-		return "<Student %r>" % self.name
+		return "<Student {}>".format(self.name)
 
 class Suggestion(db.Model):
 	'''Class that stores received suggestions'''
@@ -95,4 +96,4 @@ class Suggestion(db.Model):
 		self.message = msg
 		
 	def __repr__(self):
-		return "<Suggestion %r>" % self.message
+		return "<Suggestion {}>".format(self.message)

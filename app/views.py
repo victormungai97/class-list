@@ -1,10 +1,11 @@
 # app/views.py
-import os
-from flask import render_template, request
+
+import os, pdfkit
+from flask import render_template, request, send_from_directory
 
 from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno
 from .models import Table, Test
-from .forms import RegisterForm
+from .forms import RegisterForm, SignInForm
 from config import myHelper
 
 #home page
@@ -18,9 +19,10 @@ def home():
 @app.route('/enternew/')
 def new_student():
 	'''Function to enable one to enter information into db'''
+	from random import randint
 	create_database()
-	form = RegisterForm()
-	return render_template('add.html',form=form)
+	form = SignInForm()
+	return render_template('add.html',form=form,version=randint(1,100))
 	
 #register student
 @app.route('/register/')
@@ -41,7 +43,7 @@ def register_web():
 			# receive details from website
 			regno=request.form['regno']
 			name=request.form['name']
-			pic=form.picture.data
+			pic=request.files['picture']
 
 			# get results from insertion into db
 			message, status = register_db(regno, name, pic, "register2")
@@ -71,6 +73,7 @@ def register():
 	result = '{"message": "%s", "error": "%s"}' % (message, error)
 	return result
 	
+@app.route('/getstudents/')
 @app.route('/getstudent/',methods=['POST','GET'])
 def get_students():
 	'''Function to check registered students'''
@@ -104,8 +107,8 @@ def get_students():
 		return '{"message" : "%s", "error" : "%s"}' % (message, error)
 	
 	if request.method == 'GET':
-		result = get_contents ('Table')
-		return render_template('rlist.html', res=result)
+		rows = get_contents ('Table')
+		return render_template('rlist.html', rows=rows, table='rlist')
 		
 @app.route('/fromapp/',methods=['POST','GET'])
 def from_app():
@@ -121,7 +124,6 @@ def from_app():
 		regno = json['regno']
 		name=json['name']
 		time=json['time']
-		#gps=float(json['gps'])
 		latitude=float(json['latitude'])
 		longitude=float(json['longitude'])
 		lac=float(json['lac'])
@@ -142,13 +144,14 @@ def record():
 	'''Function to take data from website'''
 	create_database()
 	name=''; regno=''; time=None; latitude=0; longitude=0; lac=0; ci=0; pic=None; #gps = 0
-	form = RegisterForm()
+	form = SignInForm()
 	if request.method == 'POST':
 		if form.validate_on_submit():
 			# receive details from website
 			regno=request.form['regno']
 			name=request.form['name']
-			#time=request.form['time']
+			latitude=form.latitude.data
+			longitude=form.longitude.data
 			#lac=request.files['lac']
 			#ci=request.files['ci']        
 			pic=request.files['picture']
@@ -166,7 +169,7 @@ def list():
 	# select all from database
 	rows = get_contents('Test')
 	#print contents
-	return render_template("list.html",rows=rows)
+	return render_template("list.html",rows=rows,table='list')
 	
 @app.route('/basic/')
 def blist():
@@ -174,7 +177,23 @@ def blist():
 	# select all from database
 	rows = get_contents("Basic")
 	#print contents
-	return render_template("blist.html",rows=rows)
+	return render_template("blist.html",rows=rows,table='blist')
+	
+@app.route('/download/<variable>')
+def download(variable):
+	'''
+	Function that generates PDF from results and downloads them on user's machine
+	'''
+	rows = []
+	if variable == 'list': rows = get_contents('Test')
+	elif variable == 'rlist': rows = get_contents ('Table')
+	elif variable == 'blist': rows = get_contents('Basic')
+	else: rows = get_contents('Suggestion')
+	directory = os.path.abspath('app/reports')
+	if not os.path.isdir(directory): os.makedirs(directory)
+	outfile = variable+'.pdf'; options = {'quiet':'','user-style-sheet':os.path.abspath('app/static/css/style.css')}
+	pdfkit.from_string(render_template(variable+'.html',rows=rows),os.path.join(directory,outfile),options=options)
+	return send_from_directory(directory=directory,filename=outfile,mimetype='application/pdf',attachment_filename=outfile,as_attachment=True)
 	
 # delete row in db
 @app.route('/rlist/delete/',methods =['POST'])	
@@ -186,7 +205,7 @@ def rlist_delete():
 	general_delete("Test",reg_no=row.reg_no)
 	rows = general_delete("Table",id=request.form['id'])
 	#print contents
-	return render_template("rlist.html",res=rows)
+	return render_template("rlist.html",res=rows,table='rlist')
 	
 # delete row in db
 @app.route('/delete/',methods =['POST'])	
@@ -195,7 +214,7 @@ def delete():
 	general_delete("Basic",id=request.form['id'])
 	rows = general_delete("Test",id=request.form['id'])
 	#print contents
-	return render_template("list.html",rows=rows)
+	return render_template("list.html",rows=rows,table='list')
 	
 @app.route('/suggestions/',methods =['POST','GET'])
 def suggestions():
@@ -212,4 +231,4 @@ def suggestions():
 		return result
 	elif request.method == "GET":
 		rows = get_contents("Suggestion")
-		return render_template("suggestions.html",rows=rows)
+		return render_template("suggestions.html",rows=rows,table='suggestions')

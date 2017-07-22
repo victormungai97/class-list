@@ -38,16 +38,16 @@ courses = {
 
 def myHelper(filename, message):
 	'''Function to write into database'''
-	import sqlite3
+	import sqlite3, os
+	if not os.path.isfile(filename):
+		f = open(filename,'wb');f.close()
 	conn = sqlite3.connect(filename)
 	cursor = conn.cursor()
-	create = "CREATE TABLE IF NOT EXISTS Logs (Time varchar(60), Message varchar(60))"
-	cursor.execute(create)
+	cursor.execute("CREATE TABLE IF NOT EXISTS Logs (Time varchar(60), Message varchar(60))")
 	conn.commit()
 	from datetime import datetime
 	current_time = datetime.now().strftime('%Y-%m-%d %H-%M-%S') # current time
-	query = "INSERT INTO Logs VALUES ('{0}','{1}')".format(current_time, message)
-	cursor.execute(query)
+	cursor.execute("INSERT INTO Logs VALUES ('{0}','{1}')".format(current_time, message))
 	conn.commit()
 	cursor.close()
 	conn.close()

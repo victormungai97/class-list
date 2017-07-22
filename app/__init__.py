@@ -1,10 +1,10 @@
 # app/__init__.py
-import os
-import re
-import shutil
+
+import os, re, shutil
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug import secure_filename
+from flask_migrate import Migrate
 
 from config import app_config, courses, myHelper
 
@@ -18,6 +18,8 @@ def create_app(config_name):
 	app.config.from_object(app_config[config_name])
 	app.config.from_pyfile('config.py')
 	db.init_app(app)
+	# create object for migration
+	migrate = Migrate(app,db)
 	
 	return app
 
@@ -92,7 +94,7 @@ def get_url(pic,regno,method,folder):
 	os.rename(source,destination)
 	log_file = os.path.join(app.config['LOG_FOLDER'],"insert_log.db")
 	myHelper(log_file, "Picture saved")
-	pic_url = destination.replace("app","")
+	pic_url = destination.replace("app/static/","")
 	return pic_url
 	
 def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source="Browser"):
@@ -128,9 +130,10 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 	basic = Basic(name, regno, pic_url, courses.get(course_code))
 	# get details for given reg_no
 	data = Table.query.filter((Table.reg_no==regno)).first()
+	print(name)
 	
 	# Incorrect name for reg_no given
-	if data.name != name:
+	if not data:
 		message = "Name not registered. Connection unsuccessful"
 		myHelper(log_file, message)
 		status = 1
@@ -151,7 +154,7 @@ def insert_db(name, regno, time, latitude, longitude, lac, ci, pic,method,source
 			# undo changes
 			db.session.rollback()
 			message = "Record not added. Connection unsuccessful."
-			myHelper(log_file, message + " " + err)
+			myHelper(log_file, message + " " + str(err))
 			status = 2
 
 	app.config['UPLOAD_FOLDER'] = new_folder
@@ -215,7 +218,7 @@ def register_db(reg_no, name, pic="",method="register"):
 			# undo changes
 			db.session.rollback()
 			message = "Record not added. Connection unsuccessful"
-			myHelper(log_file, message + ". " + err)
+			myHelper(log_file, message + ". " + str(err))
 			status = 1
 	# if user in db
 	else:
@@ -241,7 +244,7 @@ def insert_suggestion(choice, msg):
 		print (err)
 		db.session.rollback()
 		message = "Connection unsuccessful. Suggestion not sent"
-		myHelper(log_file, message)
+		myHelper(log_file, message+". "+str(err))
 		status = 1
 		
 	return (message, status)
