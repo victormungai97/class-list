@@ -10,6 +10,8 @@ from config import app_config, courses, myHelper
 
 db = SQLAlchemy() # db instance variable
 app = Flask(__name__, instance_relative_config=True)
+# app.config['SQLALCHEMY_DATABASE_URI'] = '''mysql+pymysql://username:password@localhost/db_name'''
+# app.config['SECRET_KEY'] = "your-secret-key"
 
 def create_app(config_name):
 	global app; global db
