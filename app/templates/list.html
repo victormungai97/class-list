@@ -15,10 +15,13 @@
             <td> {{row.longitude}}</td>
             <td>{{row.lac}}</td>
 			<td>{{row.ci}}</td>
-            <td><img class="img-circle" src="{{ url_for('static', filename=row.pic_url) }}" align="center" alt="{{row.name}}" style="width:100px;height:100px"></td>
+            <td><img class="img-circle" id="{{row.id}}" 
+			    {% if download %} src="file:///{{ row.pic_url }}" 
+				{% else %} src="{{ url_for('static', filename=row.pic_url) }}" 
+				{% endif %}
+			    align="center" alt="{{row.name}}" style="width:100px;height:100px"></td>
 			<td> {{row.source}}</td>
-            <td><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
-           
+            <td {% if download %} style="display: none;" {% endif %} ><form action ="{{url_for('delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
         </tr>
         {% endfor %}
 {% endblock %}

@@ -1,29 +1,10 @@
 <!-- app/templates/home.html -->
-
-<!DOCTYPE html>
-
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=divice-width, intial-scale=1.0">
-            <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-            <style>body{background: #fff8dc}</style>
-			<link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
-			<link rel="shortcut icon" href="{{ url_for('static',filename='img/favicon.ico') }}">
-			<link rel="shortcut icon" type="image/gif" href="{{ url_for('static',filename='img/animated_favicon1.gif') }}">
-</head>
-
-<header>{% include 'includes/_navbar.html' %}</header>
-
-<body>
-    <ul class="pager">
-        <li><a href="/enternew">ADD STUDENT</a></li>
-        <li><a href="/list">LIST OF ALL STUDENTS</a></li>
-		<li><a href="/register">REGISTER HERE</a></li>
-		<li><a href="/getstudent">REGISTERED STUDENTS</a></li>
-    </ul>
-	<div class="push"></div>
-	</div>
-	{% include 'includes/_footer.html' %}
-</body>
-</html>
+{% extends "main.html" %}
+	{% block contents %}
+		<ul class="pager">
+			<li><a href="/enternew">ADD STUDENT</a></li>
+			<li><a href="/list">LIST OF ALL STUDENTS</a></li>
+			<li><a href="/register">REGISTER HERE</a></li>
+			<li><a href="/getstudent">REGISTERED STUDENTS</a></li>
+		</ul>
+	{% endblock %}
