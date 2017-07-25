@@ -7,7 +7,7 @@ body, html {
 
 body, h1, h2, h3 {
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: 700;
+    font-weight: 100;
 }
 
 a, .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
@@ -28,7 +28,6 @@ footer {
 .pager a{
 	color: #6495ED;
 	font-size: 100%;
-	font-family: "Times New Roman", Times, serif;
 }
 
 .container topnav {

@@ -74,6 +74,11 @@ def register():
 	return result
 	
 @app.route('/getstudents/')
+def students():
+	if request.method == 'GET':
+		rows = get_contents ('Table')
+		return render_template('rlist.html', rows=rows, table='rlist')
+
 @app.route('/getstudent/',methods=['POST','GET'])
 def get_students():
 	'''Function to check registered students'''
@@ -191,8 +196,13 @@ def download(variable):
 	else: rows = get_contents('Suggestion')
 	directory = os.path.abspath('app/reports')
 	if not os.path.isdir(directory): os.makedirs(directory)
-	outfile = variable+'.pdf'; options = {'quiet':'','user-style-sheet':os.path.abspath('app/static/css/style.css')}
-	pdfkit.from_string(render_template(variable+'.html',rows=rows),os.path.join(directory,outfile),options=options)
+	for row in rows:
+		if row.pic_url:
+			row.pic_url = os.path.abspath('app/static/'+row.pic_url).replace('\\','/')
+	outfile = variable+'.pdf';
+	# specify wkhtmltopdf options
+	options = {'quiet':'','user-style-sheet':os.path.abspath('app/static/css/style.css')}
+	pdfkit.from_string(render_template(variable+'.html',rows=rows, download=True),os.path.join(directory,outfile),options=options)
 	return send_from_directory(directory=directory,filename=outfile,mimetype='application/pdf',attachment_filename=outfile,as_attachment=True)
 	
 # delete row in db

@@ -10,9 +10,12 @@
 			<td> {{ row.reg_no }} </td>
 			<td> {{ row.name }} </td>
 			<td> {{ row.course }} </td>
-			<td><img class="img-circle" src="{{ url_for('static', filename=row.pic_url) }}" alt="{{ row.name }}" alt="{{ row.name }}" align="center" style="width:100px;height:100px"></td>
-            <td><form action ="{{url_for('rlist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>
-           
+			<td><img class="img-circle" id="{{row.id}}" 
+			    {% if download %} src="file:///{{ row.pic_url }}" 
+				{% else %} src="{{ url_for('static', filename=row.pic_url) }}" 
+				{% endif %}
+			    alt="{{ row.name }}" alt="{{ row.name }}" align="center" style="width:100px;height:100px"></td>
+            <td  {% if download %} style="display: none;" {% endif %}><form action ="{{url_for('rlist_delete')}}" method = 'POST'><input type=hidden value='{{row.id}}' name='id'><button id ='button'>Delete</button></form></td>  
         </tr>
         {% endfor %}
 {% endblock %}
