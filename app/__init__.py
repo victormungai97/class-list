@@ -19,7 +19,7 @@ def create_app(config_name):
 		config_name = 'development'
 	app.config.from_object(app_config[config_name])
 	# use if you have instance/config.py with your SECRET_KEY and SQLALCHEMY_DATABASE_URI
-	#app.config.from_pyfile('config.py')
+	# app.config.from_pyfile('config.py')
 	db.init_app(app)
 	# create object for migration
 	migrate = Migrate(app,db)
@@ -84,6 +84,13 @@ def get_url(pic,regno,method,folder):
 	if method == 'register' or method == 'register2':
 		file = app.config['REGISTER_FOLDER'] + regno + "." + extension
 	else: file = app.config['UPLOAD_FOLDER'] + regno + "." + extension
+	
+######################################################################################
+	if method == 'fromapp' or method == 'record':
+		'''Facial recognition should go here '''
+		pass
+######################################################################################
+	
 	if os.path.isfile(file):
 		os.remove(file)
 	
