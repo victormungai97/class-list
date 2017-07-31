@@ -35,6 +35,7 @@ import java.util.List;
 
 /***
  * Created by Victor Mungai on 4/8/2017.
+ * Class that retrieves phone's location, network information, details and current time at submission
  */
 
 class LocatingClass {

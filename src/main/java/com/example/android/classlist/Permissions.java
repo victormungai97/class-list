@@ -13,6 +13,7 @@ import android.support.v7.app.AlertDialog;
 
 /**
  * Created by User on 4/12/2017.
+ * Class that checks for the app's permissions
  */
 
 public class Permissions {

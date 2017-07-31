@@ -2,13 +2,10 @@ package com.example.android.classlist;
 
 /**
  * Created by User on 4/22/2017.
+ * Class to package information to be sent to server as message
  */
 
 public class Message {
-
-    /**
-     * Class to package information to be sent to server as message
-     */
 
     private String name="";
     private String reg_no="";

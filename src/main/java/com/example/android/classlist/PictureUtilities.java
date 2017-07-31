@@ -24,6 +24,12 @@ import java.util.Locale;
 
 class PictureUtilities {
 
+    /**
+     * Created by User on 4/8/2017.
+     * Class that contains methods to call phone's camera, scale the picture to a smaller size,
+     * check for number of faces in picture and set the picture to given image view
+     */
+
     private static final int REQUEST_PHOTO = 1;
     private static String mCurrentPhotoPath;
 
@@ -58,7 +64,7 @@ class PictureUtilities {
     /*
     * Determines how big the ImageView is by getting a conservative estimate
      */
-    static Bitmap getScaledBitmap(String path, Activity activity){
+    private static Bitmap getScaledBitmap(String path, Activity activity){
         Point size = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(size);
 

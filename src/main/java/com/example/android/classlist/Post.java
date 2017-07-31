@@ -21,13 +21,11 @@ import java.io.InputStreamReader;
 /**
  * Created by User on 4/28/2017.
  * Class contains methods for connection to database
+ * POST posts message to url, processResults processes the post's results and
+ * contentValues creates a key-value pair for insertion into SQLite database
  */
 
 class Post {
-
-    /**
-     * Class with two static methods to do post to server and process results
-     */
 
     // json keys
     private static final String NAME = "name";
