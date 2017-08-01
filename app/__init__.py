@@ -19,7 +19,7 @@ def create_app(config_name):
 		config_name = 'development'
 	app.config.from_object(app_config[config_name])
 	# use if you have instance/config.py with your SECRET_KEY and SQLALCHEMY_DATABASE_URI
-	app.config.from_pyfile('config.py')
+	# app.config.from_pyfile('config.py')
 	db.init_app(app)
 	# create object for migration
 	migrate = Migrate(app,db)
