@@ -259,14 +259,27 @@ def insert_suggestion(choice, msg):
 		
 	return (message, status)
 	
+def compress_image(filename):
+	'''Function to compress image'''
+	from PIL import Image # library for compressing images 
+	# open file to be compressed
+	img = Image.open(filename)
+	# compress the image accordingly
+	foo = img.resize((200,200),Image.ANTIALIAS)
+	# save the downsized image
+	foo.save(filename, optimize=True, quality=100)
+	
 def decode_image(data, name):
-	'''Function to decode string to image'''
+	'''
+	Function to decode string to image, compress it and save it temporarily
+	'''
 	img_data=data.encode('UTF-8','strict')
 	import base64
 	pic_name = name + ".jpg"
 	# decode image string and write into file
 	with open(pic_name, 'wb') as fh:
 		fh.write(base64.b64decode(img_data))
+	compress_image(pic_name)
 	return pic_name
 	
 def get_contents(table):

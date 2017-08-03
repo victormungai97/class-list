@@ -4,6 +4,7 @@ import android.text.TextWatcher;
 
 /**
  * Created by User on 5/25/2017.
+ * Interface for common methods that need to be overriden for different uses
  */
 
 interface Extras {

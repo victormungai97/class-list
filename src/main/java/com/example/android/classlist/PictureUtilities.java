@@ -3,6 +3,7 @@ package com.example.android.classlist;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -11,11 +12,13 @@ import android.media.FaceDetector;
 import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +34,7 @@ class PictureUtilities {
     * Scales image file, calculates rate of scaling down to given area and then rereads the
     * file to create a scaled-down Bitmap object
      */
-    private static Bitmap getScaledBitmap(String path, int destWidth, int destHeight){
+    static Bitmap getScaledBitmap(String path, int destWidth, int destHeight){
         // Read in dimensions of the image on the disk
         BitmapFactory.Options options = new BitmapFactory.Options();
 
@@ -58,7 +61,7 @@ class PictureUtilities {
     /*
     * Determines how big the ImageView is by getting a conservative estimate
      */
-    static Bitmap getScaledBitmap(String path, Activity activity){
+    private static Bitmap getScaledBitmap(String path, Activity activity){
         Point size = new Point();
         activity.getWindowManager().getDefaultDisplay().getSize(size);
 
@@ -69,15 +72,15 @@ class PictureUtilities {
     /**
      * Method invokes intent to take picture
      */
-    static Uri takePicture(Activity activity, String TAG){
+    static Uri takePicture(Fragment activity, String TAG){
 
         Uri imageForUpload = null;
-        Context context = activity.getApplicationContext();
+        Context context = activity.getActivity().getApplicationContext();
 
         // call phone's camera
         Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         // resolveActivity returns first activity component that can handle intent, preventing crash
-        if (intent.resolveActivity(activity.getPackageManager()) != null){
+        if (intent.resolveActivity(activity.getActivity().getPackageManager()) != null){
             // Create file where image should go
             File photoFile;
 
@@ -179,5 +182,34 @@ class PictureUtilities {
         }
 
         return photo;
+    }
+
+    static Uri getImageUri(Context inContext, Bitmap inImage) {
+        ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+        inImage.compress(Bitmap.CompressFormat.JPEG, 100, bytes);
+        String path = MediaStore.Images.Media.insertImage(inContext.getContentResolver(), inImage, "Title", null);
+        return Uri.parse(path);
+    }
+
+    /**
+     * Method that retrieves a picture file path from it's URI
+     * @param uri URI of the image
+     * @param activity Activity hosting the picture
+     * @return File path of picture
+     */
+    static String getRealPathFromURI(Uri uri, Activity activity) {
+        try {
+            Cursor cursor = activity.getContentResolver().query(uri, null, null, null, null);
+            assert cursor != null;
+            cursor.moveToFirst();
+            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
+            String result = cursor.getString(idx);
+            cursor.close();
+            return result;
+        } catch (Exception ex){
+            Log.e(activity.getClass().getName(),ex.getMessage());
+        }
+
+        return "";
     }
 }

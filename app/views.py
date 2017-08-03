@@ -3,7 +3,7 @@
 import os, pdfkit
 from flask import render_template, request, make_response
 
-from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno
+from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno, compress_image
 from .models import Table, Test
 from .forms import RegisterForm, SignInForm
 from config import myHelper
@@ -44,6 +44,7 @@ def register_web():
 			regno=request.form['regno']
 			name=request.form['name']
 			pic=request.files['picture']
+			compress_image(pic.filename)
 
 			# get results from insertion into db
 			message, status = register_db(regno, name, pic, "register2")
