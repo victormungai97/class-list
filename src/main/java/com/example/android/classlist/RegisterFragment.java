@@ -27,7 +27,6 @@ import android.widget.Toast;
 
 import com.example.android.classlist.database.SignBaseHelper;
 import com.example.android.classlist.database.SignInDbSchema.SignInTable;
-import com.squareup.otto.Subscribe;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -173,7 +172,7 @@ public class RegisterFragment extends Fragment implements Extras{
             mImageButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    imageForUpload = takePicture(getActivity(), TAG);
+                    imageForUpload = takePicture(RegisterFragment.this, TAG);
                     galleryAddPic(getActivity());
                 }
             });
@@ -183,7 +182,7 @@ public class RegisterFragment extends Fragment implements Extras{
         mImageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                imageForUpload = takePicture(getActivity(), TAG);
+                imageForUpload = takePicture(RegisterFragment.this, TAG);
                 galleryAddPic(getActivity());
             }
         });
@@ -263,29 +262,6 @@ public class RegisterFragment extends Fragment implements Extras{
             mServerUrl.setText(savedInstanceState.getString("URL"));
         }
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        ActivityResultBus.getInstance().register(mActivityResultSubscriber);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        ActivityResultBus.getInstance().unregister(mActivityResultSubscriber);
-    }
-
-    // facilitates creation of brodcasts so as to pass activity result from activity to fragment
-    private Object mActivityResultSubscriber = new Object() {
-        @Subscribe
-        public void onActivityResultReceived(ActivityResultEvent event) {
-            int requestCode = event.getRequestCode();
-            int resultCode = event.getResultCode();
-            Intent data = event.getData();
-            onActivityResult(requestCode, resultCode, data);
-        }
-    };
 
     /**
      * Method checks whether information has been entered before submission

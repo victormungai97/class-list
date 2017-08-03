@@ -1,9 +1,9 @@
 # app/views.py
 
 import os, pdfkit
-from flask import render_template, request, send_from_directory
+from flask import render_template, request, make_response
 
-from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno
+from app import app, create_database, insert_db, get_contents, register_db, general_delete, insert_suggestion, decode_image, get_regno, compress_image
 from .models import Table, Test
 from .forms import RegisterForm, SignInForm
 from config import myHelper
@@ -44,6 +44,7 @@ def register_web():
 			regno=request.form['regno']
 			name=request.form['name']
 			pic=request.files['picture']
+			compress_image(pic.filename)
 
 			# get results from insertion into db
 			message, status = register_db(regno, name, pic, "register2")
@@ -194,16 +195,20 @@ def download(variable):
 	elif variable == 'rlist': rows = get_contents ('Table')
 	elif variable == 'blist': rows = get_contents('Basic')
 	else: rows = get_contents('Suggestion')
-	directory = os.path.abspath('app/reports')
-	if not os.path.isdir(directory): os.makedirs(directory)
+	outfile = variable+'.pdf'
 	for row in rows:
-		if row.pic_url:
-			row.pic_url = os.path.abspath('app/static/'+row.pic_url).replace('\\','/')
-	outfile = variable+'.pdf';
+		# set path of picture to its absolute path
+		if row.pic_url: row.pic_url = os.path.abspath('app/static/'+row.pic_url).replace('\\','/')
 	# specify wkhtmltopdf options
 	options = {'quiet':'','user-style-sheet':os.path.abspath('app/static/css/style.css')}
-	pdfkit.from_string(render_template(variable+'.html',rows=rows, download=True),os.path.join(directory,outfile),options=options)
-	return send_from_directory(directory=directory,filename=outfile,mimetype='application/pdf',attachment_filename=outfile,as_attachment=True)
+	# generate pdf as variable in memory
+	pdf = pdfkit.from_string(render_template(variable+'.html',rows=rows, download=True),False,options=options)
+	# create custom response
+	response = make_response(pdf)
+	response.headers['Content-Type'] = 'application/pdf' # receive pdf file
+	# try and download the file
+	response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
+	return response
 	
 # delete row in db
 @app.route('/rlist/delete/',methods =['POST'])	

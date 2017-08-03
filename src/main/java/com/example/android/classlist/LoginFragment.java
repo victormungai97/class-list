@@ -177,7 +177,7 @@ public class LoginFragment extends Fragment implements Extras {
         ContentValues values = getContentValues(reg_no,full_name);
         mDatabase.insert(SignInTable.NAME, null, values); // insert(table_name, null, contentValues)
 
-        Intent intent = MainActivity.newIntent(getActivity(), full_name, reg_no,dir);
+        Intent intent = MainActivity.newIntent(getActivity(), full_name, reg_no, dir);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }

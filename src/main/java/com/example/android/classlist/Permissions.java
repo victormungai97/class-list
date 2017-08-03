@@ -16,12 +16,13 @@ import android.support.v7.app.AlertDialog;
  * Class that checks for the app's permissions
  */
 
-public class Permissions {
+class Permissions {
 
     // codes for various requests
     private static final int REQUEST_PHONE_STATE = 0;
     private static final int REQUEST_PHOTO = 1;
     private static final int REQUEST_LOCATION = 123;
+    private static final int REQUEST_EXTERNAL_STORAGE = 2341;
 
     private static final String allow_message = "ALLOW";
     private static final String deny_message = "DENY";
@@ -31,7 +32,7 @@ public class Permissions {
     /**
      * Check on permissions and redirect user to accept them
      */
-    public static void checkPermission(Context context, Activity activity){
+    static void checkPermission(Context context, Activity activity){
         // permission for camera
         if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.CAMERA},REQUEST_PHOTO);
@@ -51,6 +52,10 @@ public class Permissions {
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.READ_PHONE_STATE}, REQUEST_PHONE_STATE);
         }
 
+        // permission to write to external storage
+        if (ContextCompat.checkSelfPermission(context,Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE},REQUEST_EXTERNAL_STORAGE);
+        }
     }
 
     /**
