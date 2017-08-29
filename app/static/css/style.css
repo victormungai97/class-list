@@ -1,5 +1,3 @@
-/* app/static/css/style.css */
-
 body, html {
     width: 100%;
     height: 100%;
@@ -7,7 +5,7 @@ body, html {
 
 body, h1, h2, h3 {
     font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
-    font-weight: 100;
+    font-weight: 700;
 }
 
 a, .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
@@ -19,20 +17,11 @@ a:hover, .navbar-default .navbar-brand:hover, .navbar-default .navbar-nav>li>a:h
 }
 
 footer {
-	margin: auto;
-    width: 50%;
-    padding: 50px 0;
-    background-color: #fff8dc;
-}
-
-.pager a{
-	color: #6495ED;
-	font-size: 100%;
-}
-
-.container topnav {
-	width: 100%;
-	background-color: #00ff00;
+    font-size: small;
+    bottom: 0;
+    left: 0;
+    text-align: center;
+    background-color: transparent;
 }
 
 p.copyright {
@@ -49,11 +38,18 @@ p.copyright {
 
 .btn-default {
     border-color: #aec251;
+    background-color: transparent;
     color: #aec251;
 }
 
 .btn-default:hover {
     background-color: #aec251;
+    color: #1d1e1f;
+}
+
+/* Set font size of navbar-brand */
+.navbar-brand{
+  font-size: medium;
 }
 
 .center {
@@ -67,9 +63,41 @@ p.copyright {
     border-top: 1px solid #e7e7e7;
 }
 
-.footer, .push {
+.push {
   clear: both;
   height: 4em;
+}
+
+.intro-divider {
+    width: 400px;
+    border-top: 1px solid #f8f8f8;
+    border-bottom: 1px solid rgba(0,0,0,0.2);
+}
+
+.intro-header {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    text-align: center;
+    color: #f8f8f8;
+    background: url(../img/images.jpg) no-repeat center center;
+    background-size: cover;
+    height: 100%;
+}
+
+.intro-message {
+    position: relative;
+    padding-top: 20%;
+    padding-bottom: 20%;
+}
+
+.intro-message > h1 {
+    margin: 0;
+    text-shadow: 2px 2px 3px rgba(0,0,0,0.6);
+    font-size: 5em;
+}
+
+.intro-message > h3 {
+    text-shadow: 2px 2px 3px rgba(0,0,0,0.6);
 }
 
 .lead {
@@ -84,35 +112,22 @@ p.copyright {
 .wrapper {
   min-height: 100%;
   height: auto !important;
-  height: 100%;
   margin: 0 auto -4em;
 }
 
-.dropdown {
-    float: right;
-}
-
-.dropdown-content {
-    display: none;
+.outer {
+    display: table;
     position: absolute;
-    background-color: #f9f9f9;
-    min-width: 160px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
+    height: 70%;
+    width: 100%;
 }
 
-.dropdown-content a {
-    color: #aec251;
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
+.middle {
+    display: table-cell;
+    vertical-align: middle;
 }
 
-.dropdown-content a:hover {
-	color: #687430;
-    background-color: #ddd;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
+.inner {
+    margin-left: auto;
+    margin-right: auto;
 }

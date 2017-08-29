@@ -1,0 +1,23 @@
+<!-- app/templates/errors/403.html -->
+
+{% extends "main.html" %}
+{% block wrapper %}<h1 class="display-4"> 403 Error </h1>{% endblock %}
+{% block body %}
+<div class="content-section">
+  <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <div style="text-align: center">
+            <h3> You do not have sufficient permissions to access this page. </h3>
+            <hr class="intro-divider">
+            <!--suppress HtmlUnknownTarget -->
+            <a href="{{ url_for('home.index') }}" class="btn btn-default btn-lg">
+                <i class="fa fa-home"></i>
+                Home
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,47 @@
+<!-- app/templates/staff/class.html -->
+
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "main.html" %}
+{% block wrapper%}<h1 class="display-4">Start Class</h1>{% endblock %}
+{% block body %}
+<div class="content-section">
+  <br/>
+  {{ utils.flashed_messages() }}
+  <br/>
+  <div class="center">
+    <br/>
+      {% if form %}
+      {{ wtf.quick_form(form) }}
+      {% endif %}
+  </div>
+  <div class="center">
+      <button type="button" class="btn btn-link">Register course</button>
+  </div>
+</div>
+<script>
+    $(function() {
+
+        // jQuery selection for select field
+        var drop_down = {
+            course: $('#courses')
+        };
+
+        function getConfirmation(){
+            var value = confirm("Do you want to start class " + $("#courses").find("option:selected").text() + "?");
+
+            if ( value === true ){
+                $(location).attr("href","/staff/_show_clock?q="+drop_down.course.val()+"&a="+{{id}});
+            }
+        }
+
+        drop_down.course.on('change', function () {
+            getConfirmation();
+        });
+    });
+
+    $("button").click(function () {
+        $(location).attr("href","{{ url_for('staff.register_course', name=current_user.name) }}")
+    })
+</script>
+{% endblock %}
