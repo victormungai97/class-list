@@ -1,0 +1,68 @@
+<!-- app/templates/staff/course.html -->
+
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "main.html" %}
+{% block wrapper%}<h1 class="display-4">Register Course</h1>{% endblock %}
+{% block body %}
+<div class="content-section">
+  <br/>
+  {{ utils.flashed_messages() }}
+  <br/>
+  <div class="center">
+    <br/>
+    {{ wtf.quick_form(form) }}
+  </div>
+</div>
+<script>
+    $(function() {
+
+    // jQuery selection for the 2 select boxes
+    var dropdown = {
+        department: $('#programme'),
+        course: $('#course'),
+        year: $('#study_year'),
+        sem: $('#semester')
+    };
+
+    // call to update on load
+    updateCourses();
+
+    // function to call XHR and update course drop down
+    function updateCourses() {
+        var send = {
+            department: dropdown.department.val(),
+            year: dropdown.year.val(),
+            sem: dropdown.sem.val()
+        };
+        dropdown.course.attr('disabled', 'disabled');
+        dropdown.course.empty();
+        $.getJSON("{{ url_for('staff._get_courses') }}", send, function(data) {
+            data.forEach(function(item) {
+                dropdown.course.append(
+                    $('<option>', {
+                        value: item[0],
+                        text: item[1]
+                    })
+                );
+            });
+            dropdown.course.removeAttr('disabled');
+        });
+    }
+
+    // event listener to state drop down change
+    dropdown.department.on('change', function() {
+        updateCourses();
+    });
+
+    dropdown.year.on('change',function () {
+        updateCourses();
+    });
+
+    dropdown.sem.on('change',function () {
+        updateCourses();
+    });
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,23 @@
+<!-- app/templates/errors/404.html -->
+
+{% extends "main.html" %}
+{% block wrapper %}<h1 class="display-4"> 404 Error </h1>{% endblock %}
+{% block body %}
+<div class="content-section">
+  <div class="outer">
+    <div class="middle">
+      <div class="inner">
+        <div style="text-align: center">
+            <h3> The page you're looking for doesn't exist. </h3>
+            <hr class="intro-divider">
+            <!--suppress HtmlUnknownTarget -->
+            <a href="{{ url_for('home.index') }}" class="btn btn-default btn-lg">
+                <i class="fa fa-home"></i>
+                Home
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
