@@ -1,6 +1,7 @@
 # app/student/forms.py
 
 import re
+from flask_login import login_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, FileField, Field  # , HiddenField
 from wtforms.validators import DataRequired
@@ -9,7 +10,7 @@ from wtforms.widgets import HTMLString, html_params
 
 from populate import year_of_study, dict_to_tuple, courses
 from pictures import ALLOWED_EXTENSIONS
-from ..models import Programme
+from ..models import Programme, Course, Student
 
 
 class ImageWidget(object):
@@ -102,7 +103,58 @@ class RegistrationForm(FlaskForm):
 
         return True
 
+
+class CourseForm(FlaskForm):
+    """
+    This form registers the course that a student takes.
+    It takes the program, year, semester and code of the course
+    """
+    programme = SelectField("Department", validators=[DataRequired()], choices=dict_to_tuple(courses), default="")
+    study_year = SelectField("Year", validators=[DataRequired()], choices=dict_to_tuple(year_of_study), coerce=int)
+    semester = SelectField("Semester", validators=[DataRequired()], choices=[(1, "I"), (2, "II")], coerce=int)
+    course = SelectField("Course", validators=[DataRequired()],
+                         choices=[(course.id, course.name) for course in Course.query.all()],
+                         coerce=int)
+    submit = SubmitField("Submit")
+
+
+class LoginForm(FlaskForm):
+    """
+    Form for student to login
+    """
+    reg_num = StringField("Registration Number", [DataRequired()])
+    submit = SubmitField("Login")
+
+    def validate(self):
+        # check that all required fields have been filled
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        # check if given student reg no. is already registered
+        student_ = Student.query.filter_by(reg_num=self.reg_num.data).first()
+        if not student_:
+            self.reg_num.errors.append("Unknown Registration Number")
+            return False
+
+        # save lecturer
+        self.student_ = student_
+        # log staff in
+        login_user(student_)
+        # successful validation
+        return True
+
+
 class SignInForm(FlaskForm):
     """
     Form that takes a student's registration number
     """
+    reg_num = StringField("Registration Number", validators=[DataRequired()])
+    photo = FileField("Pictures",
+                      validators=[FileRequired(),
+                                  FileAllowed(ALLOWED_EXTENSIONS, "Images Only!")
+                                  ],
+                      )
+    image = ImageField(label="Image", src='#', pid="image",
+                       width="10", height='10')
+    submit = SubmitField("Sign In")

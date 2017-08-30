@@ -1,18 +1,45 @@
 # app/student/views.py
 
 import os
-from flask import render_template, request, flash, redirect, url_for
+from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from werkzeug.utils import secure_filename
 
 from .. import registration_folder
 from ..database import db_session
-from ..models import Student, Photo
+from ..models import Student, Photo, Course
 from ..student import student
-from .forms import RegistrationForm
+from .forms import RegistrationForm, CourseForm, LoginForm
 
 from pictures import allowed_file, register_get_url, compress_image
 from populate import courses
 
+
+# noinspection PyUnresolvedReferences
+@student.route('/')
+def home():
+    """
+    Function that directs to student homepage
+    :return:
+    """
+    return render_template("student/home.html", title="Students Homepage", home=True)
+
+
+@student.route("/login/", methods=["POST",'GET'])
+def login():
+    """
+    Handle requests to the /login route
+    Log staff in through the login form
+    """
+    form = LoginForm()
+    if form.validate_on_submit():
+        # save current session
+        session['student'] = form.student_.id
+        # redirect to dashboard
+        return redirect(url_for('student.home'))
+
+    # load login template
+    # noinspection PyUnresolvedReferences
+    return render_template("student/login.html", form=form, title="Student Login")
 
 # noinspection PyUnresolvedReferences
 @student.route('/register/', methods=["GET", 'POST'])
@@ -65,8 +92,8 @@ def web():
                                class_rep=False)
             for pic in pic_url:
                 photos.append(Photo(student_id=form.reg_num.data,
-                              address=pic,
-                              learning=True)
+                                    address=pic,
+                                    learning=True)
                               )
             try:
                 db_session.add(student_)
@@ -86,3 +113,36 @@ def web():
         return redirect(url_for("staff.login"))
 
     return render_template("student/register.html", form=form, title="Student Registration")
+
+
+# noinspection PyUnresolvedReferences
+@student.route('/courses/', methods=['POST','GET'])
+def courses():
+    form = CourseForm()
+
+    return render_template("student/course.html", form=form, title="Course Registration")
+
+
+@student.route('/_get_courses/')
+def _get_courses():
+    """
+    This view will respond to XHR requests for courses
+    :return: JSON list of courses
+    """
+    department = request.args.get("department", type=str)
+    year = request.args.get("year", type=int)
+    sem = request.args.get("sem", type=int)
+    course = [(course.id, course.name)
+              for course in Course.query.filter((Course.programme_id == department) &
+                                                (Course.id.like("{}%".format(year))) &
+                                                (Course.id.like("%{}".format(sem)))
+                                                ).all()]
+    return jsonify(course)
+
+
+@student.route('/sign_in/', methods=['POST', 'GET'])
+def web_():
+    """
+    Function that enables a student to sign into a respective class
+    :return:
+    """
