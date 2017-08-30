@@ -1,0 +1,20 @@
+<!-- app/templates/student/login.html -->
+
+{% import "bootstrap/utils.html" as utils %}
+{% import "bootstrap/wtf.html" as wtf %}
+{% extends "main.html" %}
+{% block wrapper%}<h1 class="display-4">Student Login</h1>{% endblock %}
+{% block body %}
+<div class="content-section">
+  <br/>
+  {{ utils.flashed_messages() }}
+  <br/>
+  <div class="center">
+    <br/>
+    {{ wtf.quick_form(form) }}
+  </div>
+  <div class="center">
+      <button type="button" onclick="location.href = '{{ url_for('student.web') }}'" class="btn btn-link">Register here</button>
+  </div>
+</div>
+{% endblock %}

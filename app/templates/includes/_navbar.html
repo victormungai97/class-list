@@ -7,12 +7,16 @@
         <ul style="font-size: small" class="nav nav-pills float-right">
             {% if current_user.is_authenticated %}
             <li class="nav-item"><a class="nav-link active" href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.logout') }}">Logout</a></li>
+                {% if active %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End Class</a></li>
+                {% else %}
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.logout') }}">Logout</a></li>
+                {% endif %}
             <li class="nav-item"><a class="nav-link"><i class="fa fa-user"></i> {{ current_user.name }}</a></li>
             {% else %}
             <li class="nav-item"><a class="nav-link active" href="{{ url_for('home.index') }}">Home</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.login') }}">Staff</a></li>
-            <li class="nav-item"><a class="nav-link" href="#">Students</a></li>
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('student.login') }}">Students</a></li>
             {% endif %}
         </ul>
     </div>

@@ -91,7 +91,7 @@ function drawHand(ctx, pos, length, width) {
 }
 
 $("#end_class").click(function () {
-    $(location).attr("href", "{{ url_for('staff._end_class', id=id) }}")
+    $(location).attr("href", "{{ url_for('staff._end_class') }}")
 })
 </script>
 {% endblock %}
