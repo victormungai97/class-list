@@ -210,6 +210,8 @@ def _show_clock():
     lec = False
     if 'active' in session:
         active = session['active']
+    if 'is_lecturer' in session:
+        lec = session['is_lecturer']
     staff_id = request.args.get("a")
     course = request.args.get("q")
     session['start'] = datetime.now()
