@@ -90,7 +90,8 @@ def web():
                                name=name,
                                year_of_study=form.year_of_study.data,
                                programme=courses.get(form.programme.data),
-                               class_rep=False)
+                               class_rep=False,
+                               is_student=True)
             for pic in pic_url:
                 photos.append(Photo(student_id=form.reg_num.data,
                                     address=pic,
@@ -118,7 +119,7 @@ def web():
 
 # noinspection PyUnresolvedReferences
 @student.route('/courses/', methods=['POST', 'GET'])
-def courses():
+def courses_():
     form = CourseForm()
 
     return render_template("student/course.html", form=form, title="Course Registration")

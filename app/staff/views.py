@@ -53,6 +53,7 @@ def login():
     if form.validate_on_submit():
         # save current session
         session['lecturer_id'] = form.lecturer.id
+        session['is_lecturer'] = True
         # redirect to dashboard
         return redirect(url_for('staff.dashboard'))
 
@@ -76,6 +77,8 @@ def logout():
         session.pop('lecturer_id')
     if 'start' in session:
         session.pop('start')
+    if 'is_lecturer' in session:
+        session.pop('is_lecturer')
 
     flash('You have successfully been logged out.')
 
@@ -87,10 +90,13 @@ def logout():
 @login_required
 def dashboard():
     active = False
+    lec = False
     if 'active' in session:
         active = session['active']
+    if 'is_lecturer' in session:
+        lec = session['is_lecturer']
     # noinspection PyUnresolvedReferences
-    return render_template("staff/dashboard.html", title="Staff Dashboard", home=True, active=active)
+    return render_template("staff/dashboard.html", title="Staff Dashboard", home=True, active=active, is_lecturer=lec)
 
 
 def autoincrement():
@@ -114,8 +120,11 @@ def register_course(name):
     :return: Dashboard if successful or template of registration form if otherwise
     """
     active = False
+    lec = False
     if 'active' in session:
         active = session['active']
+    if 'is_lecturer' in session:
+        lec = session['is_lecturer']
     form = CourseForm()
     form.staff_id = Lecturer.query.filter_by(name=name).first().id
 
@@ -132,12 +141,14 @@ def register_course(name):
             print(err)
             db_session.rollback()
             flash("Error during registration")
-            return render_template("staff/course.html", form=form, title="Course Registration", active=active)
+            return render_template("staff/course.html", form=form, title="Course Registration", active=active,
+                                   is_lecturer = lec)
 
         flash("Successful registration of course!")
         return redirect(url_for('staff.dashboard'))
 
-    return render_template("staff/course.html", form=form, title="Course Registration", active=active)
+    return render_template("staff/course.html", form=form, title="Course Registration", active=active,
+                           is_lecturer = lec)
 
 
 @staff.route('/_get_courses/')
@@ -167,9 +178,12 @@ def _start_class():
     from a list of courses (s)he has registered to
     :return: HTML template of the class form
     """
+    lec = False
     if 'active' in session and session['active']:
         flash("You cannot start a class while a class is running")
         return redirect(url_for('staff.dashboard'))
+    if 'is_lecturer' in session:
+        lec = session['is_lecturer']
     staff_id = Lecturer.query.filter_by(name=request.args.get("name")).first().id
     form = ClassForm()
     form.courses.choices = [(0, "None")]
@@ -178,7 +192,7 @@ def _start_class():
             .filter(LecturersTeaching.lecturers_id == staff_id).all():
         form.courses.choices.append((course.id, course.name))
     form.courses.default = 0
-    return render_template("staff/class.html", form=form, title="Start Class", id=staff_id)
+    return render_template("staff/class.html", form=form, title="Start Class", id=staff_id, is_lecturer=lec)
 
 
 # noinspection PyUnresolvedReferences
@@ -193,6 +207,7 @@ def _show_clock():
     :return:
     """
     active = False
+    lec = False
     if 'active' in session:
         active = session['active']
     staff_id = request.args.get("a")
@@ -216,14 +231,16 @@ def _show_clock():
         print(err)
         db_session.rollback()
         flash("An error occurred")
-        return render_template("staff/class.html", form=form, title="Start Class", id=staff_id, active=active)
+        return render_template("staff/class.html", form=form, title="Start Class", id=staff_id, active=active,
+                               is_lecturer=lec)
 
     # get id of latest started class and pass it to the end clock function
     class_id = Class.query.all()[len(Class.query.all()) - 1].id
     session['name'] = Course.query.filter(Course.id == course).first().name
     session['active'] = True
     session['id'] = class_id
-    return render_template("staff/clock.html", class_=session['name'], active=active, title="Running Class")
+    return render_template("staff/clock.html", class_=session['name'], active=active, title="Running Class",
+                           is_lecturer=lec)
 
 
 # noinspection PyUnresolvedReferences
@@ -231,9 +248,13 @@ def _show_clock():
 @login_required
 def running_class():
     active = False
+    lec = False
+    if 'is_lecturer' in session:
+        lec = session['is_lecturer']
     if 'active' in session:
         active = session['active']
-    return render_template('staff/clock.html', class_=session['name'], active=active, title="Running Class")
+    return render_template('staff/clock.html', class_=session['name'], active=active, title="Running Class",
+                           is_lecturer = lec)
 
 
 # noinspection PyUnresolvedReferences
@@ -246,6 +267,7 @@ def _end_class():
     and update its running status
     :return:
     """
+    lec = False
     if 'start' in session:
         print(session['start'])
         # search for current class and update duration and active state
@@ -262,11 +284,11 @@ def _end_class():
             print(err)
             db_session.rollback()
             flash("An error occurred")
-            return render_template("staff/class.html", title="Start Class")
+            return render_template("staff/class.html", title="Start Class", is_lecturer=lec)
 
         return redirect(url_for('staff.dashboard'))
     else:
         active = False
         if 'active' in session:
             active = session['active']
-        return render_template("staff/clock.html", active=active, title="Running Class")
+        return render_template("staff/clock.html", active=active, title="Running Class", is_lecturer=lec)

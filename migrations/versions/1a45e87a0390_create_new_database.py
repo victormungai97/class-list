@@ -61,7 +61,7 @@ def upgrade():
                     sa.Column('year_of_study', sa.Integer(), nullable=False),
                     sa.Column('programme', sa.String(length=8), nullable=False),
                     sa.Column('class_rep', sa.Boolean(), nullable=False),
-                    sa.ForeignKeyConstraint(['programme'], ['programmes.program_id'], ),
+                    sa.ForeignKeyConstraint(['programme'], ['programmes.name'], ),
                     sa.PrimaryKeyConstraint('id')
                     )
     op.create_index(op.f('ix_students_class_rep'), 'students', ['class_rep'], unique=False)

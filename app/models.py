@@ -48,7 +48,7 @@ class Programme(Base):
     id = Column("id", Integer, primary_key=True)
     program_id = Column("program_id", String(8), unique=True, nullable=False)
     name = Column("name", String(60), nullable=False, unique=True)
-    student = relationship('Student', primaryjoin="Student.programme == Programme.program_id", backref='student')
+    student = relationship('Student', primaryjoin="Student.programme == Programme.name", backref='student')
     course = relationship('Course', primaryjoin='Course.programme_id == Programme.program_id', backref='course')
     lecturer = relationship('Lecturer', primaryjoin='Lecturer.programme == Programme.name', backref='lecturer')
 
@@ -155,9 +155,9 @@ class Student(Base):
     reg_num = Column("reg_num", String(45), unique=True, index=True)
     name = Column("name", String(60), nullable=False, index=True)
     year_of_study = Column("year_of_study", Integer, nullable=False, index=True)
-    programme = Column("programme", String(8), ForeignKey('programmes.program_id'), nullable=False)
+    programme = Column("programme", String(8), ForeignKey('programmes.name'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)
-    is_lecturer = Column("is_student", Boolean)
+    is_student = Column("is_student", Boolean)
     attendance = relationship('Attendance',
                               primaryjoin='Attendance.student == Student.reg_num',
                               backref='attendance')
