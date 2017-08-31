@@ -24,7 +24,7 @@ def home():
     return render_template("student/home.html", title="Students Homepage", home=True)
 
 
-@student.route("/login/", methods=["POST",'GET'])
+@student.route("/login/", methods=["POST", 'GET'])
 def login():
     """
     Handle requests to the /login route
@@ -40,6 +40,7 @@ def login():
     # load login template
     # noinspection PyUnresolvedReferences
     return render_template("student/login.html", form=form, title="Student Login")
+
 
 # noinspection PyUnresolvedReferences
 @student.route('/register/', methods=["GET", 'POST'])
@@ -116,7 +117,7 @@ def web():
 
 
 # noinspection PyUnresolvedReferences
-@student.route('/courses/', methods=['POST','GET'])
+@student.route('/courses/', methods=['POST', 'GET'])
 def courses():
     form = CourseForm()
 

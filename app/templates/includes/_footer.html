@@ -12,7 +12,9 @@
                             {% if active %}
                             <li><a href="{{ url_for('staff.running_class') }}">End Class</a></li>
                             {% else %}
-                            <li><a href="{{ url_for('staff.logout') }}">Logout</a></li>
+                                {% if current_user.is_lecturer %}
+                                    <li><a href="{{ url_for('staff.logout') }}">Logout</a></li>
+                                {% endif %}
                             {% endif %}
                         {% else %}
                         <li class="list-inline-item"><a href="{{ url_for('home.index') }}">Home</a></li>
