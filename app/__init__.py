@@ -9,7 +9,7 @@ from flask_bootstrap import Bootstrap
 from config import app_config
 from app.database import db_session, init_db
 
-db = SQLAlchemy()  # db instance variable
+# db = SQLAlchemy()  # db instance variable
 app = Flask(__name__, instance_relative_config=True)
 login_manager = LoginManager()
 
@@ -30,7 +30,7 @@ def create_app(config_name):
     app.config.from_object(app_config[config_name])
     # use if you have instance/config.py with your SECRET_KEY and SQLALCHEMY_DATABASE_URI
     app.config.from_pyfile('config.py')
-    db.init_app(app)
+    # db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_message = "Log in required to view this page"
     Bootstrap(app)

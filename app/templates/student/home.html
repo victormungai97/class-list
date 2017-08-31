@@ -1,8 +1,8 @@
 <!-- app/templates/student/home.html -->
 
-{% import "bootstrap/wtf.html" as wtf %}
 {% extends "main.html" %}
-{% block wrapper %}<!--suppress HtmlUnknownTarget -->
+{% import "bootstrap/wtf.html" as wtf %}
+{% block wrapper %}
 <h1 class="display-4">Student Dashboard</h1>{% endblock %}
 {% block body %}
 <div class="intro-header">
@@ -15,7 +15,7 @@
                     {% with messages = get_flashed_messages() %}
                     {% if messages %}
                     <script>
-                        var messages = {{ messages | safe }}
+                        var messages = {{ messages | safe }};
                         for (var i=0; i < messages.length; i++) {
                             alert(messages[i]);
                         }

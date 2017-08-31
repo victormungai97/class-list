@@ -107,6 +107,7 @@ class Lecturer(UserMixin, Base):
                        String(60),
                        ForeignKey("programmes.name", onupdate='CASCADE', ondelete='CASCADE'),
                        )
+    is_lecturer = Column("is_lecturer", Boolean)
     password_hash = Column(String(128))
     lecturers_teaching = relationship('LecturersTeaching',
                                       primaryjoin='LecturersTeaching.lecturers_id == Lecturer.id',
@@ -156,6 +157,7 @@ class Student(Base):
     year_of_study = Column("year_of_study", Integer, nullable=False, index=True)
     programme = Column("programme", String(8), ForeignKey('programmes.program_id'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)
+    is_lecturer = Column("is_student", Boolean)
     attendance = relationship('Attendance',
                               primaryjoin='Attendance.student == Student.reg_num',
                               backref='attendance')
