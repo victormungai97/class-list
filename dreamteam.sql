@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 29, 2017 at 10:13 AM
+-- Generation Time: Sep 01, 2017 at 02:11 PM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 
@@ -23,7 +23,6 @@ SET time_zone = "+00:00";
 DROP DATABASE IF EXISTS `dreamteam`;
 CREATE DATABASE IF NOT EXISTS `dreamteam` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `dreamteam`;
-
 -- --------------------------------------------------------
 
 --
@@ -39,7 +38,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('698c699453d7');
+('587a02a3d968');
 
 -- --------------------------------------------------------
 
@@ -203,7 +202,8 @@ CREATE TABLE `lecturers` (
   `email` varchar(120) NOT NULL,
   `rank` varchar(25) DEFAULT NULL,
   `programme` varchar(60) DEFAULT NULL,
-  `password_hash` varchar(128) DEFAULT NULL
+  `password_hash` varchar(128) DEFAULT NULL,
+  `is_lecturer` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -261,8 +261,9 @@ CREATE TABLE `students` (
   `reg_num` varchar(45) DEFAULT NULL,
   `name` varchar(60) NOT NULL,
   `year_of_study` int(11) NOT NULL,
-  `programme` varchar(8) NOT NULL,
-  `class_rep` tinyint(1) NOT NULL
+  `programme` varchar(60) NOT NULL,
+  `class_rep` tinyint(1) NOT NULL,
+  `is_student` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -359,10 +360,10 @@ ALTER TABLE `programmes`
 ALTER TABLE `students`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `ix_students_reg_num` (`reg_num`),
-  ADD KEY `programme` (`programme`),
   ADD KEY `ix_students_class_rep` (`class_rep`),
   ADD KEY `ix_students_name` (`name`),
-  ADD KEY `ix_students_year_of_study` (`year_of_study`);
+  ADD KEY `ix_students_year_of_study` (`year_of_study`),
+  ADD KEY `students_ibfk_1` (`programme`);
 
 --
 -- Indexes for table `verification_statuses`
@@ -462,7 +463,7 @@ ALTER TABLE `photos`
 -- Constraints for table `students`
 --
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`program_id`);
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`);
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
