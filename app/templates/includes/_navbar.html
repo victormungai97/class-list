@@ -42,12 +42,8 @@
                 table: table
             }
             $.getJSON("{{ url_for('home.get_name') }}", send, function (data) {
-                data.forEach(function (item) {
-                    $('#fa').append($('<div>', {
-                        text: item[0]
-                    }));
-                });
-            })
+                $('.fa-user').html(data).css({"font-size":"85%","font-weight":"bold"});
+            });
         }
     })
 </script>
