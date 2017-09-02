@@ -116,8 +116,10 @@ def courses_():
 
     if form.validate_on_submit():
         student_course = StudentCourses(id=autoincrement(),
-                                  student_id=form.reg_num.data,
-                                  courses_id=form.course.data)
+                                        student_id=form.reg_num.data,
+                                        courses_id=form.course.data,
+                                        programme=form.programme.data
+                                        )
         try:
             # save lecturer and course ID to LecturerTeaching table
             db_session.add(student_course)

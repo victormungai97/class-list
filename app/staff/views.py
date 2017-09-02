@@ -133,6 +133,7 @@ def register_course(name):
         lecturer_course = LecturersTeaching(id=autoincrement(),
                                             lecturers_id=form.staff_id,
                                             courses_id=form.course.data,
+                                            programme=form.programme.data
                                             )
         try:
             # save lecturer and course ID to LecturerTeaching table

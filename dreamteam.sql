@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 01, 2017 at 11:08 PM
+-- Generation Time: Sep 02, 2017 at 03:01 AM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 
@@ -37,7 +37,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('6748113c1867');
+('6d28c3f63bb8');
 
 -- --------------------------------------------------------
 
@@ -214,7 +214,8 @@ CREATE TABLE `lecturers` (
 CREATE TABLE `lecturers_teaching` (
   `id` int(11) NOT NULL,
   `lecturers_id` int(11) NOT NULL,
-  `courses_id` int(11) NOT NULL
+  `courses_id` int(11) NOT NULL,
+  `programme` varchar(8) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -274,7 +275,8 @@ CREATE TABLE `students` (
 CREATE TABLE `student_courses` (
   `id` int(11) NOT NULL,
   `student_id` varchar(45) NOT NULL,
-  `courses_id` int(11) NOT NULL
+  `courses_id` int(11) NOT NULL,
+  `programme` varchar(8) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -347,7 +349,8 @@ ALTER TABLE `lecturers`
 ALTER TABLE `lecturers_teaching`
   ADD PRIMARY KEY (`id`,`lecturers_id`,`courses_id`),
   ADD KEY `ix_lecturers_teaching_courses_id` (`courses_id`),
-  ADD KEY `ix_lecturers_teaching_lecturers_id` (`lecturers_id`);
+  ADD KEY `ix_lecturers_teaching_lecturers_id` (`lecturers_id`),
+  ADD KEY `programme` (`programme`);
 
 --
 -- Indexes for table `photos`
@@ -382,7 +385,8 @@ ALTER TABLE `students`
 ALTER TABLE `student_courses`
   ADD PRIMARY KEY (`id`,`student_id`,`courses_id`),
   ADD KEY `ix_student_courses_courses_id` (`courses_id`),
-  ADD KEY `ix_student_courses_student_id` (`student_id`);
+  ADD KEY `ix_student_courses_student_id` (`student_id`),
+  ADD KEY `programme` (`programme`);
 
 --
 -- Indexes for table `verification_statuses`
@@ -470,7 +474,8 @@ ALTER TABLE `lecturers`
 --
 ALTER TABLE `lecturers_teaching`
   ADD CONSTRAINT `lecturers_teaching_ibfk_1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `lecturers_teaching_ibfk_2` FOREIGN KEY (`lecturers_id`) REFERENCES `lecturers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `lecturers_teaching_ibfk_2` FOREIGN KEY (`lecturers_id`) REFERENCES `lecturers` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `lecturers_teaching_ibfk_3` FOREIGN KEY (`programme`) REFERENCES `programmes` (`program_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `photos`
@@ -492,7 +497,8 @@ SET FOREIGN_KEY_CHECKS = 1;
 SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE `student_courses`
   ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`reg_num`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`reg_num`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student_courses_ibfk_3` FOREIGN KEY (`programme`) REFERENCES `programmes` (`program_id`) ON DELETE CASCADE ON UPDATE CASCADE;
 SET FOREIGN_KEY_CHECKS = 1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

@@ -51,8 +51,8 @@ class Programme(Base):
     student = relationship('Student', primaryjoin="Student.programme == Programme.name", backref='student')
     course = relationship('Course', primaryjoin='Course.programme_id == Programme.program_id', backref='course')
     lecturer = relationship('Lecturer', primaryjoin='Lecturer.programme == Programme.name', backref='lecturer')
-    lecturer_teaching = relationship('LecturerTeaching',
-                                     primaryjoin='LecturerTeaching.programme == Programme.program_id',
+    lecturer_teaching = relationship('LecturersTeaching',
+                                     primaryjoin='LecturersTeaching.programme == Programme.program_id',
                                      backref='lecturer_teaching')
     student_course = relationship('StudentCourses',
                                   primaryjoin='StudentCourses.programme == Programme.program_id',
@@ -177,12 +177,6 @@ class Student(Base, UserMixin):
 
     def __repr__(self):
         return "<Student {}>".format(self.reg_num)
-
-
-# Set up user_loader
-@login_manager.user_loader
-def load_user(user_id):
-    return Lecturer.query.get(int(user_id))
 
 
 class Photo(Base):
