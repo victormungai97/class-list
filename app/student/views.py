@@ -1,14 +1,14 @@
 # app/student/views.py
 
 import os
-from flask import render_template, request, flash, redirect, url_for, jsonify, session
+from flask import render_template, request, flash, redirect, url_for, jsonify
 from werkzeug.utils import secure_filename
 
 from .. import registration_folder
 from ..database import db_session
-from ..models import Student, Photo, Course
+from ..models import Student, Photo, Course, Programme, StudentCourses
 from ..student import student
-from .forms import RegistrationForm, CourseForm, LoginForm
+from .forms import RegistrationForm, CourseForm
 
 from pictures import allowed_file, register_get_url, compress_image
 from populate import courses
@@ -21,28 +21,10 @@ def home():
     Function that directs to student homepage
     :return:
     """
-    return render_template("student/home.html", title="Students Homepage", home=True)
+    return render_template("student/home.html", title="Students Homepage", home=True, is_student=True)
 
 
-@student.route("/login/", methods=["POST", 'GET'])
-def login():
-    """
-    Handle requests to the /login route
-    Log staff in through the login form
-    """
-    form = LoginForm()
-    if form.validate_on_submit():
-        # save current session
-        session['student'] = form.student_.id
-        # redirect to dashboard
-        return redirect(url_for('student.home'))
-
-    # load login template
-    # noinspection PyUnresolvedReferences
-    return render_template("student/login.html", form=form, title="Student Login")
-
-
-# noinspection PyUnresolvedReferences
+# noinspection PyUnresolvedReferences,PyArgumentList
 @student.route('/register/', methods=["GET", 'POST'])
 def web():
     """
@@ -112,9 +94,19 @@ def web():
             return render_template("student/register.html", form=form, title="Student Registration")
 
         flash("Successful registration of {}".format(name))
-        return redirect(url_for("staff.login"))
+        return redirect(url_for("student.home"))
 
     return render_template("student/register.html", form=form, title="Student Registration")
+
+
+def autoincrement():
+    """
+    Function will autoincrement id in StudentCourses table
+    by querying entire table
+    and adding one to the len of returned list
+    :return: New ID number
+    """
+    return len(StudentCourses.query.all()) + 1
 
 
 # noinspection PyUnresolvedReferences
@@ -122,7 +114,31 @@ def web():
 def courses_():
     form = CourseForm()
 
-    return render_template("student/course.html", form=form, title="Course Registration")
+    if form.validate_on_submit():
+        student_course = StudentCourses(id=autoincrement(),
+                                  student_id=form.reg_num.data,
+                                  courses_id=form.course.data)
+        try:
+            # save lecturer and course ID to LecturerTeaching table
+            db_session.add(student_course)
+            db_session.commit()
+            flash("Success")
+            return redirect(url_for('student.home'))
+        except Exception as err:
+            print(err)
+            db_session.rollback()
+            flash("Error during registration")
+
+    return render_template("student/course.html", form=form, title="Course Registration", is_student=True)
+
+
+@student.route('/_get_department/')
+def _get_departments():
+    dept = request.args.get("text", type=str).split('/')[0]
+    departments = [(programme.program_id, programme.name)
+                   for programme in Programme.query.filter(Programme.program_id == dept)
+                       .all()]
+    return jsonify(departments)
 
 
 @student.route('/_get_courses/')
@@ -148,3 +164,4 @@ def web_():
     Function that enables a student to sign into a respective class
     :return:
     """
+    return "Hello"

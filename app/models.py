@@ -51,6 +51,12 @@ class Programme(Base):
     student = relationship('Student', primaryjoin="Student.programme == Programme.name", backref='student')
     course = relationship('Course', primaryjoin='Course.programme_id == Programme.program_id', backref='course')
     lecturer = relationship('Lecturer', primaryjoin='Lecturer.programme == Programme.name', backref='lecturer')
+    lecturer_teaching = relationship('LecturerTeaching',
+                                     primaryjoin='LecturerTeaching.programme == Programme.program_id',
+                                     backref='lecturer_teaching')
+    student_course = relationship('StudentCourses',
+                                  primaryjoin='StudentCourses.programme == Programme.program_id',
+                                  backref='student_course')
 
     def __repr__(self):
         return "<Department {}>".format(self.name)
@@ -70,6 +76,9 @@ class Course(Base):
     lecturers_teaching = relationship('LecturersTeaching',
                                       primaryjoin='LecturersTeaching.courses_id == Course.id',
                                       backref='courses')
+    student_courses = relationship('StudentCourses',
+                                   primaryjoin='StudentCourses.courses_id == Course.id',
+                                   backref='courses2')
 
     # class_details = relationship("ClassDetails",
     #                            primaryjoin='ClassDetails.CourseName == Course.name '
@@ -143,7 +152,7 @@ def load_user(user_id):
     return Lecturer.query.get(int(user_id))
 
 
-class Student(Base):
+class Student(Base, UserMixin):
     """
     Class maps to the students table.
     Contains the student's ID, registration number, year of study, department and whether on is a class representative
@@ -161,10 +170,19 @@ class Student(Base):
     attendance = relationship('Attendance',
                               primaryjoin='Attendance.student == Student.reg_num',
                               backref='attendance')
+    student_courses = relationship('StudentCourses',
+                                   primaryjoin='StudentCourses.student_id == Student.reg_num',
+                                   backref='student')
     photo = relationship('Photo', primaryjoin='Photo.student_id == Student.reg_num', backref='photo')
 
     def __repr__(self):
         return "<Student {}>".format(self.reg_num)
+
+
+# Set up user_loader
+@login_manager.user_loader
+def load_user(user_id):
+    return Lecturer.query.get(int(user_id))
 
 
 class Photo(Base):
@@ -193,7 +211,8 @@ class Photo(Base):
 class LecturersTeaching(Base):
     """
     Class maps the relationship between lecturers and courses
-    Contains the ID of the lecturers and students
+    Contains the ID of the lecturers, departments and courses
+    The department field helps to differentiate the courses
     """
 
     __tablename__ = 'lecturers_teaching'
@@ -211,9 +230,44 @@ class LecturersTeaching(Base):
                         nullable=False,
                         primary_key=True,
                         index=True)
+    programme = Column('programme',
+                       String(8),
+                       ForeignKey('programmes.program_id', ondelete='CASCADE', onupdate='CASCADE'),
+                       nullable=False)
     class_ = relationship('Class',
                           primaryjoin='Class.lec_course_id == ''LecturersTeaching.id',
                           backref='lecturers_teaching')
+
+    def __repr__(self):
+        return "<Lecturer {}, Course {}.>".format(self.lecturers_id, self.courses_id)
+
+
+class StudentCourses(Base):
+    """
+    Class maps the relationship between students and courses
+    Contains the ID of the courses, departments and students
+    The department field helps to differentiate the courses
+    """
+
+    __tablename__ = 'student_courses'
+
+    id = Column('id', Integer, primary_key=True, autoincrement=True)
+    student_id = Column('student_id',
+                        String(45),
+                        ForeignKey('students.reg_num', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=False,
+                        primary_key=True,
+                        index=True)
+    courses_id = Column('courses_id',
+                        Integer,
+                        ForeignKey('courses.id', ondelete='CASCADE', onupdate='CASCADE'),
+                        nullable=False,
+                        primary_key=True,
+                        index=True)
+    programme = Column('programme',
+                       String(8),
+                       ForeignKey('programmes.program_id', ondelete='CASCADE', onupdate='CASCADE'),
+                       nullable=False)
 
     def __repr__(self):
         return "<Lecturer {}, Course {}.>".format(self.lecturers_id, self.courses_id)

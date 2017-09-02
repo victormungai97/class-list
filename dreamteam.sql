@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 01, 2017 at 02:11 PM
+-- Generation Time: Sep 01, 2017 at 11:08 PM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 
@@ -19,7 +19,6 @@ SET time_zone = "+00:00";
 --
 -- Database: `dreamteam`
 --
-
 DROP DATABASE IF EXISTS `dreamteam`;
 CREATE DATABASE IF NOT EXISTS `dreamteam` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `dreamteam`;
@@ -38,7 +37,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('587a02a3d968');
+('6748113c1867');
 
 -- --------------------------------------------------------
 
@@ -269,6 +268,18 @@ CREATE TABLE `students` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `student_courses`
+--
+
+CREATE TABLE `student_courses` (
+  `id` int(11) NOT NULL,
+  `student_id` varchar(45) NOT NULL,
+  `courses_id` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `verification_statuses`
 --
 
@@ -366,6 +377,14 @@ ALTER TABLE `students`
   ADD KEY `students_ibfk_1` (`programme`);
 
 --
+-- Indexes for table `student_courses`
+--
+ALTER TABLE `student_courses`
+  ADD PRIMARY KEY (`id`,`student_id`,`courses_id`),
+  ADD KEY `ix_student_courses_courses_id` (`courses_id`),
+  ADD KEY `ix_student_courses_student_id` (`student_id`);
+
+--
 -- Indexes for table `verification_statuses`
 --
 ALTER TABLE `verification_statuses`
@@ -399,7 +418,7 @@ ALTER TABLE `lecturers`
 -- AUTO_INCREMENT for table `photos`
 --
 ALTER TABLE `photos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `programmes`
 --
@@ -409,7 +428,7 @@ ALTER TABLE `programmes`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 --
 -- AUTO_INCREMENT for table `verification_statuses`
 --
@@ -462,8 +481,19 @@ ALTER TABLE `photos`
 --
 -- Constraints for table `students`
 --
+SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE `students`
   ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`);
+SET FOREIGN_KEY_CHECKS = 1;
+
+--
+-- Constraints for table `student_courses`
+--
+SET FOREIGN_KEY_CHECKS = 0;
+ALTER TABLE `student_courses`
+  ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`reg_num`) ON DELETE CASCADE ON UPDATE CASCADE;
+SET FOREIGN_KEY_CHECKS = 1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

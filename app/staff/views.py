@@ -28,6 +28,7 @@ def register():
                             email=form.email.data,
                             rank=staff_roles.get(form.rank.data),
                             password=form.password.data,
+                            is_lecturer=True
                             )
 
         # add staff to database
@@ -82,7 +83,7 @@ def logout():
 
     flash('You have successfully been logged out.')
 
-    # redirect to the login page
+    # redirect to the home page
     return redirect(url_for('home.index'))
 
 
@@ -137,18 +138,15 @@ def register_course(name):
             # save lecturer and course ID to LecturerTeaching table
             db_session.add(lecturer_course)
             db_session.commit()
+            flash("Successful registration of course!")
+            return redirect(url_for('staff.dashboard'))
         except Exception as err:
             print(err)
             db_session.rollback()
             flash("Error during registration")
-            return render_template("staff/course.html", form=form, title="Course Registration", active=active,
-                                   is_lecturer = lec)
-
-        flash("Successful registration of course!")
-        return redirect(url_for('staff.dashboard'))
 
     return render_template("staff/course.html", form=form, title="Course Registration", active=active,
-                           is_lecturer = lec)
+                           is_lecturer=lec)
 
 
 @staff.route('/_get_courses/')
@@ -246,7 +244,7 @@ def _show_clock():
 
 
 # noinspection PyUnresolvedReferences
-@staff.route('/running_class')
+@staff.route('/running_class/')
 @login_required
 def running_class():
     active = False
@@ -256,7 +254,7 @@ def running_class():
     if 'active' in session:
         active = session['active']
     return render_template('staff/clock.html', class_=session['name'], active=active, title="Running Class",
-                           is_lecturer = lec)
+                           is_lecturer=lec)
 
 
 # noinspection PyUnresolvedReferences

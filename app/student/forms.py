@@ -1,7 +1,6 @@
 # app/student/forms.py
 
 import re
-from flask_login import login_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, FileField, Field  # , HiddenField
 from wtforms.validators import DataRequired
@@ -10,7 +9,7 @@ from wtforms.widgets import HTMLString, html_params
 
 from populate import year_of_study, dict_to_tuple, courses
 from pictures import ALLOWED_EXTENSIONS
-from ..models import Programme, Course, Student
+from ..models import Programme, Course, StudentCourses, Student
 
 
 class ImageWidget(object):
@@ -109,7 +108,10 @@ class CourseForm(FlaskForm):
     This form registers the course that a student takes.
     It takes the program, year, semester and code of the course
     """
-    programme = SelectField("Department", validators=[DataRequired()], choices=dict_to_tuple(courses), default="")
+    reg_num = StringField("Registration Number", validators=[DataRequired()])
+    programme = SelectField("Department", validators=[DataRequired()],
+                            choices=[(programme.program_id, programme.name) for programme in Programme.query.all()],
+                            default="")
     study_year = SelectField("Year", validators=[DataRequired()], choices=dict_to_tuple(year_of_study), coerce=int)
     semester = SelectField("Semester", validators=[DataRequired()], choices=[(1, "I"), (2, "II")], coerce=int)
     course = SelectField("Course", validators=[DataRequired()],
@@ -117,31 +119,25 @@ class CourseForm(FlaskForm):
                          coerce=int)
     submit = SubmitField("Submit")
 
-
-class LoginForm(FlaskForm):
-    """
-    Form for student to login
-    """
-    reg_num = StringField("Registration Number", [DataRequired()])
-    submit = SubmitField("Login")
-
     def validate(self):
         # check that all required fields have been filled
         rv = FlaskForm.validate(self)
         if not rv:
             return False
 
-        # check if given student reg no. is already registered
-        student_ = Student.query.filter_by(reg_num=self.reg_num.data).first()
-        if not student_:
-            self.reg_num.errors.append("Unknown Registration Number")
+        # check if student is registered in Students table and raise error if not
+        student = Student.query.filter_by(reg_num=self.reg_num.data).first()
+        if not student:
+            self.reg_num.errors.append("Registration number not recognised")
             return False
 
-        # save lecturer
-        self.student_ = student_
-        # log staff in
-        login_user(student_)
-        # successful validation
+        # check if student has already registered given course and raise error if so
+        registered = StudentCourses.query.filter((StudentCourses.student_id == self.reg_num.data) &
+                                                 (StudentCourses.courses_id == self.course.data)).first()
+        if registered:
+            self.course.errors.append("Course already registered")
+            return False
+
         return True
 
 

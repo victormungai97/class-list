@@ -25,8 +25,34 @@
         sem: $('#semester')
     };
 
+    // jQuery selection for the text field and dept field
+    var text = {
+      registration: $('#reg_num'),
+      department: $('#programme')
+    };
+
     // call to update on load
+    updateDepartments();
     updateCourses();
+
+    // function updates department list as student enters name
+    function updateDepartments() {
+        var send = {
+            text: text.registration.val()
+        };
+        text.department.empty();
+        $.getJSON("{{ url_for('student._get_departments') }}", send, function (data) {
+            data.forEach(function (item) {
+                text.department.append(
+                    $('<option>', {
+                        value: item[0],
+                        text: item[1]
+                    })
+                );
+            });
+            updateCourses();
+        });
+    }
 
     // function to call XHR and update course drop down
     function updateCourses() {
@@ -49,6 +75,10 @@
             dropdown.course.removeAttr('disabled');
         });
     }
+
+    text.registration.on('input', function () {
+       updateDepartments();
+    });
 
     // event listener to state drop down change
     dropdown.department.on('change', function() {
