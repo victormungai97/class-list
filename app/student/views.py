@@ -7,9 +7,9 @@ from werkzeug.utils import secure_filename
 
 from .. import registration_folder
 from ..database import db_session
-from ..models import Student, Photo, Course, Programme, StudentCourses
+from ..models import Student, Photo, Course, Programme, StudentCourses, Class, LecturersTeaching
 from ..student import student
-from .forms import RegistrationForm, CourseForm, LoginForm
+from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm
 
 from pictures import allowed_file, register_get_url, compress_image
 from populate import courses
@@ -17,13 +17,15 @@ from populate import courses
 
 # noinspection PyUnresolvedReferences
 @student.route('/')
+@student.route('/dashboard/')
 @login_required
 def home():
     """
     Function that directs to student homepage
-    :return:
+    :return: HTML template to student homepage
     """
-    return render_template("student/home.html", title="Students Homepage", home=True, is_student=True)
+    return render_template("student/home.html", title="Students Homepage", home=True, is_student=True,
+                           pid=session['student_id'])
 
 
 @student.route("/login/", methods=["POST", 'GET'])
@@ -126,7 +128,7 @@ def web():
                 db_session.commit()
 
                 flash("Successful registration of {}".format(name))
-                return redirect(url_for("student.home"))
+                return redirect(url_for("student.login"))
             except Exception as err:
                 print(err)
                 db_session.rollback()
@@ -170,7 +172,8 @@ def courses_():
             db_session.rollback()
             flash("Error during registration")
 
-    return render_template("student/course.html", form=form, title="Course Registration", is_student=True)
+    return render_template("student/course.html", form=form, title="Course Registration", is_student=True,
+                           pid=session['student_id'])
 
 
 @student.route('/_get_department/')
@@ -200,11 +203,37 @@ def _get_courses():
     return jsonify(course)
 
 
-@student.route('/sign_in/', methods=['POST', 'GET'])
+@student.route('/sign_in/<pid>', methods=['POST', 'GET'])
 @login_required
-def web_():
+def web_(pid):
     """
     Function that enables a student to sign into a respective class
     :return:
     """
-    return "Hello"
+    # retrieve student's reg number
+    reg_num = Student.query.filter(Student.id == pid).first().reg_num
+    # query courses student is registered to
+    _courses = []
+    for course in Course.query.filter(Course.id == StudentCourses.courses_id).filter(
+                    StudentCourses.student_id == reg_num).all():
+        _courses.append(course.id)
+    active_classes = []
+    # query running classes among registered courses
+    for course in _courses:
+        for class_ in Course.query.filter(Course.id == course).filter(LecturersTeaching.courses_id == Course.id) \
+                .filter(Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
+            active_classes.append((class_.id, class_.name))
+    print(active_classes)
+    # attach running class to form
+    form = ClassForm()
+    form.courses.choices = [(0, "None")]
+    form.courses.choices.extend(active_classes)
+    return render_template("student/class.html", form=form, title="Start Class", is_lecturer=True,
+                           pid=session['student_id'])
+
+
+@student.route('/attend_class/')
+@login_required
+def attend_class():
+    flash("Attended")
+    return redirect(url_for('student.home'))

@@ -41,7 +41,7 @@
     });
 
     $("button").click(function () {
-        $(location).attr("href","{{ url_for('staff.register_course', name=current_user.name) }}")
+        $(location).attr("href","{{ url_for('staff.register_course', pid=pid) }}")
     })
 </script>
 {% endblock %}

@@ -104,20 +104,20 @@ def autoincrement():
 
 
 # noinspection PyUnresolvedReferences
-@staff.route('/register_course/<name>/', methods=['GET', 'POST'])
+@staff.route('/register_course/<pid>/', methods=['GET', 'POST'])
 @login_required
-def register_course(name):
+def register_course(pid):
     """
     This function will render the form for course registration
     and save the entered data into the database
-    :param name: Name of the lecturer
+    :param pid: ID of the lecturer
     :return: Dashboard if successful or template of registration form if otherwise
     """
     active = False
     if 'active' in session:
         active = session['active']
     form = CourseForm()
-    form.staff_id = Lecturer.query.filter_by(name=name).first().id
+    form.staff_id = Lecturer.query.filter_by(id=pid).first().id
 
     if form.validate_on_submit():
         lecturer_course = LecturersTeaching(id=autoincrement(),
@@ -170,7 +170,8 @@ def _start_class():
     if 'active' in session and session['active']:
         flash("You cannot start a class while a class is running")
         return redirect(url_for('staff.dashboard'))
-    staff_id = Lecturer.query.filter_by(name=request.args.get("name")).first().id
+    # get lecturer's ID
+    staff_id = Lecturer.query.filter_by(id=request.args.get("pid")).first().id
     form = ClassForm()
     form.courses.choices = [(0, "None")]
     # query courses that a given lecturer has registered to and add them to the drop down list
@@ -266,7 +267,8 @@ def _end_class():
             print(err)
             db_session.rollback()
             flash("An error occurred")
-            return render_template("staff/class.html", title="Start Class", is_lecturer=True, pid=session['lecturer_id'])
+            return render_template("staff/class.html", title="Start Class", is_lecturer=True,
+                                   pid=session['lecturer_id'])
 
         return redirect(url_for('staff.dashboard'))
     else:

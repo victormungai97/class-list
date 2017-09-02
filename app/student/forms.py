@@ -182,3 +182,10 @@ class LoginForm(FlaskForm):
         login_user(student_)
         # successful validation
         return True
+
+
+class ClassForm(FlaskForm):
+    """
+    Form to start a class
+    """
+    courses = SelectField("Course", validators=[DataRequired()])

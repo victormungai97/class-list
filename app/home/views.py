@@ -20,5 +20,4 @@ def get_name():
         user = Lecturer.query.filter_by(id= pid).first().name
     elif table == 'Student':
         user = Student.query.filter_by(id=pid).first().name
-    print(user)
     return jsonify(user)

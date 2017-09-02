@@ -4,7 +4,8 @@
 <nav class="navbar navbar-default">
     <div class="header clearfix">
         <a class="navbar-brand topnav" href={% if is_lecturer %}
-                "{{ url_for('staff.dashboard') }}">{% else %}
+                "{{ url_for('staff.dashboard') }}">{% elif is_student %}
+                "{{ url_for('student.home') }}">{% else %}
                 "{{ url_for('home.index') }}"> {% endif %}
         Class Attendance System</a>
         <ul style="font-size: small" class="nav nav-pills float-right">
@@ -18,7 +19,7 @@
                         {% endif %}
                 {% elif is_student %}
                     <li class="nav-item"><a class="nav-link active" href="{{ url_for('student.home') }}">Dashboard</a> </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_') }}">Attend Class</a> </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_', pid=pid) }}">Attend Class</a> </li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link"><i class="fa fa-user"></i></a></li>
             {% else %}
@@ -42,7 +43,7 @@
                 table: table
             }
             $.getJSON("{{ url_for('home.get_name') }}", send, function (data) {
-                $('.fa-user').html(data).css({"font-size":"85%","font-weight":"bold"});
+                $('.fa-user').html(data).css({"font-size":"95%","font-weight":"bold"});
             });
         }
     })

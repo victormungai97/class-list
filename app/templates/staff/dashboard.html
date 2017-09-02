@@ -27,7 +27,7 @@
                     <ul class="list-inline">
                         <li class="list-inline-item">
                             <h4>
-                                <a href="{{ url_for('staff.register_course', name=current_user.name) }}" style="font-size: medium">
+                                <a href="{{ url_for('staff.register_course', pid=pid) }}" style="font-size: medium">
                                     Register Unit</a>
                             </h4>
                         </li>
@@ -37,7 +37,7 @@
                                 {% if active %}
                                 <a href="{{ url_for('staff.running_class') }}" style="font-size: medium">End Class</a>
                                 {% else %}
-                                <a href="{{ url_for('staff._start_class', name=current_user.name) }}" style="font-size: medium">Start Class</a>
+                                <a href="{{ url_for('staff._start_class', pid=pid) }}" style="font-size: medium">Start Class</a>
                                 {% endif %}
                             </h4>
                         </li>
