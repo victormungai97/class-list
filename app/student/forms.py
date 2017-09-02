@@ -2,6 +2,7 @@
 
 import re
 from flask_wtf import FlaskForm
+from flask_login import login_user
 from wtforms import StringField, SubmitField, SelectField, FileField, Field  # , HiddenField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileRequired, FileAllowed
@@ -154,3 +155,30 @@ class SignInForm(FlaskForm):
     image = ImageField(label="Image", src='#', pid="image",
                        width="10", height='10')
     submit = SubmitField("Sign In")
+
+
+class LoginForm(FlaskForm):
+    """
+    Form for student to login
+    """
+    reg_num = StringField("Registration Number", [DataRequired()])
+    submit = SubmitField("Login")
+
+    def validate(self):
+        # check that all required fields have been filled
+        rv = FlaskForm.validate(self)
+        if not rv:
+            return False
+
+        # check if given student reg no. is already registered
+        student_ = Student.query.filter_by(reg_num=self.reg_num.data).first()
+        if not student_:
+            self.reg_num.errors.append("Unknown Registration Number")
+            return False
+
+        # save lecturer
+        self.student_ = student_
+        # log staff in
+        login_user(student_)
+        # successful validation
+        return True

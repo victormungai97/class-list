@@ -179,6 +179,12 @@ class Student(Base, UserMixin):
         return "<Student {}>".format(self.reg_num)
 
 
+# Set up user_loader
+@login_manager.user_loader
+def load_user(user_id):
+    return Student.query.get(int(user_id))
+
+
 class Photo(Base):
     """
     Class maps to the photos table

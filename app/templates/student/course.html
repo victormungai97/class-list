@@ -17,9 +17,10 @@
 <script>
     $(function() {
 
+    dept = $('#programme');
     // jQuery selection for the 2 select boxes
     var dropdown = {
-        department: $('#programme'),
+        department: dept,
         course: $('#course'),
         year: $('#study_year'),
         sem: $('#semester')
@@ -28,7 +29,7 @@
     // jQuery selection for the text field and dept field
     var text = {
       registration: $('#reg_num'),
-      department: $('#programme')
+      department: dept
     };
 
     // call to update on load

@@ -1,14 +1,15 @@
 # app/student/views.py
 
 import os
-from flask import render_template, request, flash, redirect, url_for, jsonify
+from flask import render_template, request, flash, redirect, url_for, jsonify, session
+from flask_login import login_required, logout_user
 from werkzeug.utils import secure_filename
 
 from .. import registration_folder
 from ..database import db_session
 from ..models import Student, Photo, Course, Programme, StudentCourses
 from ..student import student
-from .forms import RegistrationForm, CourseForm
+from .forms import RegistrationForm, CourseForm, LoginForm
 
 from pictures import allowed_file, register_get_url, compress_image
 from populate import courses
@@ -16,12 +17,46 @@ from populate import courses
 
 # noinspection PyUnresolvedReferences
 @student.route('/')
+@login_required
 def home():
     """
     Function that directs to student homepage
     :return:
     """
     return render_template("student/home.html", title="Students Homepage", home=True, is_student=True)
+
+
+@student.route("/login/", methods=["POST", 'GET'])
+def login():
+    """
+    Handle requests to the /login route
+    Log student in through the login form
+    """
+    form = LoginForm()
+    if form.validate_on_submit():
+        # save current session
+        session['student_id'] = form.student_.id
+        # redirect to dashboard
+        return redirect(url_for('student.home'))
+
+    # load login template
+    # noinspection PyUnresolvedReferences
+    return render_template("student/login.html", form=form, title="Student Login")
+
+
+@student.route('/logout/', methods=["POST", "GET"])
+@login_required
+def logout():
+    """
+    Handle logging out requests
+    :return: redirection to home page
+    """
+    logout_user()
+    if 'student_id' in session:
+        session.pop("student_id")
+
+    # redirect to the home page
+    return redirect(url_for('home.index'))
 
 
 # noinspection PyUnresolvedReferences,PyArgumentList
@@ -33,6 +68,10 @@ def web():
     :return:
     """
     form = RegistrationForm()
+
+    if 'student_id' in session:
+        flash("Logout out first")
+        return redirect(url_for('student.home'))
 
     if form.validate_on_submit():
         reg_num = form.reg_num.data
@@ -48,7 +87,8 @@ def web():
                 if not allowed_file(image.filename):
                     # if not allowed, raise error
                     form.photo.errors.append("Files should only be pictures")
-                    return render_template("student/register.html", form=form, title="Student Registration")
+                    return render_template("student/register.html", form=form, title="Student Registration",
+                                           is_student=True)
                 else:
                     # split reg_num to retrieve year, course and specific number of student
                     details = reg_num.split("/")
@@ -84,19 +124,17 @@ def web():
                 for photo in photos:
                     db_session.add(photo)
                 db_session.commit()
+
+                flash("Successful registration of {}".format(name))
+                return redirect(url_for("student.home"))
             except Exception as err:
                 print(err)
                 db_session.rollback()
-                return render_template("student/register.html", form=form, title="Student Registration")
 
         else:
             form.reg_num.errors.append("Registration number already registered")
-            return render_template("student/register.html", form=form, title="Student Registration")
 
-        flash("Successful registration of {}".format(name))
-        return redirect(url_for("student.home"))
-
-    return render_template("student/register.html", form=form, title="Student Registration")
+    return render_template("student/register.html", form=form, title="Student Registration", is_student=True)
 
 
 def autoincrement():
@@ -111,6 +149,7 @@ def autoincrement():
 
 # noinspection PyUnresolvedReferences
 @student.route('/courses/', methods=['POST', 'GET'])
+@login_required
 def courses_():
     form = CourseForm()
 
@@ -135,15 +174,16 @@ def courses_():
 
 
 @student.route('/_get_department/')
+@login_required
 def _get_departments():
     dept = request.args.get("text", type=str).split('/')[0]
     departments = [(programme.program_id, programme.name)
-                   for programme in Programme.query.filter(Programme.program_id == dept)
-                       .all()]
+                   for programme in Programme.query.filter(Programme.program_id == dept).all()]
     return jsonify(departments)
 
 
 @student.route('/_get_courses/')
+@login_required
 def _get_courses():
     """
     This view will respond to XHR requests for courses
@@ -161,6 +201,7 @@ def _get_courses():
 
 
 @student.route('/sign_in/', methods=['POST', 'GET'])
+@login_required
 def web_():
     """
     Function that enables a student to sign into a respective class

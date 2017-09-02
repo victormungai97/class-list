@@ -9,21 +9,45 @@
         Class Attendance System</a>
         <ul style="font-size: small" class="nav nav-pills float-right">
             {% if current_user.is_authenticated %}
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
-                    {% if active %}
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End Class</a></li>
-                    {% else %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.logout') }}">Logout</a></li>
-                    {% endif %}
-                <li class="nav-item"><a class="nav-link"><i class="fa fa-user"></i> {{ current_user.name }}</a></li>
-            {% elif is_student %}
-                <li class="nav-item"><a class="nav-link active" href="{{ url_for('student.home') }}">Dashboard</a> </li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_') }}">Attend Class</a> </li>
+                {% if is_lecturer %}
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
+                        {% if active %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End Class</a></li>
+                        {% else %}
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.logout') }}">Logout</a></li>
+                        {% endif %}
+                {% elif is_student %}
+                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('student.home') }}">Dashboard</a> </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_') }}">Attend Class</a> </li>
+                {% endif %}
+                <li class="nav-item"><a class="nav-link"><i class="fa fa-user"></i></a></li>
             {% else %}
                 <li class="nav-item"><a class="nav-link active" href="{{ url_for('home.index') }}">Home</a></li>
                 <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.login') }}">Staff</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url_for('student.home') }}">Students</a></li>
+                <li class="nav-item"><a class="nav-link" href="{{ url_for('student.login') }}">Students</a></li>
             {% endif %}
         </ul>
     </div>
 </nav>
+<script>
+    $(function () {
+        // call on load
+        getUserName();
+
+        function getUserName() {
+            table = '';
+            {% if is_lecturer %} table='Lecturer' {% elif is_student %} table='Student' {% endif %}
+            var send = {
+                id: {{ pid }},
+                table: table
+            }
+            $.getJSON("{{ url_for('home.get_name') }}", send, function (data) {
+                data.forEach(function (item) {
+                    $('#fa').append($('<div>', {
+                        text: item[0]
+                    }));
+                });
+            })
+        }
+    })
+</script>
