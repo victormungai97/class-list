@@ -109,7 +109,7 @@ class CourseForm(FlaskForm):
     This form registers the course that a student takes.
     It takes the program, year, semester and code of the course
     """
-    reg_num = StringField("Registration Number", validators=[DataRequired()])
+    reg_num = StringField("Registration Number", validators=[DataRequired()], render_kw={"disabled": True})
     programme = SelectField("Department", validators=[DataRequired()],
                             choices=[(programme.program_id, programme.name) for programme in Programme.query.all()],
                             default="")

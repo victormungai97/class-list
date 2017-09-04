@@ -2,6 +2,8 @@
 
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
+
+from .. import registration_folder, upload_folder
 from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching
 from ..student import student
@@ -85,7 +87,9 @@ def web():
                     return render_template("student/register.html", form=form, title="Student Registration",
                                            is_student=True)
                 else:
-                    pic_url.append(determine_picture(reg_num, list_of_images=images, image=image, counter=counter))
+                    pic_url.append(determine_picture(reg_num, folder=registration_folder,
+                                                     list_of_images=images, image=image, counter=counter)
+                                   )
                 counter += 1
 
         # check if student already registered
@@ -103,9 +107,12 @@ def web():
 @student.route('/courses/', methods=['POST', 'GET'])
 @login_required
 def courses_():
+    """
+    Render form to register a student to a course, then save the IDs of the student and course to StudentCourses table
+    :return: redirection to student homepage if successful, else html for course form
+    """
     form = CourseForm()
     form.reg_num.data = Student.query.filter_by(id=session['student_id']).first().reg_num
-    form.reg_num.render_kw = {"disabled": True}
 
     if form.validate_on_submit():
         student_course = StudentCourses(id=(len(StudentCourses.query.all()) + 1),
@@ -114,7 +121,7 @@ def courses_():
                                         programme=form.programme.data
                                         )
         try:
-            # save lecturer and course ID to LecturerTeaching table
+            # save student and course ID to LecturerTeaching table
             db_session.add(student_course)
             db_session.commit()
             flash("Success")
@@ -155,7 +162,7 @@ def _get_courses():
     return jsonify(course)
 
 
-@student.route('/attend/<pid>', methods=['POST', 'GET'])
+@student.route('/attend/<pid>/', methods=['POST', 'GET'])
 @login_required
 def web_(pid):
     """
@@ -168,18 +175,15 @@ def web_(pid):
     _courses = []
     for course in Course.query.filter(Course.id == StudentCourses.courses_id).filter(
                     StudentCourses.student_id == reg_num).all():
-        _courses.append(course.id)
-    active_classes = []
-    # query running classes among registered courses
-    for course in _courses:
-        for class_ in Course.query.filter(Course.id == course).filter(LecturersTeaching.courses_id == Course.id) \
-                .filter(Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
-            active_classes.append((class_.id, class_.name))
-    print(active_classes)
+        # query running classes among registered courses
+        for crs in Course.query.filter(Course.id == course.id).filter(LecturersTeaching.courses_id == Course.id).filter(
+                        Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
+            _courses.append((crs.id, crs.name))
+    print(_courses)
     # attach running class to form
     form = ClassForm()
     form.courses.choices = [(0, "None")]
-    form.courses.choices.extend(active_classes)
+    form.courses.choices.extend(_courses)
     return render_template("student/class.html", form=form, title="Start Class", is_student=True,
                            pid=session['student_id'])
 
@@ -193,6 +197,10 @@ def attend_class():
     """
     form, message, status = SignInForm(), '', 0
     reg_num, url, verified = Student.query.filter_by(id=session['student_id']).first().reg_num, "", 0
+    # get chosen running class
+    course = request.args.get("course")
+    class_ = Class.query.filter(Class.is_active).filter(LecturersTeaching.courses_id == course) \
+        .filter(Class.lec_course_id == LecturersTeaching.id).first().id
 
     if form.validate_on_submit():
         print(reg_num)
@@ -200,9 +208,9 @@ def attend_class():
         # check if allowed
         if allowed_file(image.filename):
             # if allowed, process image to get url and verification status of image
-            url, verified = determine_picture(reg_num, image)
+            url, verified = determine_picture(reg_num, image, upload_folder)
             # add to db
-            message, status = atten_dance(reg_num, url, verified)
+            message, status = atten_dance(reg_num, url, verified, class_)
 
             if not status:
                 flash(message)
@@ -216,3 +224,9 @@ def attend_class():
 
     return render_template("student/attend.html", form=form, title="Attend Class", is_student=True,
                            pid=session['student_id'])
+
+
+@student.route('/classes/')
+@login_required
+def classes():
+    pass

@@ -28,10 +28,13 @@
         };
 
         function getConfirmation(){
-            var value = confirm("Do you want to attend class " + $("#courses").find("option:selected").text() + "?");
+            var value = confirm("Do you want to attend class " + drop_down.course.find("option:selected").text() + "?");
+            var send = {
+                course: drop_down.course.find("option:selected").val()
+            };
 
             if ( value === true ){
-                $(location).attr("href","{{ url_for('student.attend_class') }}");
+                $.get("{{ url_for('student.attend_class') }}", send);
             }
         }
 

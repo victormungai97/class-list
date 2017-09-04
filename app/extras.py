@@ -1,7 +1,7 @@
 # app/extras.py
 
 from .database import db_session
-from .models import Student, Photo, Attendance, VerificationStatus
+from .models import Student, Photo, Attendance, VerificationStatus, Class, LecturersTeaching, Course, StudentCourses
 from populate import verification
 
 
@@ -47,7 +47,7 @@ def add_student(reg_num, name, year, programme, pic_url):
     return message, status
 
 
-def atten_dance(reg_num, url, verified):
+def atten_dance(reg_num, url, verified, class_):
     """
     Method to save attendance and verification of a student to a class
     :param reg_num: Registration number of student
@@ -64,7 +64,7 @@ def atten_dance(reg_num, url, verified):
                                 error_message=verification[verified]['error_message'])
     attendance = Attendance(id=(len(Attendance.query.all()) + 1),
                             student=reg_num,
-                            class_=2,  # to be adjusted
+                            class_=class_,  # to be adjusted
                             verified=verified,
                             uploaded_photo=url)
     try:
