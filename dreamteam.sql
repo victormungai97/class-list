@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 02, 2017 at 03:01 AM
+-- Generation Time: Sep 03, 2017 at 10:21 AM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
 -- File name: dreamteam.sql
@@ -78,7 +78,7 @@ CREATE TABLE `classes` (
 CREATE TABLE `courses` (
   `id` int(11) NOT NULL,
   `programme_id` varchar(8) NOT NULL,
-  `name` varchar(45) NOT NULL
+  `name` varchar(80) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -110,8 +110,8 @@ INSERT INTO `courses` (`id`, `programme_id`, `name`) VALUES
 (242, 'F17', 'Engineering Drawing B'),
 (251, 'F17', 'Thermodynamics For Electrical Engineers'),
 (252, 'F17', 'Fluid Mechanics For Electrical Engineers'),
-(261, 'F17', 'Mechanics Of Machines And Strengths Of Materi'),
-(262, 'F17', 'Mechanics Of Machines And Strenghts Of Materi'),
+(261, 'F17', 'Mechanics Of Machines And Strengths Of Materials A'),
+(262, 'F17', 'Mechanics Of Machines And Strengths Of Materials B'),
 (271, 'F17', 'Mathematics II A'),
 (272, 'F17', 'Mathematics II B'),
 (281, 'F17', 'Laboratory II A'),
@@ -201,7 +201,7 @@ CREATE TABLE `lecturers` (
   `name` varchar(45) NOT NULL,
   `email` varchar(120) NOT NULL,
   `rank` varchar(25) DEFAULT NULL,
-  `programme` varchar(60) DEFAULT NULL,
+  `programme` varchar(80) DEFAULT NULL,
   `password_hash` varchar(128) DEFAULT NULL,
   `is_lecturer` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -241,7 +241,7 @@ CREATE TABLE `photos` (
 CREATE TABLE `programmes` (
   `id` int(11) NOT NULL,
   `program_id` varchar(8) NOT NULL,
-  `name` varchar(60) NOT NULL
+  `name` varchar(80) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -262,7 +262,7 @@ CREATE TABLE `students` (
   `reg_num` varchar(45) DEFAULT NULL,
   `name` varchar(60) NOT NULL,
   `year_of_study` int(11) NOT NULL,
-  `programme` varchar(60) NOT NULL,
+  `programme` varchar(80) NOT NULL,
   `class_rep` tinyint(1) NOT NULL,
   `is_student` tinyint(1) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -423,7 +423,7 @@ ALTER TABLE `lecturers`
 -- AUTO_INCREMENT for table `photos`
 --
 ALTER TABLE `photos`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `programmes`
 --
@@ -433,7 +433,7 @@ ALTER TABLE `programmes`
 -- AUTO_INCREMENT for table `students`
 --
 ALTER TABLE `students`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `verification_statuses`
 --

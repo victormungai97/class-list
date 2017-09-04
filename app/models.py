@@ -47,7 +47,7 @@ class Programme(Base):
 
     id = Column("id", Integer, primary_key=True)
     program_id = Column("program_id", String(8), unique=True, nullable=False)
-    name = Column("name", String(60), nullable=False, unique=True)
+    name = Column("name", String(80), nullable=False, unique=True)
     student = relationship('Student', primaryjoin="Student.programme == Programme.name", backref='student')
     course = relationship('Course', primaryjoin='Course.programme_id == Programme.program_id', backref='course')
     lecturer = relationship('Lecturer', primaryjoin='Lecturer.programme == Programme.name', backref='lecturer')
@@ -72,7 +72,7 @@ class Course(Base):
 
     id = Column('id', Integer, primary_key=True)
     programme_id = Column("programme_id", String(8), ForeignKey('programmes.program_id'), nullable=False, index=True)
-    name = Column('name', String(45), nullable=False, unique=True)
+    name = Column('name', String(80), nullable=False, unique=True)
     lecturers_teaching = relationship('LecturersTeaching',
                                       primaryjoin='LecturersTeaching.courses_id == Course.id',
                                       backref='courses')
@@ -113,7 +113,7 @@ class Lecturer(UserMixin, Base):
     email = Column('email', String(120), unique=True, nullable=False)
     rank = Column('rank', String(25), nullable=True)
     programme = Column('programme',
-                       String(60),
+                       String(80),
                        ForeignKey("programmes.name", onupdate='CASCADE', ondelete='CASCADE'),
                        )
     is_lecturer = Column("is_lecturer", Boolean)
@@ -164,7 +164,7 @@ class Student(Base, UserMixin):
     reg_num = Column("reg_num", String(45), unique=True, index=True)
     name = Column("name", String(60), nullable=False, index=True)
     year_of_study = Column("year_of_study", Integer, nullable=False, index=True)
-    programme = Column("programme", String(60), ForeignKey('programmes.name'), nullable=False)
+    programme = Column("programme", String(80), ForeignKey('programmes.name'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)
     is_student = Column("is_student", Boolean)
     attendance = relationship('Attendance',

@@ -12,7 +12,10 @@
                 to fix the error.  </h3>
             <hr class="intro-divider">
             <!--suppress HtmlUnknownTarget -->
-            <a href="{{ url_for('home.index') }}" class="btn btn-default btn-lg">
+            <a class="btn btn-default btn-lg" href={% if is_lecturer %}"{{ url_for('staff.dashboard') }}"
+                    {% elif is_student %}"{{ url_for('student.home') }}"
+                    {% else %}"{{ url_for('home.index') }}"
+                    {% endif %} >
                 <i class="fa fa-home"></i>
                 Home
             </a>

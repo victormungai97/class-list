@@ -14,8 +14,6 @@ class Config(object):
 
 class DevelopmentConfig(Config):
     """Development configurations"""
-
-    TESTING = True
     DEBUG = True  # activates debug mode on app
     SQLALCHEMY_ECHO = True  # allows SQLAlchemy to log errors
     SQLALCHEMY_TRACK_MODIFICATIONS = True  # allows SQLAlchemy to track changes while running
@@ -28,6 +26,6 @@ class ProductionConfig(Config):
 
 
 app_config = {
-    'development': DevelopmentConfig,
-    'production': ProductionConfig
+    'development': 'DevelopmentConfig',
+    'production': 'ProductionConfig'
 }

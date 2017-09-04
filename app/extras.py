@@ -1,170 +1,82 @@
 # app/extras.py
 
-from sqlalchemy.orm import mapper
-from sqlalchemy import *
-from sqlalchemy.sql import table, text
-from sqlalchemy.schema import DDLElement
-from sqlalchemy.ext import compiler
-import datetime
-
-from app.database import db_session
-from app.models import Base
-
-######
-# Views
-######
-
-class_details = Table(
-    'classdetails', Base.metadata,
-    Column('ClassId', Integer, primary_key=True),
-    Column('Start', DateTime),
-    Column('End', DateTime),
-    Column('ArchiveState', Boolean, server_default=FetchedValue()),
-    Column('LecCoursePairId', Integer),
-    Column('LecId', Integer),
-    Column('LecName', String(60)),
-    Column('CourseId', Integer, ForeignKey('courses.name', ondelete='CASCADE', onupdate='CASCADE')),
-    Column('CourseName', String(60), ForeignKey('courses.name', ondelete='CASCADE', onupdate='CASCADE')),
-    autoload=True,
-    autoload_with=engine,
-)
+from .database import db_session
+from .models import Student, Photo, Attendance, VerificationStatus
+from populate import verification
 
 
-class ClassDetails(object):
-    query = db_session.query_property()
-
-    def __init__(self, start=datetime.datetime.now, end=None, archivedState=False, lecCoursePairId=0, lecId=0,
-                 lecName='',
-                 courseId=0, courseName=''):
-        self.Start = start
-        self.End = end
-        self.ArchivedState = archivedState
-        self.LecCoursePairId = lecCoursePairId
-        self.LecId = lecId
-        self.LecName = lecName
-        self.CourseId = courseId
-        self.CourseName = courseName
-
-
-active_classes = Table(
-    'activeclasses', Base.metadata,
-    Column('ClassId', Integer, primary_key=True),
-    Column('DateAndTime', DateTime),
-    Column('Duration', Float, server_default=FetchedValue()),
-    Column('ArchiveState', Boolean, server_default=FetchedValue()),
-    Column('LecCoursePairId', Integer),
-    Column('LecId', Integer),
-    Column('LecName', String(60)),
-    Column('CourseId', Integer, ForeignKey('courses.name', ondelete='CASCADE', onupdate='CASCADE')),
-    Column('CourseName', String(60), ForeignKey('courses.name', ondelete='CASCADE', onupdate='CASCADE')),
-    autoload=True,
-    autoload_with=engine,
-)
-
-
-class ActiveClasses(object):
-    query = db_session.query_property()
-
-    def __init__(self, DateAndTime=datetime.datetime, Duration=0, ArchiveState=False, LecCoursePairId=0, LecId=0,
-                 LecName='',
-                 CourseId=0, CourseName=''):
-        self.DateAndTime = DateAndTime
-        self.Duration = Duration
-        self.ArchiveState = ArchiveState
-        self.LecCoursePairId = LecCoursePairId
-        self.LecId = LecId
-        self.LecName = LecName
-        self.CourseId = CourseId
-        self.CourseName = CourseName
-
-
-mapper(ClassDetails, class_details)
-mapper(ActiveClasses, active_classes)
-
-metadata = MetaData(bind=engine)
-
-
-class CreateView(DDLElement):
+# noinspection PyArgumentList
+def add_student(reg_num, name, year, programme, pic_url):
     """
-    Class takes the name of the view to create
-    and the fields to be selected from
+    Function to add student and registration photos to db
+    :param reg_num: Registration number of student
+    :param name: Name of student
+    :param year: Year of study of student
+    :param programme: Programme student is undertaking e.g. Architecture
+    :param pic_url: List of images student has uploaded
+    :return: Error status - if any - and the associated message
     """
+    photos, message, status = [], '', 0
+    if not Student.query.filter(Student.reg_num == reg_num).first():
+        # if student not registered, them register
+        student_ = Student(reg_num=reg_num,
+                           name=name,
+                           year_of_study=year,
+                           programme=programme,
+                           class_rep=False,
+                           is_student=True)
+        for pic in pic_url:
+            photos.append(Photo(student_id=reg_num,
+                                address=pic,
+                                learning=True)
+                          )
+        try:
+            db_session.add(student_)
+            for photo in photos:
+                db_session.add(photo)
+            db_session.commit()
 
-    def __init__(self, name, selectable, or_replace=False):
-        self.name = name
-        self.selectable = selectable
-        self.or_replace = or_replace
+            message = "Successful registration of {}".format(name)
+        except Exception as err:
+            status, message = 1, "Error during registration"
+            print(err)
+            db_session.rollback()
+
+    else:
+        status, message = 2, "Registration number already registered"
+    return message, status
 
 
-class DropView(DDLElement):
+def atten_dance(reg_num, url, verified):
     """
-    Class takes the name of th view to be deleted
+    Method to save attendance and verification of a student to a class
+    :param reg_num: Registration number of student
+    :param url: URL of uploaded picture
+    :param verified: Verification code/status of student's picture
+    :return: Error status - if any - and the associated message
     """
+    message, status = '', 0
 
-    def __init__(self, name, if_exists=False, cascade=False):
-        self.name = name
-        self.if_exists = if_exists
-        self.cascade = cascade
+    photo = Photo(student_id=reg_num,
+                  address=url,
+                  learning=False)
+    verify = VerificationStatus(description=verification[verified]['description'],
+                                error_message=verification[verified]['error_message'])
+    attendance = Attendance(id=(len(Attendance.query.all()) + 1),
+                            student=reg_num,
+                            class_=2,  # to be adjusted
+                            verified=verified,
+                            uploaded_photo=url)
+    try:
+        db_session.add(photo)
+        db_session.add(verify)
+        db_session.add(attendance)
+        db_session.commit()
 
+        message = "Success"
+    except Exception as err:
+        message, status = "Something went wrong in attendance. Please try again", 1
+        print(err)
+        db_session.rollback()
 
-@compiler.compiles(CreateView)
-def create_view_compiler(element, compiled):
-    query = "CREATE "
-    if element.or_replace:
-        query += "OR REPLACE "
-    query += "VIEW {} AS {}".format(element.name, compiled.sql_compiler.process(
-        element.selectable
-    ))
-    return query
-
-
-@compiler.compiles(DropView)
-def drop_view_compiler(element):
-    query = "DROP VIEW "
-    if element.if_exists:
-        query += "IF EXISTS "
-    query += "{}".format(element.name)
-
-
-def view(view_name, metadatas, selectable):
-    """
-    Method to interface with creation and dropping of view
-    :param view_name: Name of view
-    :param metadatas: Metadata of the database
-    :param selectable: Fields to be selected from
-    :return:
-    """
-    view_table = table(view_name)
-
-    for c in selectable.c:
-        # noinspection PyProtectedMember
-        c._make_proxy(view_table)
-
-    # create view after creating source table(s)
-    CreateView(view_name, selectable, True).execute_at(event_name="after-create", target=metadatas)
-    # delete view before deleting source table(s)
-    DropView(view_name, if_exists=True, cascade=True).execute_at("before-drop", metadatas)
-    return view_table
-
-
-def create_view(view_name='', definition=''):
-    """
-    Method creates or replaces view using given commands
-    :param view_name: Name of the view to be created
-    :param definition: Commands to follow to create view
-    :return:
-    """
-    _view = Table(view_name, MetaData(engine))
-    definition = text(definition)
-    CreateView(_view, definition, or_replace=True).compile()
-
-
-def drop_view(view_name=''):
-    """
-    Method that deletes an existing view
-    :param view_name: Name of view
-    :return:
-    """
-    _view = Table(view_name, metadata)
-    DropView(_view, if_exists=True, cascade=True).compile()
-
+    return message, status

@@ -144,16 +144,16 @@ class CourseForm(FlaskForm):
 
 class SignInForm(FlaskForm):
     """
-    Form that takes a student's registration number
+    Form to sign in a class
     """
-    reg_num = StringField("Registration Number", validators=[DataRequired()])
-    photo = FileField("Pictures",
+    # reg_num = StringField("Registration Number", validators=[DataRequired()],render_kw={"disabled":True})
+    photo = FileField("Picture",
                       validators=[FileRequired(),
                                   FileAllowed(ALLOWED_EXTENSIONS, "Images Only!")
                                   ],
                       )
-    image = ImageField(label="Image", src='#', pid="image",
-                       width="10", height='10')
+    image = ImageField(label="Image", src='#', pid="image", class_="img-circle",
+                       width="100", height='100')
     submit = SubmitField("Sign In")
 
 
@@ -163,6 +163,7 @@ class LoginForm(FlaskForm):
     """
     reg_num = StringField("Registration Number", [DataRequired()])
     submit = SubmitField("Login")
+    student_ = ''
 
     def validate(self):
         # check that all required fields have been filled

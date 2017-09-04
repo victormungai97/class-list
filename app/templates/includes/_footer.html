@@ -8,24 +8,24 @@
                     <ul class="list-inline">
                         {% if current_user.is_authenticated %}
                             {% if is_lecturer %}
-                                <li class="list-inline-item"><a href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
+                                <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
                                 <li class="footer-menu-divider list-inline-item">⋅</li>
                                     {% if active %}
-                                        <li><a href="{{ url_for('staff.running_class') }}">End Class</a></li>
+                                        <li><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('staff.running_class') }}">End Class</a></li>
                                     {% else %}
-                                        <li><a href="{{ url_for('staff.logout') }}">Logout</a></li>
+                                        <li><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('staff.logout') }}">Logout</a></li>
                                     {% endif %}
                             {% elif is_student %}
-                                <li class="list-inline-item"><a href="{{ url_for('student.home') }}">Dashboard</a> </li>
+                                <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('student.home') }}">Dashboard</a> </li>
                                 <li class="footer-menu-divider list-inline-item">⋅</li>
-                                <li class="list-inline-item"><a href="{{ url_for('student.logout') }}">Logout</a> </li>
+                                <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('student.logout') }}">Logout</a> </li>
                             {% endif %}
                         {% else %}
-                            <li class="list-inline-item"><a href="{{ url_for('home.index') }}">Home</a></li>
+                            <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('home.index') }}">Home</a></li>
                             <li class="footer-menu-divider list-inline-item">⋅</li>
-                            <li class="list-inline-item"><a href="{{ url_for('staff.login') }}">Staff</a></li>
+                            <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('staff.login') }}">Staff</a></li>
                             <li class="footer-menu-divider list-inline-item">⋅</li>
-                            <li class="list-inline-item"><a href="{{ url_for('student.login') }}">Students</a></li>
+                            <li class="list-inline-item"><a {% if not home %} class="nav-link" {% endif %} href="{{ url_for('student.login') }}">Students</a></li>
                         {% endif %}
                     </ul>
                     <p class="copyright text-muted small">&copy; Class Attendance System, 2017</p>

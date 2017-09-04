@@ -21,7 +21,7 @@ def upgrade():
     op.create_table('programmes',
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('program_id', sa.String(length=8), nullable=False),
-                    sa.Column('name', sa.String(length=60), nullable=False),
+                    sa.Column('name', sa.String(length=80), nullable=False),
                     sa.PrimaryKeyConstraint('id'),
                     sa.UniqueConstraint('name'),
                     sa.UniqueConstraint('program_id')
@@ -35,7 +35,7 @@ def upgrade():
     op.create_table('courses',
                     sa.Column('id', sa.Integer(), nullable=False),
                     sa.Column('programme_id', sa.String(length=8), nullable=False),
-                    sa.Column('name', sa.String(length=45), nullable=False),
+                    sa.Column('name', sa.String(length=80), nullable=False),
                     sa.ForeignKeyConstraint(['programme_id'], ['programmes.program_id'], ),
                     sa.PrimaryKeyConstraint('id'),
                     sa.UniqueConstraint('name')
@@ -47,7 +47,7 @@ def upgrade():
                     sa.Column('name', sa.String(length=45), nullable=False),
                     sa.Column('email', sa.String(length=120), nullable=False),
                     sa.Column('rank', sa.String(length=25), nullable=True),
-                    sa.Column('programme', sa.String(length=60), nullable=True),
+                    sa.Column('programme', sa.String(length=80), nullable=True),
                     sa.Column('password_hash', sa.String(length=128), nullable=True),
                     sa.ForeignKeyConstraint(['programme'], ['programmes.name'], onupdate='CASCADE', ondelete='CASCADE'),
                     sa.PrimaryKeyConstraint('id'),
@@ -59,7 +59,7 @@ def upgrade():
                     sa.Column('reg_num', sa.String(length=45), nullable=True),
                     sa.Column('name', sa.String(length=60), nullable=False),
                     sa.Column('year_of_study', sa.Integer(), nullable=False),
-                    sa.Column('programme', sa.String(length=8), nullable=False),
+                    sa.Column('programme', sa.String(length=80), nullable=False),
                     sa.Column('class_rep', sa.Boolean(), nullable=False),
                     sa.ForeignKeyConstraint(['programme'], ['programmes.name'], ),
                     sa.PrimaryKeyConstraint('id')

@@ -1,7 +1,7 @@
 # app/__init__.py
 
 import os
-from flask import Flask, render_template, abort
+from flask import Flask, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
@@ -27,7 +27,7 @@ def create_app(config_name):
     """
     if config_name not in app_config.keys():
         config_name = 'development'
-    app.config.from_object(app_config[config_name])
+    app.config.from_object(".".join(["config", app_config[config_name]]))
     # use if you have instance/config.py with your SECRET_KEY and SQLALCHEMY_DATABASE_URI
     app.config.from_pyfile('config.py')
     # db.init_app(app)
@@ -72,10 +72,6 @@ def create_app(config_name):
     def temporarily_unavailable(error):
         return render_template('errors/503.html', title="Temporarily Unavailable", wrapper="Temporarily Unavailable",
                                error=True), 503
-
-    @app.route('/500/')
-    def error():
-        abort(500)
 
     return app
 

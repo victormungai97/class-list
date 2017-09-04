@@ -120,7 +120,7 @@ def register_course(pid):
     form.staff_id = Lecturer.query.filter_by(id=pid).first().id
 
     if form.validate_on_submit():
-        lecturer_course = LecturersTeaching(id=autoincrement(),
+        lecturer_course = LecturersTeaching(id=(len(LecturersTeaching.query.all()) + 1),
                                             lecturers_id=form.staff_id,
                                             courses_id=form.course.data,
                                             programme=form.programme.data

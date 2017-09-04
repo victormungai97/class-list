@@ -1,17 +1,14 @@
 # app/student/views.py
 
-import os
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
-from werkzeug.utils import secure_filename
-
-from .. import registration_folder
 from ..database import db_session
-from ..models import Student, Photo, Course, Programme, StudentCourses, Class, LecturersTeaching
+from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching
 from ..student import student
-from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm
+from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
+from ..extras import add_student, atten_dance
 
-from pictures import allowed_file, register_get_url, compress_image
+from pictures import allowed_file, determine_picture
 from populate import courses
 
 
@@ -67,21 +64,17 @@ def web():
     """
     Function to render form to student on the website
     and subsequently register student
-    :return:
+    :return: Student login page if successful, else registration page
     """
-    form = RegistrationForm()
+    form, message, status = RegistrationForm(), '', 0
 
     if 'student_id' in session:
         flash("Logout out first")
         return redirect(url_for('student.home'))
 
     if form.validate_on_submit():
-        reg_num = form.reg_num.data
-        name = form.first_name.data + " " + form.last_name.data
-        images = request.files.getlist("photo")
-        counter = 1
-        pic_url = []
-        photos = []
+        reg_num, name = form.reg_num.data, form.first_name.data + " " + form.last_name.data
+        images, counter, pic_url = request.files.getlist("photo"), 1, []
         if images:
             # if len(images) < 10: form.photo.errors.append("Please upload at least 10 images of yourself")
             for image in images:
@@ -92,61 +85,18 @@ def web():
                     return render_template("student/register.html", form=form, title="Student Registration",
                                            is_student=True)
                 else:
-                    # split reg_num to retrieve year, course and specific number of student
-                    details = reg_num.split("/")
-                    # create new path to folder for student's image(s)
-                    path = '/'.join([registration_folder, details[0], details[2], details[1], '/'])
-                    # create the new folder
-                    if not os.path.isdir(path):
-                        os.makedirs(path)
-                    # get name of the source file + Make the filename safe, remove unsupported chars
-                    filename = str(secure_filename(image.filename))
-                    image.save(os.path.join(path, filename))
-                    # compress image
-                    compress_image(os.path.join(path, image.filename))
-                    pic_url.append(register_get_url(filename, path, counter, regno=details[1], list_of_images=images))
+                    pic_url.append(determine_picture(reg_num, list_of_images=images, image=image, counter=counter))
                 counter += 1
 
         # check if student already registered
-        if not Student.query.filter(Student.reg_num == form.reg_num.data).first():
-            # if student not registered, them register
-            student_ = Student(reg_num=reg_num,
-                               name=name,
-                               year_of_study=form.year_of_study.data,
-                               programme=courses.get(form.programme.data),
-                               class_rep=False,
-                               is_student=True)
-            for pic in pic_url:
-                photos.append(Photo(student_id=form.reg_num.data,
-                                    address=pic,
-                                    learning=True)
-                              )
-            try:
-                db_session.add(student_)
-                for photo in photos:
-                    db_session.add(photo)
-                db_session.commit()
-
-                flash("Successful registration of {}".format(name))
-                return redirect(url_for("student.login"))
-            except Exception as err:
-                print(err)
-                db_session.rollback()
-
+        message, status = add_student(form.reg_num.data, name, form.year_of_study.data,
+                                      courses.get(form.programme.data), pic_url)
+        if not status:
+            flash(message)
+            return redirect(url_for('student.login'))
         else:
-            form.reg_num.errors.append("Registration number already registered")
-
-    return render_template("student/register.html", form=form, title="Student Registration", is_student=True)
-
-
-def autoincrement():
-    """
-    Function will autoincrement id in StudentCourses table
-    by querying entire table
-    and adding one to the len of returned list
-    :return: New ID number
-    """
-    return len(StudentCourses.query.all()) + 1
+            form.reg_num.errors.append(message)
+    return render_template("student/register.html", form=form, title="Student Registration")
 
 
 # noinspection PyUnresolvedReferences
@@ -154,9 +104,11 @@ def autoincrement():
 @login_required
 def courses_():
     form = CourseForm()
+    form.reg_num.data = Student.query.filter_by(id=session['student_id']).first().reg_num
+    form.reg_num.render_kw = {"disabled": True}
 
     if form.validate_on_submit():
-        student_course = StudentCourses(id=autoincrement(),
+        student_course = StudentCourses(id=(len(StudentCourses.query.all()) + 1),
                                         student_id=form.reg_num.data,
                                         courses_id=form.course.data,
                                         programme=form.programme.data
@@ -203,7 +155,7 @@ def _get_courses():
     return jsonify(course)
 
 
-@student.route('/sign_in/<pid>', methods=['POST', 'GET'])
+@student.route('/attend/<pid>', methods=['POST', 'GET'])
 @login_required
 def web_(pid):
     """
@@ -228,12 +180,39 @@ def web_(pid):
     form = ClassForm()
     form.courses.choices = [(0, "None")]
     form.courses.choices.extend(active_classes)
-    return render_template("student/class.html", form=form, title="Start Class", is_lecturer=True,
+    return render_template("student/class.html", form=form, title="Start Class", is_student=True,
                            pid=session['student_id'])
 
 
-@student.route('/attend_class/')
+@student.route('/sign_in/', methods=['POST', 'GET'])
 @login_required
 def attend_class():
-    flash("Attended")
-    return redirect(url_for('student.home'))
+    """
+    Function to render form for class attendance
+    :return: redirection to student homepage, else attendance template
+    """
+    form, message, status = SignInForm(), '', 0
+    reg_num, url, verified = Student.query.filter_by(id=session['student_id']).first().reg_num, "", 0
+
+    if form.validate_on_submit():
+        print(reg_num)
+        image = request.files['photo']
+        # check if allowed
+        if allowed_file(image.filename):
+            # if allowed, process image to get url and verification status of image
+            url, verified = determine_picture(reg_num, image)
+            # add to db
+            message, status = atten_dance(reg_num, url, verified)
+
+            if not status:
+                flash(message)
+                return redirect(url_for('student.home'))
+            else:
+                form.photo.errors.append(message)
+
+        if not allowed_file(image.filename):
+            # if not allowed, raise error
+            form.photo.errors.append("Files should only be pictures")
+
+    return render_template("student/attend.html", form=form, title="Attend Class", is_student=True,
+                           pid=session['student_id'])

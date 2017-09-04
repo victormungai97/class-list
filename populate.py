@@ -31,7 +31,7 @@ cous = [
     Course(232, "F17", 'Computer Science IV'),
     Course(242, "F17", 'Engineering Drawing B'),
     Course(252, "F17", 'Fluid Mechanics For Electrical Engineers'),
-    Course(262, "F17", 'Mechanics Of Machines And Strenghts Of Materials B'),
+    Course(262, "F17", 'Mechanics Of Machines And Strengths Of Materials B'),
     Course(272, "F17", 'Mathematics II B'),
     Course(282, "F17", 'Laboratory II B'),
     Course(301, "F17", 'Analogue Electronic A'),
@@ -129,6 +129,13 @@ year_of_study = {
     5: 'V',
     6: 'VI',
 }
+
+verification = {1: {"description": "Verified", "error_message": "Successful recognition"},
+                2: {"description": "Missing Face", "error_message": "No face detected"},
+                3: {"description": "Multiple Faces", "error_message": "Multiple faces detected"},
+                4: {"description": "Unidentified Face", "error_message": "Unidentified face detected"},
+                5: {"description": "Other", "error_message": "Other error detected"},
+                }
 
 
 def dict_to_tuple(courses_dict):

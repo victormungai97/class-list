@@ -10,12 +10,16 @@ body, h1, h2, h3 {
     font-weight: 700;
 }
 
-a, .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
-  color: #aec251;
+a {
+    color: #E0FFFF;
+}
+
+.nav-link, .btn-default, .navbar-default .navbar-brand, .navbar-default .navbar-nav>li>a {
+  color: #004D40;
 }
 
 a:hover, .navbar-default .navbar-brand:hover, .navbar-default .navbar-nav>li>a:hover {
-  color: #687430;
+  color: #000000;
 }
 
 footer {
@@ -36,17 +40,6 @@ p.copyright {
     color: #687430;
     background-color: #e6ecca;
     border-color: #aec251;
-}
-
-.btn-default {
-    border-color: #aec251;
-    background-color: transparent;
-    color: #aec251;
-}
-
-.btn-default:hover {
-    background-color: #aec251;
-    color: #1d1e1f;
 }
 
 /* Set font size of navbar-brand */
@@ -81,7 +74,7 @@ p.copyright {
     padding-bottom: 50px;
     text-align: center;
     color: #f8f8f8;
-    background: url(../img/images.jpg) no-repeat center center;
+    background: url(../img/uon-logo.jpg) no-repeat center center;
     background-size: cover;
     height: 100%;
 }
