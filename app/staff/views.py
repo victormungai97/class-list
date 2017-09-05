@@ -9,6 +9,7 @@ from . import staff
 from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm
 from ..database import db_session
 from ..models import Lecturer, Course, LecturersTeaching, Class, User
+from ..extras import return_403
 
 
 @staff.route('/register/', methods=['GET', 'POST'])
@@ -17,6 +18,11 @@ def register():
         Handle requests to the /register route
         Add a staff member to the database through the registration form
         """
+    if 'lecturer_id' in session:
+        flash("Logout out first")
+        return redirect(url_for('staff.dashboard'))
+    return_403('student_id')
+
     form = RegistrationForm()
 
     # if successful validation
@@ -51,6 +57,10 @@ def login():
         Handle requests to the /login route
         Log staff in through the login form
         """
+    if 'lecturer_id' in session:
+        return redirect(url_for('staff.dashboard'))
+    return_403('student_id')
+
     form = LoginForm()
     if form.validate_on_submit():
         # save current session
@@ -70,6 +80,7 @@ def logout():
     Handle requests to the /logout route
     Log a staff member out through the logout link
     """
+    return_403('student_id')
     if 'active' in session and session['active']:
         flash("You cannot log out while a class is running")
         return redirect(url_for('staff.dashboard'))
@@ -86,6 +97,7 @@ def logout():
 @staff.route('/dashboard/')
 @login_required
 def dashboard():
+    return_403('student_id')
     active = False
     if 'active' in session:
         active = session['active']
@@ -114,6 +126,7 @@ def register_course(pid):
     :param pid: ID of the lecturer
     :return: Dashboard if successful or template of registration form if otherwise
     """
+    return_403('student_id')
     active = False
     if 'active' in session:
         active = session['active']
@@ -168,6 +181,7 @@ def _start_class():
     from a list of courses (s)he has registered to
     :return: HTML template of the class form
     """
+    return_403('student_id')
     if 'active' in session and session['active']:
         flash("You cannot start a class while a class is running")
         return redirect(url_for('staff.dashboard'))
@@ -195,6 +209,7 @@ def _show_clock():
     We save the start time and the title of the class to the session for use in later functions
     :return:
     """
+    return_403('student_id')
     active = False
     if 'active' in session:
         active = session['active']
@@ -234,6 +249,7 @@ def _show_clock():
 @staff.route('/running_class/')
 @login_required
 def running_class():
+    return_403('student_id')
     active = False
     if 'active' in session:
         active = session['active']
@@ -251,6 +267,7 @@ def _end_class():
     and update its running status
     :return: redirection to the staff dashboard if successful
     """
+    return_403('student_id')
     if 'start' in session:
         # search for current class and update duration and active state
         class_ = Class.query.filter((Class.id == session['id'])).first()

@@ -1,5 +1,6 @@
 # app/extras.py
 
+from flask import session, abort
 from .database import db_session
 from .models import Student, Photo, Attendance, VerificationStatus, User
 from populate import verification
@@ -82,3 +83,14 @@ def attendance(reg_num, url, verified, class_):
         db_session.rollback()
 
     return message, status
+
+
+def return_403(key):
+    """
+    Function to raise 403 Forbidden error if key in session.
+    Prevents access to unauthorised pages
+    :param key: Key to be checked in session dict
+    :return: Error if key in session
+    """
+    if key in session:
+        abort(403)

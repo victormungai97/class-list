@@ -8,7 +8,7 @@ from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
-from ..extras import add_student, attendance
+from ..extras import add_student, attendance, return_403
 
 from pictures import allowed_file, determine_picture
 from populate import courses
@@ -23,6 +23,7 @@ def home():
     Function that directs to student homepage
     :return: HTML template to student homepage
     """
+    return_403('lecturer_id')
     return render_template("student/home.html", title="Students Homepage", home=True, is_student=True,
                            pid=session['student_id'])
 
@@ -33,6 +34,10 @@ def login():
     Handle requests to the /login route
     Log student in through the login form
     """
+    if 'student_id' in session:
+        return redirect(url_for('student.home'))
+    return_403('lecturer_id')
+
     form = LoginForm()
     if form.validate_on_submit():
         # save current session
@@ -52,6 +57,7 @@ def logout():
     Handle logging out requests
     :return: redirection to home page
     """
+    return_403('lecturer_id')
     logout_user()
     if 'student_id' in session:
         session.pop("student_id")
@@ -73,6 +79,8 @@ def web():
     if 'student_id' in session:
         flash("Logout out first")
         return redirect(url_for('student.home'))
+
+    return_403('lecturer_id')
 
     if form.validate_on_submit():
         reg_num, name = form.reg_num.data, form.first_name.data + " " + form.last_name.data
@@ -111,6 +119,7 @@ def courses_():
     Render form to register a student to a course, then save the IDs of the student and course to StudentCourses table
     :return: redirection to student homepage if successful, else html for course form
     """
+    return_403('lecturer_id')
     form = CourseForm()
     form.reg_num.data = Student.query.filter_by(id=session['student_id']).first().reg_num
 
@@ -169,6 +178,7 @@ def web_(pid):
     Function that enables a student to sign into a respective class
     :return:
     """
+    return_403('lecturer_id')
     # retrieve student's reg number
     reg_num = Student.query.filter(Student.id == pid).first().reg_num
     # query courses student is registered to
@@ -194,6 +204,7 @@ def attend_class():
     Function to render form for class attendance
     :return: redirection to student homepage, else attendance template
     """
+    return_403('lecturer_id')
     form, message, status = SignInForm(), '', 0
     reg_num, url, verified = Student.query.filter_by(id=session['student_id']).first().reg_num, "", 0
     # get chosen running class
@@ -232,4 +243,5 @@ def attend_class():
 @student.route('/classes/')
 @login_required
 def classes():
+    return_403('lecturer_id')
     pass

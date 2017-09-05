@@ -1,6 +1,6 @@
 # app/home/views.py
 
-from flask import render_template, request, jsonify
+from flask import render_template, request, jsonify, session, redirect, url_for
 
 from . import home
 from app.models import Lecturer, Student
@@ -8,6 +8,10 @@ from app.models import Lecturer, Student
 
 @home.route('/')
 def index():
+    if 'student_id' in session:
+        return redirect(url_for('student.home'))
+    if 'lecturer_id' in session:
+        return redirect(url_for('staff.dashboard'))
     return render_template("home/home.html", title="Home", home=True)
 
 

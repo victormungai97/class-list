@@ -126,3 +126,18 @@ p.copyright {
     margin-left: auto;
     margin-right: auto;
 }
+
+/* Courtesy of formvalidation.io */
+
+/* Color of invalid field */
+.has-error .help-block,
+.has-error .form-control-feedback {
+    color: red;
+}
+
+/* Color of valid field */
+.has-success .control-label,
+.has-success .help-block,
+.has-success .form-control-feedback {
+    color: #18bc9c;
+}
