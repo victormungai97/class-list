@@ -95,7 +95,6 @@ def class_get_url(filename="", path="", regno=""):
             for file in files:
                 if os.path.basename(file).startswith(str(regno)):
                     common_files.append(file)
-            print(common_files)
             file_ = common_files[-1]
             start, end = tuple(file_.split('_'))
             file_ = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
