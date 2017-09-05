@@ -1,7 +1,7 @@
 # app/extras.py
 
 from .database import db_session
-from .models import Student, Photo, Attendance, VerificationStatus, Class, LecturersTeaching, Course, StudentCourses
+from .models import Student, Photo, Attendance, VerificationStatus, User
 from populate import verification
 
 
@@ -24,6 +24,7 @@ def add_student(reg_num, name, year, programme, pic_url):
                            year_of_study=year,
                            programme=programme,
                            class_rep=False,
+                           user=len(User.query.all()) + 1,
                            is_student=True)
         for pic in pic_url:
             photos.append(Photo(student_id=reg_num,
@@ -47,9 +48,10 @@ def add_student(reg_num, name, year, programme, pic_url):
     return message, status
 
 
-def atten_dance(reg_num, url, verified, class_):
+def attendance(reg_num, url, verified, class_):
     """
     Method to save attendance and verification of a student to a class
+    :param class_: ID of chosen running class
     :param reg_num: Registration number of student
     :param url: URL of uploaded picture
     :param verified: Verification code/status of student's picture

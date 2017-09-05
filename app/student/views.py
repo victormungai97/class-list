@@ -8,7 +8,7 @@ from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
-from ..extras import add_student, atten_dance
+from ..extras import add_student, attendance
 
 from pictures import allowed_file, determine_picture
 from populate import courses
@@ -210,7 +210,7 @@ def attend_class():
             # if allowed, process image to get url and verification status of image
             url, verified = determine_picture(reg_num, image, upload_folder)
             # add to db
-            message, status = atten_dance(reg_num, url, verified, class_)
+            message, status = attendance(reg_num, url, verified, class_)
 
             if not status:
                 flash(message)

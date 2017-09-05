@@ -3,10 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 03, 2017 at 10:21 AM
+-- Generation Time: Sep 05, 2017 at 12:03 PM
 -- Server version: 10.1.21-MariaDB
 -- PHP Version: 5.6.30
--- File name: dreamteam.sql
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -38,7 +37,7 @@ CREATE TABLE `alembic_version` (
 --
 
 INSERT INTO `alembic_version` (`version_num`) VALUES
-('6d28c3f63bb8');
+('31c8d6cf4739');
 
 -- --------------------------------------------------------
 
@@ -203,7 +202,8 @@ CREATE TABLE `lecturers` (
   `rank` varchar(25) DEFAULT NULL,
   `programme` varchar(80) DEFAULT NULL,
   `password_hash` varchar(128) DEFAULT NULL,
-  `is_lecturer` tinyint(1) DEFAULT NULL
+  `is_lecturer` tinyint(1) DEFAULT NULL,
+  `user` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -264,7 +264,8 @@ CREATE TABLE `students` (
   `year_of_study` int(11) NOT NULL,
   `programme` varchar(80) NOT NULL,
   `class_rep` tinyint(1) NOT NULL,
-  `is_student` tinyint(1) DEFAULT NULL
+  `is_student` tinyint(1) DEFAULT NULL,
+  `user` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -278,6 +279,16 @@ CREATE TABLE `student_courses` (
   `student_id` varchar(45) NOT NULL,
   `courses_id` int(11) NOT NULL,
   `programme` varchar(8) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `user_id` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -342,7 +353,8 @@ ALTER TABLE `lecturers`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`),
   ADD UNIQUE KEY `staff_id` (`staff_id`),
-  ADD KEY `programme` (`programme`);
+  ADD KEY `programme` (`programme`),
+  ADD KEY `user` (`user`);
 
 --
 -- Indexes for table `lecturers_teaching`
@@ -378,7 +390,8 @@ ALTER TABLE `students`
   ADD KEY `ix_students_class_rep` (`class_rep`),
   ADD KEY `ix_students_name` (`name`),
   ADD KEY `ix_students_year_of_study` (`year_of_study`),
-  ADD KEY `students_ibfk_1` (`programme`);
+  ADD KEY `students_ibfk_1` (`programme`),
+  ADD KEY `user` (`user`);
 
 --
 -- Indexes for table `student_courses`
@@ -388,6 +401,12 @@ ALTER TABLE `student_courses`
   ADD KEY `ix_student_courses_courses_id` (`courses_id`),
   ADD KEY `ix_student_courses_student_id` (`student_id`),
   ADD KEY `programme` (`programme`);
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- Indexes for table `verification_statuses`
@@ -418,7 +437,7 @@ ALTER TABLE `days_of_the_week`
 -- AUTO_INCREMENT for table `lecturers`
 --
 ALTER TABLE `lecturers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `photos`
 --
@@ -434,6 +453,11 @@ ALTER TABLE `programmes`
 --
 ALTER TABLE `students`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `user_id` int(11) NOT NULL AUTO_INCREMENT;
 --
 -- AUTO_INCREMENT for table `verification_statuses`
 --
@@ -468,7 +492,8 @@ ALTER TABLE `courses`
 -- Constraints for table `lecturers`
 --
 ALTER TABLE `lecturers`
-  ADD CONSTRAINT `lecturers_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `lecturers_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `lecturers_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `lecturers_teaching`
@@ -487,20 +512,17 @@ ALTER TABLE `photos`
 --
 -- Constraints for table `students`
 --
-SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE `students`
-  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`);
-SET FOREIGN_KEY_CHECKS = 1;
+  ADD CONSTRAINT `students_ibfk_1` FOREIGN KEY (`programme`) REFERENCES `programmes` (`name`),
+  ADD CONSTRAINT `students_ibfk_2` FOREIGN KEY (`user`) REFERENCES `users` (`user_id`);
 
 --
 -- Constraints for table `student_courses`
 --
-SET FOREIGN_KEY_CHECKS = 0;
 ALTER TABLE `student_courses`
   ADD CONSTRAINT `student_courses_ibfk_1` FOREIGN KEY (`courses_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `student_courses_ibfk_2` FOREIGN KEY (`student_id`) REFERENCES `students` (`reg_num`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `student_courses_ibfk_3` FOREIGN KEY (`programme`) REFERENCES `programmes` (`program_id`) ON DELETE CASCADE ON UPDATE CASCADE;
-SET FOREIGN_KEY_CHECKS = 1;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

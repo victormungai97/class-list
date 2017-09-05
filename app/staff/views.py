@@ -8,7 +8,7 @@ from populate import staff_roles, courses
 from . import staff
 from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm
 from ..database import db_session
-from ..models import Lecturer, Course, LecturersTeaching, Class
+from ..models import Lecturer, Course, LecturersTeaching, Class, User
 
 
 @staff.route('/register/', methods=['GET', 'POST'])
@@ -28,6 +28,7 @@ def register():
                             email=form.email.data,
                             rank=staff_roles.get(form.rank.data),
                             password=form.password.data,
+                            user = len(User.query.all()) + 1,
                             is_lecturer=True
                             )
 

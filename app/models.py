@@ -98,11 +98,21 @@ class Course(Base):
         return "<Course {}>".format(self.name)
 
 
-class Lecturer(UserMixin, Base):
+class User(UserMixin, Base):
+    """
+    Class that maps to user tables that Lecturer and Student inherit
+    """
+    __tablename__ = "users"
+
+    user_id = Column("user_id", Integer, primary_key=True)
+
+
+class Lecturer(User):
     """
     Class maps to the lecturers table
     It contains the ID, name, email and rank of the lecturer/staff
     It will also have a login functionality to validate the staff
+    Also contains reference to general users table
     """
 
     __tablename__ = 'lecturers'
@@ -118,6 +128,7 @@ class Lecturer(UserMixin, Base):
                        )
     is_lecturer = Column("is_lecturer", Boolean)
     password_hash = Column(String(128))
+    user = Column("user", Integer, ForeignKey("users.user_id"))
     lecturers_teaching = relationship('LecturersTeaching',
                                       primaryjoin='LecturersTeaching.lecturers_id == Lecturer.id',
                                       backref='lecturer')
@@ -149,13 +160,14 @@ class Lecturer(UserMixin, Base):
 # Set up user_loader
 @login_manager.user_loader
 def load_user(user_id):
-    return Lecturer.query.get(int(user_id))
+    return User.query.get(int(user_id))
 
 
-class Student(Base, UserMixin):
+class Student(User):
     """
     Class maps to the students table.
     Contains the student's ID, registration number, year of study, department and whether on is a class representative
+    Also contains reference to general users table
     """
 
     __tablename__ = 'students'
@@ -167,6 +179,7 @@ class Student(Base, UserMixin):
     programme = Column("programme", String(80), ForeignKey('programmes.name'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)
     is_student = Column("is_student", Boolean)
+    user = Column("user", Integer, ForeignKey("users.user_id"))
     attendance = relationship('Attendance',
                               primaryjoin='Attendance.student == Student.reg_num',
                               backref='attendance')
@@ -177,12 +190,6 @@ class Student(Base, UserMixin):
 
     def __repr__(self):
         return "<Student {}>".format(self.reg_num)
-
-
-# Set up user_loader
-@login_manager.user_loader
-def load_user(user_id):
-    return Student.query.get(int(user_id))
 
 
 class Photo(Base):
