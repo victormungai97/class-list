@@ -49,7 +49,7 @@ def add_student(reg_num, name, year, programme, pic_url):
     return message, status
 
 
-def attendance(reg_num, url, verified, class_):
+def atten_dance(reg_num, url, verified, class_):
     """
     Method to save attendance and verification of a student to a class
     :param class_: ID of chosen running class
