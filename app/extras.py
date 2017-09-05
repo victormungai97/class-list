@@ -87,7 +87,7 @@ def atten_dance(reg_num, url, verified, class_):
 
 def return_403(key):
     """
-    Function to raise 403 Forbidden error if key in session.
+    Function to raise 403 Forbidden error if key in session dict
     Prevents access to unauthorised pages
     :param key: Key to be checked in session dict
     :return: Error if key in session
