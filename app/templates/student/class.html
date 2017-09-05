@@ -1,8 +1,8 @@
 <!-- app/templates/student/class.html -->
 
+{% extends "main.html" %}
 {% import "bootstrap/utils.html" as utils %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% extends "main.html" %}
 {% block wrapper%}<h1 class="display-4">Attend Class</h1>{% endblock %}
 {% block body %}
 <div class="content-section">
@@ -29,12 +29,10 @@
 
         function getConfirmation(){
             var value = confirm("Do you want to attend class " + drop_down.course.find("option:selected").text() + "?");
-            var send = {
-                course: drop_down.course.find("option:selected").val()
-            };
+            var send = drop_down.course.find("option:selected").val();
 
             if ( value === true ){
-                $.get("{{ url_for('student.attend_class') }}", send);
+                $(location).attr("href", "{{ url_for('student.attend_class') }}?course=" + send);
             }
         }
 

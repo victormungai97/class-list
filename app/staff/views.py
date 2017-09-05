@@ -28,7 +28,7 @@ def register():
                             email=form.email.data,
                             rank=staff_roles.get(form.rank.data),
                             password=form.password.data,
-                            user = len(User.query.all()) + 1,
+                            user=len(User.query.all()) + 1,
                             is_lecturer=True
                             )
 
@@ -201,7 +201,6 @@ def _show_clock():
     staff_id = request.args.get("a")
     course = request.args.get("q")
     session['start'] = datetime.now()
-    print(session['start'])
     lec_course = LecturersTeaching.query.filter((LecturersTeaching.lecturers_id == staff_id) &
                                                 (LecturersTeaching.courses_id == course)).first().id
     # create instance of class
@@ -253,11 +252,9 @@ def _end_class():
     :return: redirection to the staff dashboard if successful
     """
     if 'start' in session:
-        print(session['start'])
         # search for current class and update duration and active state
         class_ = Class.query.filter((Class.id == session['id'])).first()
         class_.duration = (datetime.now() - session['start']).total_seconds() / 3600
-        print(class_.duration)
         class_.is_active = False
         if session['active']:
             session['active'] = False

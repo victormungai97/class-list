@@ -75,9 +75,9 @@ def class_get_url(filename="", path="", regno=""):
     # get extension of file
     extension = str(filename.split(".")[len(filename.split(".")) - 1])
     # get path to source of uploaded file
-    source = path + filename
+    source = os.path.join(path, filename)
     # get path of file
-    file_ = path + regno + "." + extension
+    file_ = os.path.join(path, "".join([str(regno), "_", str(0), ".", extension]))
     # status for verification, to be modified as per findings of image recognition
     verified = 1
 
@@ -86,10 +86,20 @@ def class_get_url(filename="", path="", regno=""):
     pass
     ##############################
 
-    # rename new file
-    if os.path.isfile(file_):
-        start, end = tuple(file_.split('_'))
-        file_ = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
+    # check if file is in current directory. If so, rename it
+    for root, dirs, files in os.walk(path):
+        for i in range(len(files)):
+            files[i] = os.path.join(root, files[i])
+        common_files = []
+        if file_ in files:
+            for file in files:
+                if os.path.basename(file).startswith(str(regno)):
+                    common_files.append(file)
+            print(common_files)
+            file_ = common_files[-1]
+            start, end = tuple(file_.split('_'))
+            file_ = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
+
     # rename file
     os.rename(source, file_)
     # get url to save to db

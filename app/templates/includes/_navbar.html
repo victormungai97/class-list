@@ -15,7 +15,8 @@
                         {% if active %}
                         <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End Class</a></li>
                         {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.logout') }}">Logout</a></li>
+                            <li class="nav-item"><a class="nav-link" href="{{ url_for('staff._start_class', pid=pid) }}">Start Class
+                            </a></li>
                         {% endif %}
                 {% elif is_student %}
                     <li class="nav-item"><a class="nav-link active" href="{{ url_for('student.home') }}">Dashboard</a> </li>

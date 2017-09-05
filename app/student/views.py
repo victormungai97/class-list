@@ -5,7 +5,7 @@ from flask_login import login_required, logout_user
 
 from .. import registration_folder, upload_folder
 from ..database import db_session
-from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching
+from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
 from ..extras import add_student, attendance
@@ -179,7 +179,6 @@ def web_(pid):
         for crs in Course.query.filter(Course.id == course.id).filter(LecturersTeaching.courses_id == Course.id).filter(
                         Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
             _courses.append((crs.id, crs.name))
-    print(_courses)
     # attach running class to form
     form = ClassForm()
     form.courses.choices = [(0, "None")]
@@ -202,8 +201,12 @@ def attend_class():
     class_ = Class.query.filter(Class.is_active).filter(LecturersTeaching.courses_id == course) \
         .filter(Class.lec_course_id == LecturersTeaching.id).first().id
 
+    # check if student has already signed into a class
+    if Attendance.query.filter((Attendance.student == reg_num) & (Attendance.class_ == class_)).first():
+        flash("Class already attended")
+        return redirect(url_for('student.web_', pid=session['student_id']))
+
     if form.validate_on_submit():
-        print(reg_num)
         image = request.files['photo']
         # check if allowed
         if allowed_file(image.filename):
