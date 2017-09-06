@@ -1,0 +1,42 @@
+<!-- app/templates/lists/index.html -->
+
+{% extends "main.html" %}
+{% block wrapper %}<h1 class="display-4">{{ title }}</h1>{% endblock %}
+ {% block body %}
+     <div class="content-section">
+         <div class="outer">
+             <div class="middle">
+                 <div class="inner">
+                     <h1 style="text-align:center;">{{ wrap }}</h1>
+                     {% if rows %}
+                         <hr class="intro-divider">
+                         <div class="center">
+                             <table class="table table-striped table-bordered">
+                                 <thead>
+                                 <tr>
+                                     {% block heading %}{% endblock %}
+                                 </tr>
+                                 </thead>
+                                 <tbody>
+                                 {% block contents %}{% endblock %}
+                                 </tbody>
+                             </table>
+                         </div>
+                         <div style="text-align: center">
+                     {% else %}
+                         <br>
+                         <div style="text-align: center">
+                            <h3> Nothing here. </h3>
+                            <hr class="intro-divider">
+                     {% endif %}
+                     <a href="{{ url_for(url) }}" class="btn btn-default btn-lg">
+                         <i class="fa fa-plus"></i>
+                         Add {{ wrap }}
+                     </a>
+                     </div>
+                     </div>
+                 </div>
+             </div>
+         </div>
+     </div>
+ {% endblock %}

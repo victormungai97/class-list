@@ -34,6 +34,27 @@ p.copyright {
     margin: 15px 0 0;
 }
 
+table {
+    width: 100%;
+}
+
+td, th {
+    border: 1px solid #ddd;
+    padding: 8px;
+}
+
+tr:hover {
+    background-color: #ddd;
+}
+
+th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color: #4CAF50;
+    color: white;
+}
+
 .alert-info {
     width: 50%;
     margin: auto;

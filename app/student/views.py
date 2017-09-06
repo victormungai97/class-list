@@ -124,14 +124,15 @@ def courses_():
     form.reg_num.data = Student.query.filter_by(id=session['student_id']).first().reg_num
 
     if form.validate_on_submit():
-        student_course = StudentCourses(id=(len(StudentCourses.query.all()) + 1),
-                                        student_id=form.reg_num.data,
-                                        courses_id=form.course.data,
-                                        programme=form.programme.data
-                                        )
         try:
-            # save student and course ID to LecturerTeaching table
-            db_session.add(student_course)
+            # save student and course ID to StudentCourses table
+            for unit in form.course.data:
+                db_session.add(StudentCourses(id=(len(StudentCourses.query.all()) + 1),
+                                              student_id=form.reg_num.data,
+                                              courses_id=unit,
+                                              programme=form.programme.data
+                                              )
+                               )
             db_session.commit()
             flash("Success")
             return redirect(url_for('student.home'))
@@ -238,6 +239,24 @@ def attend_class():
 
     return render_template("student/attend.html", form=form, title="Attend Class", is_student=True,
                            pid=session['student_id'])
+
+
+@student.route('/registered/')
+@login_required
+def registered_courses():
+    """
+    Function to list courses student is registered to
+    :return: HTML template of registered courses
+    """
+    return_403('lecturer_id')
+    rows = [('FEE' + str(course.id), course.name)
+            for course in Course.query.filter(
+                (Course.id == StudentCourses.courses_id) &
+                (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
+            ).all()]
+
+    return render_template("lists/units.html", title="Courses Registered", is_student=True, pid=session['student_id'],
+                           rows=rows, url="student.courses_", empty=True, wrap="Courses")
 
 
 @student.route('/classes/')

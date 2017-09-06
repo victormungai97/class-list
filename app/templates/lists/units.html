@@ -1,0 +1,14 @@
+<!-- app/templates/lists/units.html -->
+
+{% extends "lists/index.html" %}
+{% block heading %}
+    <th>Code</th><th>Name</th>
+{% endblock %}
+{% block contents %}
+    {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+        </tr>
+    {% endfor %}
+{% endblock %}

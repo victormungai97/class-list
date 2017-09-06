@@ -3,7 +3,7 @@
 import re
 from flask_wtf import FlaskForm
 from flask_login import login_user
-from wtforms import StringField, SubmitField, SelectField, FileField, Field  # , HiddenField
+from wtforms import StringField, SubmitField, SelectField, FileField, Field, SelectMultipleField
 from wtforms.validators import DataRequired
 from flask_wtf.file import FileRequired, FileAllowed
 from wtforms.widgets import HTMLString, html_params
@@ -115,9 +115,9 @@ class CourseForm(FlaskForm):
                             default="")
     study_year = SelectField("Year", validators=[DataRequired()], choices=dict_to_tuple(year_of_study), coerce=int)
     semester = SelectField("Semester", validators=[DataRequired()], choices=[(1, "I"), (2, "II")], coerce=int)
-    course = SelectField("Course", validators=[DataRequired()],
-                         choices=[(course.id, course.name) for course in Course.query.all()],
-                         coerce=int)
+    course = SelectMultipleField("Course", validators=[DataRequired()],
+                                 choices=[(course.id, course.name) for course in Course.query.all()],
+                                 coerce=int)
     submit = SubmitField("Submit")
 
     def validate(self):
@@ -133,11 +133,13 @@ class CourseForm(FlaskForm):
             return False
 
         # check if student has already registered given course and raise error if so
-        registered = StudentCourses.query.filter((StudentCourses.student_id == self.reg_num.data) &
-                                                 (StudentCourses.courses_id == self.course.data)).first()
-        if registered:
-            self.course.errors.append("Course already registered")
-            return False
+        for unit in self.course.data:
+            registered = StudentCourses.query.filter((StudentCourses.student_id == self.reg_num.data) &
+                                                     (StudentCourses.courses_id == unit)).first()
+            if registered:
+                self.course.errors.append("Course '{}' registered".format(
+                    Course.query.filter_by(id=unit).first().name))
+                return False
 
         return True
 

@@ -3,7 +3,8 @@
 {% extends "main.html" %}
 {% import "bootstrap/wtf.html" as wtf %}
 {% block wrapper %}
-<h1 class="display-4">Student Dashboard</h1>{% endblock %}
+    <h1 class="display-4">Student Dashboard</h1>
+{% endblock %}
 {% block body %}
 <div class="intro-header">
     <div class="container">
@@ -29,6 +30,12 @@
                         <li class="list-inline-item">
                             <h4>
                                 <a href="{{ url_for('student.courses_') }}" style="font-size: medium">Course Registration</a>
+                            </h4>
+                        </li>
+                        <li class="divider"><h4>|</h4></li>
+                        <li class="list-inline-item">
+                            <h4>
+                                <a href="{{ url_for('student.registered_courses') }}" style="font-size: medium">Courses Registered</a>
                             </h4>
                         </li>
                         <li class="divider"><h4>|</h4></li>

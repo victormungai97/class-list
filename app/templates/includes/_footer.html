@@ -1,6 +1,7 @@
 <!-- app/templates/includes/_footer.html -->
 
 <!--suppress ALL -->
+{% if not empty %}
 <footer {% if error %} style="position: fixed;" {% else %} style="position: absolute;" {% endif %} >
         <div class="container">
             <div class="row">
@@ -33,3 +34,4 @@
             </div>
         </div>
     </footer>
+{% endif %}
