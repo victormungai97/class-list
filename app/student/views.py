@@ -66,6 +66,17 @@ def logout():
     return redirect(url_for('home.index'))
 
 
+@student.route('/phone/', methods=['POST'])
+def phone():
+    """
+    Function to register student from the mobile app
+    :return:
+    """
+    print(request.get_json(force=True))
+    message = {'message': "Success", "status": 0}
+    return jsonify(message)
+
+
 # noinspection PyUnresolvedReferences,PyArgumentList
 @student.route('/register/', methods=["GET", 'POST'])
 def web():
@@ -143,6 +154,19 @@ def courses_():
 
     return render_template("student/course.html", form=form, title="Course Registration", is_student=True,
                            pid=session['student_id'])
+
+
+@student.route('/get_departments/')
+def get_departments():
+    """
+    Function to send department names to the phone during registration
+    :return: JSON Object containing array of department names
+    """
+    dept = request.args.get("text", type=str).split('/')[0]
+    departments = {"departments": [programme.name
+                                   for programme in Programme.query.filter(Programme.program_id == dept).all()]}
+    print(departments)
+    return jsonify(departments)
 
 
 @student.route('/_get_department/')
@@ -251,8 +275,8 @@ def registered_courses():
     return_403('lecturer_id')
     rows = [('FEE' + str(course.id), course.name)
             for course in Course.query.filter(
-                (Course.id == StudentCourses.courses_id) &
-                (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
+            (Course.id == StudentCourses.courses_id) &
+            (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
             ).all()]
 
     return render_template("lists/units.html", title="Courses Registered", is_student=True, pid=session['student_id'],
