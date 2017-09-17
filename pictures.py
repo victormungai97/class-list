@@ -3,6 +3,7 @@
 import os
 
 from werkzeug.utils import secure_filename
+# from classifier import infer
 
 ALLOWED_EXTENSIONS = {'jpeg', 'jpg', 'png'}
 
@@ -81,10 +82,7 @@ def class_get_url(filename="", path="", regno=""):
     # status for verification, to be modified as per findings of image recognition
     verified = 1
 
-    # call image recognition code
-    ##############################
-    pass
-    ##############################
+    
 
     # check if file is in current directory. If so, rename it
     for root, dirs, files in os.walk(path):
@@ -126,10 +124,41 @@ def determine_picture(reg_num, image, folder, list_of_images=None, counter=0):
         os.makedirs(path)
     # get name of the source file + Make the filename safe, remove unsupported chars
     filename = str(secure_filename(image.filename))
+    # get extension of file
+    extension = str(filename.split(".")[len(filename.split(".")) - 1])
+    # get path of file
+    filename = path + filename 
     # save image
-    image.save(os.path.join(path, filename))
+    image.save(filename)
     # compress image
-    compress_image(os.path.join(path, filename))
-    if list_of_images and counter != 0:
-        return register_get_url(filename, path, counter, regno=details[1], list_of_images=list_of_images)
-    return class_get_url(filename, path, regno=details[1])
+    compress_image(filename)
+
+    # status for verification, to be modified as per findings of image recognition
+    verified = 1
+
+    # call image recognition code
+    ##############################
+    '''
+    rs = infer(path)
+    if rs >= 0.7:
+      verified = 1
+    elif rs < 0.7:
+      verified = 4
+    '''
+    ##############################
+
+    # check if file is in current directory. If so, rename it
+    for root, dirs, files in os.walk(path):
+        for i in range(len(files)):
+            files[i] = os.path.join(root, files[i])
+        common_files = []
+        if filename in files:
+            for file in files:
+                if os.path.basename(file).startswith(str(filename)):
+                    common_files.append(file)
+            if common_files:
+                filename = common_files[-1]
+                start, end = tuple(filename.split('_'))
+                filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
+
+    return filename.replace("app/static/", "")
