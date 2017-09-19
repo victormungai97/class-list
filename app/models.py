@@ -320,7 +320,7 @@ class Attendance(Base):
     verified = Column('verified',
                       Integer,
                       ForeignKey('verification_statuses.id', ondelete='CASCADE', onupdate='CASCADE'),
-                      nullable=False,
+                      nullable=True,
                       index=True)
     uploaded_photo = Column("uploaded_photo",
                             String(100),

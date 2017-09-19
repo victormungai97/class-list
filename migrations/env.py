@@ -5,7 +5,7 @@ from logging.config import fileConfig
 from sys import path
 
 # add project folder to path so as to import app package
-path.append("F:\\class-list")
+path.append("/home/victor/Desktop/PYTHON/class-list")
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
