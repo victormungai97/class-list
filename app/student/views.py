@@ -1,9 +1,9 @@
 # app/student/views.py
 
+from werkzeug.utils import secure_filename
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
 
-from .. import registration_folder, upload_folder
 from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
@@ -99,6 +99,8 @@ def web():
         if images:
             # if len(images) < 10: form.photo.errors.append("Please upload at least 10 images of yourself")
             for image in images:
+                # get name of the source file + Make the filename safe, remove unsupported chars
+                filename = str(secure_filename(image.filename))
                 # check if allowed
                 if not allowed_file(image.filename):
                     # if not allowed, raise error
@@ -106,9 +108,8 @@ def web():
                     return render_template("student/register.html", form=form, title="Student Registration",
                                            is_student=True)
                 else:
-                    pic_url.append(determine_picture(reg_num, folder=registration_folder,
-                                                     list_of_images=images, image=image, counter=counter)
-                                   )
+                    url, verified = determine_picture(reg_num, image, filename)
+                    pic_url.append(url)
                 counter += 1
 
         # check if student already registered
@@ -246,8 +247,10 @@ def attend_class():
         image = request.files['photo']
         # check if allowed
         if allowed_file(image.filename):
+            # get name of the source file + Make the filename safe, remove unsupported chars
+            filename = str(secure_filename(image.filename))
             # if allowed, process image to get url and verification status of image
-            url, verified = determine_picture(reg_num, image, upload_folder)
+            url, verified = determine_picture(reg_num, image, filename, attendance=True)
             # add to db
             message, status = atten_dance(reg_num, url, verified, class_)
 

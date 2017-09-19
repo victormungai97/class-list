@@ -1,13 +1,16 @@
 # app/__init__.py
 
 import os
+from threading import Timer
+from datetime import datetime
 from flask import Flask, render_template
-from flask_sqlalchemy import SQLAlchemy
+# from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
 
 from config import app_config
 from app.database import db_session, init_db
+# from automate import automate
 
 # db = SQLAlchemy()  # db instance variable
 app = Flask(__name__, instance_relative_config=True)
@@ -17,6 +20,24 @@ login_manager = LoginManager()
 # app.config['SECRET_KEY'] = "your-secret-key"
 
 print(u"Current path is", os.path.abspath(os.curdir), sep=' ')
+
+
+def train_images():
+    t = Timer(86400, train_images)
+    t.start()
+
+    if datetime.now() >= datetime(2015, 12, 12):
+        print("Calling image training")
+        # image training code goes here
+        ###############################
+        """
+        automate()
+        """
+        ###############################
+        t.cancel()
+        return
+
+    print("Registration still on")
 
 
 def create_app(config_name):
@@ -76,16 +97,14 @@ def create_app(config_name):
     return app
 
 
-# path to registration pictures
-registration_folder = os.path.join("app/static/register")
 # path to class pictures
 upload_folder = os.path.join("app/static/uploads")
 
 # create the folders
-if not os.path.isdir(registration_folder):
-    os.makedirs(registration_folder)
 if not os.path.isdir(upload_folder):
     os.makedirs(upload_folder)
+
+train_images()
 
 
 @app.teardown_appcontext
