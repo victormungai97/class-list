@@ -347,3 +347,32 @@ class DaysOfTheWeek(Base):
 
     def __repr__(self):
         return "Day: {}, ID: {}.".format(self.name, self.id)
+
+
+class Suggestion(Base):
+    """
+    Class to store suggestions from user
+    """
+    __tablename__ = 'suggestions'
+
+    id = Column("id", Integer, primary_key=True)
+    title = Column("title", String(20), nullable=False)
+    message = Column("message", String(2000), nullable=False)
+
+
+class Extras(Base):
+    """
+    Class contains values that are optional but important for the running of the app
+    """
+
+    __tablename__ = "extras"
+
+    id = Column("id", Integer, primary_key=True)
+    # device user is accessing backend from
+    source = Column("source", String(120))
+    # gps coordinates
+    longitude = Column("longitude", Float, default=0.0)
+    latitude = Column("latitude", Float, default=0.0)
+    # cell network coordinates
+    lac = Column("LAC", Float, default=0.0)
+    cid = Column("CID", Float, default=0.0)

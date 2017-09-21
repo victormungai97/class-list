@@ -1,8 +1,11 @@
 # pictures.py
 
 import os
+from shutil import move
+from werkzeug.utils import secure_filename
 
 from app import upload_folder
+
 # from classifier import infer
 
 ALLOWED_EXTENSIONS = {'jpeg', 'jpg', 'png'}
@@ -10,7 +13,7 @@ ALLOWED_EXTENSIONS = {'jpeg', 'jpg', 'png'}
 
 def allowed_file(filename):
     """
-    Function hecks whether file is allowed based on filename extension
+    Function checks whether file is allowed based on filename extension
     :param filename: File to be checked
     :return: Status of checking, either True(allowed) or False(disallowed)
     """
@@ -32,10 +35,11 @@ def compress_image(filename):
     foo.save(filename, optimize=True, quality=100)
 
 
-def determine_picture(reg_num, image, filename, attendance=False):
+def determine_picture(reg_num, image, filename, attendance=False, phone=False):
     """
     Function that processes images and
     returns their URLs and the verification status of the images, if any
+    :param phone: Checks if image is from phone
     :param attendance: Checks whether student is registering or attending class
     :param filename: Name of the specific image file
     :param reg_num: Registration number of student
@@ -46,6 +50,7 @@ def determine_picture(reg_num, image, filename, attendance=False):
     details = reg_num.split("/")
     # create new path to folder for student's image(s)
     path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
+    file_ = os.path.join(path, filename)
     # create the new folder
     if not os.path.isdir(path):
         os.makedirs(path)
@@ -53,6 +58,10 @@ def determine_picture(reg_num, image, filename, attendance=False):
     basename, extension = filename.rsplit('.', 1)[0], filename.rsplit('.', 1)[-1]
     # get path of file
     filename = os.path.join(path, "".join([basename, "_", str(0), ".", extension]))
+    print(file_, filename)
+    if phone:
+        move(file_, filename)
+        file_ = filename
 
     # check if file is in current directory. If so, rename it
     for root, dirs, files in os.walk(path):
@@ -64,12 +73,17 @@ def determine_picture(reg_num, image, filename, attendance=False):
                 if os.path.basename(file).startswith(basename):
                     common_files.append(file)
             if common_files:
+                print(common_files)
                 filename = common_files[-1]
-                start, end = tuple(filename.split('_'))
+                start, end = tuple(filename.rsplit('_', 1))
                 filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
 
     # save image
-    image.save(filename)
+    if not phone:
+        image.save(filename)
+    else:
+        move(file_, filename)
+
     # compress image
     compress_image(filename)
 
@@ -90,3 +104,29 @@ def determine_picture(reg_num, image, filename, attendance=False):
     ##############################
 
     return filename.replace("app/static/", ""), verified
+
+
+def decode_image(data, name, reg_num):
+    """
+    Function to decode byte string to image
+    Base64 module function b64decode will decode the byte string into bytes
+    and these bytes will then be written into a file whose name is the student's name
+    :param reg_num: Registration number of the student
+    :param data: Byte string of the image
+    :param name: Name of student to be used as file name
+    :return: Image file name of the student
+    """
+    # get encoded version of the byte string
+    img_data = data.encode('UTF-8', 'strict')
+    # split reg_num to retrieve year, course and specific number of student
+    details = reg_num.split("/")
+    # create new path to folder for student's image(s)
+    path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
+    import base64
+    # create file name
+    pic_name = path + secure_filename(name) + ".jpg"
+    # decode image string and write into file
+    with open(pic_name, 'wb') as fh:
+        fh.write(base64.b64decode(img_data))
+    # return file name without directory path
+    return pic_name.rsplit('/', 1)[-1]

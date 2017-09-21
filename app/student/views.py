@@ -10,7 +10,7 @@ from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
 from ..extras import add_student, atten_dance, return_403
 
-from pictures import allowed_file, determine_picture
+from pictures import allowed_file, determine_picture, decode_image
 from populate import courses
 
 
@@ -70,11 +70,25 @@ def logout():
 def phone():
     """
     Function to register student from the mobile app
-    :return:
+    :return: JSON Object containing error code and accompanying message
     """
-    print(request.get_json(force=True))
-    message = {'message': "Success", "status": 0}
-    return jsonify(message)
+    json, message, status, pic_url = request.get_json(force=True), '', 0, []
+    name = json['name']
+    reg_no = json['regno']
+    department = json['departments']
+    year = json['year']
+    image = decode_image(json['picture'], name, reg_no)
+
+    filename = secure_filename(image)
+    if not allowed_file(filename):
+        message, status = "File format not supported", 3
+    else:
+        url, verified = determine_picture(reg_no, image=image, filename=filename, phone=True)
+        pic_url.append(url)
+
+    message, status = add_student(reg_no, name, year, department, pic_url)
+
+    return jsonify({'message': message, "status": status})
 
 
 # noinspection PyUnresolvedReferences,PyArgumentList
@@ -95,7 +109,7 @@ def web():
 
     if form.validate_on_submit():
         reg_num, name = form.reg_num.data, form.first_name.data + " " + form.last_name.data
-        images, counter, pic_url = request.files.getlist("photo"), 1, []
+        images, pic_url = request.files.getlist("photo"), []
         if images:
             # if len(images) < 10: form.photo.errors.append("Please upload at least 10 images of yourself")
             for image in images:
@@ -110,7 +124,6 @@ def web():
                 else:
                     url, verified = determine_picture(reg_num, image, filename)
                     pic_url.append(url)
-                counter += 1
 
         # check if student already registered
         message, status = add_student(form.reg_num.data, name, form.year_of_study.data,
@@ -276,11 +289,12 @@ def registered_courses():
     :return: HTML template of registered courses
     """
     return_403('lecturer_id')
-    rows = [('FEE' + str(course.id), course.name)
-            for course in Course.query.filter(
-            (Course.id == StudentCourses.courses_id) &
-            (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
-            ).all()]
+    rows = []
+    for course in Course.query.filter(
+                    (Course.id == StudentCourses.courses_id) &
+                    (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
+    ).all():
+        rows.append(('FEE' + str(course.id), course.name))
 
     return render_template("lists/units.html", title="Courses Registered", is_student=True, pid=session['student_id'],
                            rows=rows, url="student.courses_", empty=True, wrap="Courses")

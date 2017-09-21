@@ -44,7 +44,7 @@ CREATE TABLE `alembic_version` (
 
 LOCK TABLES `alembic_version` WRITE;
 /*!40000 ALTER TABLE `alembic_version` DISABLE KEYS */;
-INSERT INTO `alembic_version` VALUES ('882074fb4391');
+INSERT INTO `alembic_version` VALUES ('f4a8ef2b6155');
 /*!40000 ALTER TABLE `alembic_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -163,6 +163,33 @@ LOCK TABLES `days_of_the_week` WRITE;
 /*!40000 ALTER TABLE `days_of_the_week` DISABLE KEYS */;
 INSERT INTO `days_of_the_week` VALUES (6,'Friday'),(2,'Monday'),(7,'Saturday'),(1,'Sunday'),(5,'Thursday'),(3,'Tuesday'),(4,'Wednesday');
 /*!40000 ALTER TABLE `days_of_the_week` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `extras`
+--
+
+DROP TABLE IF EXISTS `extras`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `extras` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `source` varchar(120) DEFAULT NULL,
+  `longitude` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `LAC` float DEFAULT NULL,
+  `CID` float DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `extras`
+--
+
+LOCK TABLES `extras` WRITE;
+/*!40000 ALTER TABLE `extras` DISABLE KEYS */;
+/*!40000 ALTER TABLE `extras` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -356,6 +383,30 @@ LOCK TABLES `students` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `suggestions`
+--
+
+DROP TABLE IF EXISTS `suggestions`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `suggestions` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `title` varchar(20) NOT NULL,
+  `message` varchar(2000) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `suggestions`
+--
+
+LOCK TABLES `suggestions` WRITE;
+/*!40000 ALTER TABLE `suggestions` DISABLE KEYS */;
+/*!40000 ALTER TABLE `suggestions` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `users`
 --
 
@@ -410,4 +461,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-19  3:22:56
+-- Dump completed on 2017-09-21 21:23:26
