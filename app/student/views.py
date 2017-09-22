@@ -1,5 +1,6 @@
 # app/student/views.py
 
+import re
 from werkzeug.utils import secure_filename
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
@@ -75,6 +76,15 @@ def phone():
     json, message, status, pic_url = request.get_json(force=True), '', 0, []
     name = json['name']
     reg_no = json['regno']
+
+    # check that correct format of student reg. num is followed
+    if not re.search("/[\S]+/", reg_no):
+        return jsonify({'message': 'Invalid registration number', 'status': 4})
+
+    # check if student is already registered
+    if Student.query.filter_by(reg_num=reg_no).first():
+        return jsonify({'message': 'Registration number already registered', 'status': 2})
+
     department = json['departments']
     year = json['year']
     image = decode_image(json['picture'], name, reg_no)

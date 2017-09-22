@@ -88,6 +88,11 @@ class RegistrationForm(FlaskForm):
         if not rv:
             return False
 
+        # check if student is already registered
+        if Student.query.filter_by(reg_num=self.reg_num.data).first():
+            self.reg_num.errors.append('Registration number already registered')
+            return False
+
         # check that correct format of student reg. num is followed
         match = re.search("/[\S]+/", self.reg_num.data)
         if not match:

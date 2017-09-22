@@ -18,34 +18,31 @@ def add_student(reg_num, name, year, programme, pic_url):
     :return: Error status - if any - and the associated message
     """
     photos, message, status = [], '', 0
-    if not Student.query.filter(Student.reg_num == reg_num).first():
-        # if student not registered, them register
-        student_ = Student(reg_num=reg_num,
-                           name=name,
-                           year_of_study=year,
-                           programme=programme,
-                           class_rep=False,
-                           user=len(User.query.all()) + 1,
-                           is_student=True)
-        for pic in pic_url:
-            photos.append(Photo(student_id=reg_num,
-                                address=pic,
-                                learning=True)
-                          )
-        try:
-            db_session.add(student_)
-            for photo in photos:
-                db_session.add(photo)
-            db_session.commit()
 
-            message = "Successful registration of {}".format(name)
-        except Exception as err:
-            status, message = 1, "Error during registration"
-            print(err)
-            db_session.rollback()
+    student_ = Student(reg_num=reg_num,
+                       name=name,
+                       year_of_study=year,
+                       programme=programme,
+                       class_rep=False,
+                       user=len(User.query.all()) + 1,
+                       is_student=True)
+    for pic in pic_url:
+        photos.append(Photo(student_id=reg_num,
+                            address=pic,
+                            learning=True)
+                      )
+    try:
+        db_session.add(student_)
+        for photo in photos:
+            db_session.add(photo)
+        db_session.commit()
 
-    else:
-        status, message = 2, "Registration number already registered"
+        message = "Successful registration of {}".format(name)
+    except Exception as err:
+        status, message = 1, "Error during registration"
+        print(err)
+        db_session.rollback()
+
     return message, status
 
 

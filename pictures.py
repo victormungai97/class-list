@@ -69,10 +69,11 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
             files[i] = os.path.join(root, files[i])
         common_files = []
         if filename in files:
-            for file in files:
-                if os.path.basename(file).startswith(basename):
-                    common_files.append(file)
+            for _file in files:
+                if os.path.basename(_file).startswith(basename):
+                    common_files.append(_file)
             if common_files:
+                common_files.sort()
                 print(common_files)
                 filename = common_files[-1]
                 start, end = tuple(filename.rsplit('_', 1))
