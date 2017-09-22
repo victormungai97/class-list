@@ -373,6 +373,7 @@ class Extras(Base):
     # gps coordinates
     longitude = Column("longitude", Float, default=0.0)
     latitude = Column("latitude", Float, default=0.0)
+    altitude = Column("altitude", Float, default=0.0)
     # cell network coordinates
     lac = Column("LAC", Float, default=0.0)
     cid = Column("CID", Float, default=0.0)

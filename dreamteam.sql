@@ -44,7 +44,7 @@ CREATE TABLE `alembic_version` (
 
 LOCK TABLES `alembic_version` WRITE;
 /*!40000 ALTER TABLE `alembic_version` DISABLE KEYS */;
-INSERT INTO `alembic_version` VALUES ('f4a8ef2b6155');
+INSERT INTO `alembic_version` VALUES ('04a84768a546');
 /*!40000 ALTER TABLE `alembic_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -179,6 +179,7 @@ CREATE TABLE `extras` (
   `latitude` float DEFAULT NULL,
   `LAC` float DEFAULT NULL,
   `CID` float DEFAULT NULL,
+  `altitude` float DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -461,4 +462,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-21 21:23:26
+-- Dump completed on 2017-09-22 23:38:38
