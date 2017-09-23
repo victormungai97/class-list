@@ -58,7 +58,6 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
     basename, extension = filename.rsplit('.', 1)[0], filename.rsplit('.', 1)[-1]
     # get path of file
     filename = os.path.join(path, "".join([basename, "_", str(0), ".", extension]))
-    print(file_, filename)
     if phone:
         move(file_, filename)
         file_ = filename
@@ -74,7 +73,6 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
                     common_files.append(_file)
             if common_files:
                 common_files.sort()
-                print(common_files)
                 filename = common_files[-1]
                 start, end = tuple(filename.rsplit('_', 1))
                 filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
@@ -123,6 +121,8 @@ def decode_image(data, name, reg_num):
     details = reg_num.split("/")
     # create new path to folder for student's image(s)
     path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
+    if not os.path.isdir(path):
+        os.makedirs(path)
     import base64
     # create file name
     pic_name = path + secure_filename(name) + ".jpg"

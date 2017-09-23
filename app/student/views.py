@@ -87,16 +87,37 @@ def phone():
 
     department = json['departments']
     year = json['year']
-    image = decode_image(json['picture'], name, reg_no)
+    images = json['images']
+
+    image = decode_image(images, name, reg_no)
 
     filename = secure_filename(image)
     if not allowed_file(filename):
+        # noinspection PyUnusedLocal
         message, status = "File format not supported", 3
     else:
         url, verified = determine_picture(reg_no, image=image, filename=filename, phone=True)
         pic_url.append(url)
 
     message, status = add_student(reg_no, name, year, department, pic_url)
+
+    return jsonify({'message': message, "status": status})
+
+
+@student.route('/login2/', methods=['POST'])
+def login2():
+    """
+    Function enables student to login to the system from the android app
+    :return: JSON Object containing name of student or error and accompanying message
+    """
+    json, message, status = request.get_json(force=True), '', 0
+    reg_no = json['regno']
+
+    student_ = Student.query.filter_by(reg_num=reg_no).first()
+    if not student_:
+        message, status = "Unknown Registration Number", 1
+    else:
+        message = student_.name
 
     return jsonify({'message': message, "status": status})
 

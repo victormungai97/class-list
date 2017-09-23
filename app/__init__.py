@@ -23,6 +23,13 @@ print(u"Current path is", os.path.abspath(os.curdir), sep=' ')
 
 
 def train_images():
+    """
+    This function checks if the registration deadline - to be provided by admin - has been reached
+    If so, it will close the registration options and call the image training code
+    If not, it will count for another 24 hours and check again
+    It uses the Timer class in the threading module to loop for (24*3600) seconds
+    :return: None
+    """
     t = Timer(86400, train_images)
     t.start()
 
