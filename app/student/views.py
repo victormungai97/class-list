@@ -89,15 +89,16 @@ def phone():
     year = json['year']
     images = json['images']
 
-    image = decode_image(images, name, reg_no)
+    for image in images:
+        image = decode_image(image, name, reg_no)
 
-    filename = secure_filename(image)
-    if not allowed_file(filename):
-        # noinspection PyUnusedLocal
-        message, status = "File format not supported", 3
-    else:
-        url, verified = determine_picture(reg_no, image=image, filename=filename, phone=True)
-        pic_url.append(url)
+        filename = secure_filename(image)
+        if not allowed_file(filename):
+            # noinspection PyUnusedLocal
+            message, status = "File format not supported", 3
+        else:
+            url, verified = determine_picture(reg_no, image=image, filename=filename, phone=True)
+            pic_url.append(url)
 
     message, status = add_student(reg_no, name, year, department, pic_url)
 
