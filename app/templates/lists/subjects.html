@@ -1,0 +1,18 @@
+<!-- app/templates/lists/subjects.html -->
+
+{% extends "lists/index.html" %}
+{% block heading %}
+    <th>Code</th><th>Name</th>
+{% endblock %}
+{% block contents %}
+    {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td><a class="btn btn-outline-primary btn-sm" href="{{ url_for('staff._start_class', pid=pid) }}">
+                    <i class="fa fa-clock-o" aria-hidden="true"> Start Class</i>
+                </a>
+            </td>
+        </tr>
+    {% endfor %}
+{% endblock %}
