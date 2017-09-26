@@ -1,8 +1,10 @@
 # app/student/views.py
 
 import re
+# import os
+# import pdfkit
 from werkzeug.utils import secure_filename
-from flask import render_template, request, flash, redirect, url_for, jsonify, session
+from flask import render_template, request, flash, redirect, url_for, jsonify, session  # , make_response
 from flask_login import login_required, logout_user
 
 from ..database import db_session
@@ -280,6 +282,7 @@ def attend_class():
     reg_num, url, verified = Student.query.filter_by(id=session['student_id']).first().reg_num, "", 0
     # get chosen running class
     course = request.args.get("course")
+    name = Course.query.filter(Course.id == course).first().name
     class_ = Class.query.filter(Class.is_active).filter(LecturersTeaching.courses_id == course) \
         .filter(Class.lec_course_id == LecturersTeaching.id).first().id
 
@@ -297,7 +300,7 @@ def attend_class():
             # if allowed, process image to get url and verification status of image
             url, verified = determine_picture(reg_num, image, filename, attendance=True)
             # add to db
-            message, status = atten_dance(reg_num, url, verified, class_)
+            message, status = atten_dance(reg_num, url, verified, class_, name)
 
             if not status:
                 flash(message)
@@ -329,11 +332,53 @@ def registered_courses():
         rows.append(('FEE' + str(course.id), course.name))
 
     return render_template("lists/units.html", title="Courses Registered", is_student=True, pid=session['student_id'],
-                           rows=rows, url="student.courses_", empty=True, wrap="Courses")
+                           rows=rows, url="student.courses_", empty=True, wrap="Add Courses")
 
 
 @student.route('/classes/')
 @login_required
 def classes():
     return_403('lecturer_id')
-    pass
+    rows = []
+    for attendance in Attendance.query.filter(
+                    Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
+        rows.append((attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo))
+
+    print(session['student_id'], rows)
+    return render_template("lists/classes.html", title="Classes Attended", is_student=True, pid=session['student_id'],
+                           rows=rows, url="student.download", empty=True, wrap="Download Attendance")
+
+
+@student.route('/download/')
+@login_required
+def download():
+    """
+    return_403('lecturer_id')
+    rows, outfile, text = [], "attendance.pdf", ''
+    for attendance in Attendance.query.filter(
+                    Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
+        rows.append([attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo])
+
+    for row in rows:
+        # set path of picture to its absolute path
+        if row[2]:
+            row[2] = os.path.abspath('app/static/' + row[2]).replace('\\', '/')
+
+    # specify wkhtmltopdf options
+    options = {'quiet': '', 'user-style-sheet': os.path.abspath('app/static/css/style.css')}
+    # generate pdf as variable in memory
+    pdf = pdfkit.from_string(render_template("lists/classes.html",
+                                             url="student.download",
+                                             wrap="Download Attendance",
+                                             rows=rows, download=True),
+                             False, options=options
+                             )
+    # create custom response
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'  # receive pdf file
+    # try and download the file
+    response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
+
+    return response
+    """
+    return "Under construction"

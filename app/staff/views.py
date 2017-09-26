@@ -292,3 +292,26 @@ def _end_class():
             active = session['active']
         return render_template("staff/clock.html", active=active, title="Running Class", is_lecturer=True,
                                pid=session['lecturer_id'])
+
+
+@staff.route('/list_units/')
+@login_required
+def list_units():
+    return_403('student_id')
+    active = ''
+    if 'active' in session:
+        active = session['active']
+    rows = []
+    for course in Course.query.filter(
+                    (Course.id == LecturersTeaching.courses_id) &
+                    (LecturersTeaching.lecturers_id == Lecturer.query.filter_by(id=session['lecturer_id'])
+                        .first().id
+                     )
+    ).all():
+        rows.append(('FEE' + str(course.id), course.name))
+
+    print(rows)
+
+    return render_template("lists/subjects.html", title="Courses Registered", is_lecturer=True,
+                           pid=session['lecturer_id'],
+                           rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)

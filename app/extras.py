@@ -46,9 +46,10 @@ def add_student(reg_num, name, year, programme, pic_url):
     return message, status
 
 
-def atten_dance(reg_num, url, verified, class_):
+def atten_dance(reg_num, url, verified, class_, course):
     """
     Method to save attendance and verification of a student to a class
+    :param course: Course student is attending
     :param class_: ID of chosen running class
     :param reg_num: Registration number of student
     :param url: URL of uploaded picture
@@ -66,7 +67,8 @@ def atten_dance(reg_num, url, verified, class_):
                             student=reg_num,
                             class_=class_,  # to be adjusted
                             verified=verified,
-                            uploaded_photo=url)
+                            uploaded_photo=url,
+                            course=course)
     try:
         db_session.add(photo)
         db_session.add(verify)

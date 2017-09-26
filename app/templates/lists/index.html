@@ -7,7 +7,7 @@
          <div class="outer">
              <div class="middle">
                  <div class="inner">
-                     <h1 style="text-align:center;">{{ wrap }}</h1>
+                     <h1 style="text-align:center;">{{ wrap.split()[-1] }}</h1>
                      {% if rows %}
                          <hr class="intro-divider">
                          <div class="center">
@@ -29,9 +29,8 @@
                             <h3> Nothing here. </h3>
                             <hr class="intro-divider">
                      {% endif %}
-                     <a href="{{ url_for(url) }}" class="btn btn-default btn-lg">
-                         <i class="fa fa-plus"></i>
-                         Add {{ wrap }}
+                     <a href="{{ url_for(url, pid=pid) }}" class="btn btn-default btn-lg">
+                         <i class="fa fa-plus"></i> {{ wrap }}
                      </a>
                      </div>
                      </div>

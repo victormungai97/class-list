@@ -79,6 +79,9 @@ class Course(Base):
     student_courses = relationship('StudentCourses',
                                    primaryjoin='StudentCourses.courses_id == Course.id',
                                    backref='courses2')
+    attended = relationship('Attendance',
+                            primaryjoin='Attendance.course == Course.name',
+                            backref='attended')
 
     # class_details = relationship("ClassDetails",
     #                            primaryjoin='ClassDetails.CourseName == Course.name '
@@ -302,6 +305,7 @@ class Attendance(Base):
     """
     Class that maps the students who attended a given class
     Contains the student's picture, registration number, class attended and verification id
+    Also contains the time of attendance and the unit student is attending
     """
 
     __tablename__ = 'attendance'
@@ -327,6 +331,10 @@ class Attendance(Base):
                             ForeignKey('photos.address', ondelete='CASCADE', onupdate='CASCADE'),
                             primary_key=True,
                             nullable=False)
+    course = Column("course",
+                    String(80),
+                    ForeignKey('courses.name', ondelete='CASCADE', onupdate='CASCADE'))
+    time_attended = Column('time_started', DateTime, nullable=False, default=datetime.datetime.now, index=True)
 
     def __repr__(self):
         return "<Student {} attended class {}.>".format(self.student, self.class_)

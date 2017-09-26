@@ -44,7 +44,7 @@ CREATE TABLE `alembic_version` (
 
 LOCK TABLES `alembic_version` WRITE;
 /*!40000 ALTER TABLE `alembic_version` DISABLE KEYS */;
-INSERT INTO `alembic_version` VALUES ('04a84768a546');
+INSERT INTO `alembic_version` VALUES ('bc793a9bc5e7');
 /*!40000 ALTER TABLE `alembic_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -61,15 +61,20 @@ CREATE TABLE `attendance` (
   `class_` int(11) NOT NULL,
   `verified` int(11) DEFAULT NULL,
   `uploaded_photo` varchar(100) NOT NULL,
+  `course` varchar(80) DEFAULT NULL,
+  `time_started` datetime NOT NULL,
   PRIMARY KEY (`id`,`student`,`class_`,`uploaded_photo`),
   KEY `class_` (`class_`),
   KEY `student` (`student`),
   KEY `uploaded_photo` (`uploaded_photo`),
   KEY `ix_attendance_verified` (`verified`),
+  KEY `ix_attendance_time_started` (`time_started`),
+  KEY `course` (`course`),
   CONSTRAINT `attendance_ibfk_1` FOREIGN KEY (`class_`) REFERENCES `classes` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `attendance_ibfk_2` FOREIGN KEY (`student`) REFERENCES `students` (`reg_num`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `attendance_ibfk_3` FOREIGN KEY (`uploaded_photo`) REFERENCES `photos` (`address`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `attendance_ibfk_4` FOREIGN KEY (`verified`) REFERENCES `verification_statuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT `attendance_ibfk_4` FOREIGN KEY (`verified`) REFERENCES `verification_statuses` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `attendance_ibfk_5` FOREIGN KEY (`course`) REFERENCES `courses` (`name`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -462,4 +467,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-22 23:38:38
+-- Dump completed on 2017-09-25 20:42:23

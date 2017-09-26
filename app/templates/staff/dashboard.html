@@ -28,7 +28,15 @@
                         <li class="list-inline-item">
                             <h4>
                                 <a href="{{ url_for('staff.register_course', pid=pid) }}" style="font-size: medium">
-                                    Register Unit</a>
+                                    Register Course</a>
+                            </h4>
+                        </li>
+                        <li class="divider"><h4>|</h4></li>
+                        <li class="list-inline-item">
+                            <h4>
+                                <a href="{{ url_for('staff.list_units', pid=pid) }}" style="font-size: medium">
+                                    Courses Registered
+                                </a>
                             </h4>
                         </li>
                         <li class="divider"><h4>|</h4></li>
