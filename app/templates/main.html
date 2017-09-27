@@ -5,6 +5,7 @@
 <html lang="en">
 <head>
     <title>{{ title }} | Class Attendance System</title>
+    {% if not download %}
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
     {% if home %}<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">{% endif %}
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -17,6 +18,7 @@
             (new Date()).getTime() +
             '" rel="stylesheet" />')
     </script>
+     {% endif %}
 </head>
 
 <header>

@@ -10,8 +10,8 @@
                      <h1 style="text-align:center;">{{ wrap.split()[-1] }}</h1>
                      {% if rows %}
                          <hr class="intro-divider">
-                         <div class="center">
-                             <table class="table table-striped table-bordered">
+                         <div class="center col-lg-12 col-sm-12 col-md-12">
+                             <table class="table table-bordered table-striped">
                                  <thead>
                                  <tr>
                                      {% block heading %}{% endblock %}
@@ -29,9 +29,9 @@
                             <h3> Nothing here. </h3>
                             <hr class="intro-divider">
                      {% endif %}
-                     <a href="{{ url_for(url, pid=pid) }}" class="btn btn-default btn-lg">
+                     {% if not download %}<a href="{{ url_for(url, pid=pid) }}" class="btn btn-default btn-lg">
                          <i class="fa fa-plus"></i> {{ wrap }}
-                     </a>
+                     </a> {% endif %}
                      </div>
                      </div>
                  </div>

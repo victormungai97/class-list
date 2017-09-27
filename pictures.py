@@ -5,6 +5,7 @@ from shutil import move
 from werkzeug.utils import secure_filename
 
 from app import upload_folder
+from app.extras import unique_files
 
 # from classifier import infer
 
@@ -62,20 +63,8 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
         move(file_, filename)
         file_ = filename
 
-    # check if file is in current directory. If so, rename it
-    for root, dirs, files in os.walk(path):
-        for i in range(len(files)):
-            files[i] = os.path.join(root, files[i])
-        common_files = []
-        if filename in files:
-            for _file in files:
-                if os.path.basename(_file).startswith(basename):
-                    common_files.append(_file)
-            if common_files:
-                common_files.sort()
-                filename = common_files[-1]
-                start, end = tuple(filename.rsplit('_', 1))
-                filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
+
+    filename = unique_files(path, filename, basename, extension)
 
     # save image
     if not phone:

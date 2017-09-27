@@ -1,5 +1,6 @@
 # app/extras.py
 
+import os
 from flask import session, abort
 from .database import db_session
 from .models import Student, Photo, Attendance, VerificationStatus, User
@@ -93,3 +94,28 @@ def return_403(key):
     """
     if key in session:
         abort(403)
+
+
+def unique_files(directory, filename, basename, extension='pdf'):
+    """
+    check if file is in current directory. If so, rename it
+    :param directory: Directory to save in
+    :param filename: Name of file currently
+    :param basename: Base name of file
+    :param extension: Extension of file
+    :return: New file name if current name exists
+    """
+    for root, dirs, files in os.walk(directory):
+        for i in range(len(files)):
+            files[i] = os.path.join(root, files[i])
+        common_files = []
+        if filename in files:
+            for _file in files:
+                if os.path.basename(_file).startswith(basename):
+                    common_files.append(_file)
+            if common_files:
+                common_files.sort()
+                filename = common_files[-1]
+                start, end = tuple(filename.rsplit('_', 1))
+                filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
+    return filename

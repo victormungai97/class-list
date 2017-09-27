@@ -1,10 +1,10 @@
 # app/student/views.py
 
 import re
-# import os
-# import pdfkit
+import os
+import pdfkit
 from werkzeug.utils import secure_filename
-from flask import render_template, request, flash, redirect, url_for, jsonify, session  # , make_response
+from flask import render_template, request, flash, redirect, url_for, jsonify, session, make_response
 from flask_login import login_required, logout_user
 
 from ..database import db_session
@@ -352,7 +352,7 @@ def classes():
 @student.route('/download/')
 @login_required
 def download():
-    """
+    # """
     return_403('lecturer_id')
     rows, outfile, text = [], "attendance.pdf", ''
     for attendance in Attendance.query.filter(
@@ -364,8 +364,10 @@ def download():
         if row[2]:
             row[2] = os.path.abspath('app/static/' + row[2]).replace('\\', '/')
 
+    # list of css files
+    css = ['app/static/css/style.css','app/static/css/bootstrap.min.css','app/static/css/narrow-jumbotron.css']
     # specify wkhtmltopdf options
-    options = {'quiet': '', 'user-style-sheet': os.path.abspath('app/static/css/style.css')}
+    options = {'quiet': '', 'user-style-sheet': css}
     # generate pdf as variable in memory
     pdf = pdfkit.from_string(render_template("lists/classes.html",
                                              url="student.download",
@@ -380,5 +382,5 @@ def download():
     response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
 
     return response
-    """
-    return "Under construction"
+    # """
+    # return "Under construction"
