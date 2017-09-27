@@ -354,12 +354,13 @@ def classes():
 def download():
     """
     Function converts HTML template page to pdf and passes the pdf to user for download
-    :return:
+    :return: response to download pdf
     """
     return_403('lecturer_id')
-    rows, outfile, text = [], "attendance.pdf", ''
+    rows, reg_no, outfile, text = [], "", "attendance.pdf", ''
     for attendance in Attendance.query.filter(
                     Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
+        reg_no = attendance.student
         rows.append([attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo])
 
     for row in rows:
@@ -370,13 +371,13 @@ def download():
     # list of css files
     css = ['app/static/css/style.css', 'app/static/css/bootstrap.min.css', 'app/static/css/narrow-jumbotron.css']
     # specify wkhtmltopdf options
-    options = {'quiet': '', 'user-style-sheet': css}
+    options = {'quiet': ''}
     # generate pdf as variable in memory
     pdf = pdfkit.from_string(render_template("lists/classes.html",
-                                             url="student.download",
+                                             reg_no=reg_no,
                                              wrap="Download Attendance",
                                              rows=rows, download=True),
-                             False, options=options
+                             False, options=options, css=css
                              )
     # create custom response
     response = make_response(pdf)

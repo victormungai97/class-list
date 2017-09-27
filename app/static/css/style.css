@@ -60,7 +60,7 @@ th {
     padding-bottom: 12px;
     text-align: left;
     background-color: #4CAF50;
-    color: white;
+    color: black;
 }
 
 .alert-info {
@@ -169,4 +169,10 @@ th {
 .has-success .help-block,
 .has-success .form-control-feedback {
     color: #18bc9c;
+}
+
+.download{
+    float: right;
+    text-align: right;
+    font-size: small;
 }
