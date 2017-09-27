@@ -352,7 +352,10 @@ def classes():
 @student.route('/download/')
 @login_required
 def download():
-    # """
+    """
+    Function converts HTML template page to pdf and passes the pdf to user for download
+    :return:
+    """
     return_403('lecturer_id')
     rows, outfile, text = [], "attendance.pdf", ''
     for attendance in Attendance.query.filter(
@@ -365,7 +368,7 @@ def download():
             row[2] = os.path.abspath('app/static/' + row[2]).replace('\\', '/')
 
     # list of css files
-    css = ['app/static/css/style.css','app/static/css/bootstrap.min.css','app/static/css/narrow-jumbotron.css']
+    css = ['app/static/css/style.css', 'app/static/css/bootstrap.min.css', 'app/static/css/narrow-jumbotron.css']
     # specify wkhtmltopdf options
     options = {'quiet': '', 'user-style-sheet': css}
     # generate pdf as variable in memory
@@ -382,5 +385,3 @@ def download():
     response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
 
     return response
-    # """
-    # return "Under construction"
