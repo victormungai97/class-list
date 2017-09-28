@@ -2,17 +2,18 @@
 
 {% extends "lists/index.html" %}
 {% block heading %}
-    <th>Name</th><th>Date</th><th>Photo</th>
+    <th></th><th>Name</th><th>Date</th><th>Photo</th>
 {% endblock %}
 {% block contents %}
     {% for row in rows %}
         <tr>
             <td>{{ row[0] }}</td>
             <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
             <td><img class="img-circle"
-                     {% if download %} src="file:///{{ row[2] }}"
-                     {% else %} src="{{ url_for('static', filename=row[2]) }}" {% endif %}
-                     align="center" alt="{{ row[0] }}" style="width:100px;height:100px"></td>
+                     {% if download %} src="file:///{{ row[3] }}"
+                     {% else %} src="{{ url_for('static', filename=row[3]) }}" {% endif %}
+                     align="center" alt="{{ row[1] }}" style="width:100px;height:100px"></td>
         </tr>
     {% endfor %}
 {% endblock %}

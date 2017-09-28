@@ -339,10 +339,11 @@ def registered_courses():
 @login_required
 def classes():
     return_403('lecturer_id')
-    rows = []
+    rows, counter = [], 1
     for attendance in Attendance.query.filter(
                     Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
-        rows.append((attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo))
+        rows.append((counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo))
+        counter += 1
 
     print(session['student_id'], rows)
     return render_template("lists/classes.html", title="Classes Attended", is_student=True, pid=session['student_id'],
@@ -357,16 +358,17 @@ def download():
     :return: response to download pdf
     """
     return_403('lecturer_id')
-    rows, reg_no, outfile, text = [], "", "attendance.pdf", ''
+    rows, reg_no, outfile, text, counter = [], "", "attendance.pdf", '', 1
     for attendance in Attendance.query.filter(
                     Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
         reg_no = attendance.student
-        rows.append([attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo])
+        rows.append([counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo])
+        counter += 1
 
     for row in rows:
         # set path of picture to its absolute path
-        if row[2]:
-            row[2] = os.path.abspath('app/static/' + row[2]).replace('\\', '/')
+        if isinstance(row[3], str) and row[3].endswith('.jpg'):
+            row[3] = os.path.abspath('app/static/' + row[3]).replace('\\', '/')
 
     # list of css files
     css = ['app/static/css/style.css', 'app/static/css/bootstrap.min.css', 'app/static/css/narrow-jumbotron.css']
