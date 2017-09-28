@@ -2,16 +2,15 @@
 
 import re
 import os
-import pdfkit
 from werkzeug.utils import secure_filename
-from flask import render_template, request, flash, redirect, url_for, jsonify, session, make_response
+from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
 
 from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
-from ..extras import add_student, atten_dance, return_403
+from ..extras import add_student, atten_dance, return_403, make_pdf
 
 from pictures import allowed_file, determine_picture, decode_image
 from populate import courses
@@ -324,14 +323,17 @@ def registered_courses():
     :return: HTML template of registered courses
     """
     return_403('lecturer_id')
-    rows = []
+    rows, reg_no, html = [], Student.query.filter_by(id=session['student_id']).first().reg_num, "lists/units.html"
     for course in Course.query.filter(
                     (Course.id == StudentCourses.courses_id) &
-                    (StudentCourses.student_id == Student.query.filter_by(id=session['student_id']).first().reg_num)
+                    (StudentCourses.student_id == reg_no)
     ).all():
         rows.append(('FEE' + str(course.id), course.name))
 
-    return render_template("lists/units.html", title="Courses Registered", is_student=True, pid=session['student_id'],
+    if request.args.get("download"):
+        return make_pdf(reg_no, rows, "courses.pdf", html, "Add Courses")
+
+    return render_template(html, title="Courses Registered", is_student=True, pid=session['student_id'],
                            rows=rows, url="student.courses_", empty=True, wrap="Add Courses")
 
 
@@ -339,52 +341,21 @@ def registered_courses():
 @login_required
 def classes():
     return_403('lecturer_id')
-    rows, counter = [], 1
+    rows, counter, reg_no = [], 1, Student.query.filter_by(id=session['student_id']).first().reg_num
+    outfile, html, wrap = "attendance.pdf", "lists/classes.html", "Download Attendance"
     for attendance in Attendance.query.filter(
-                    Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
-        rows.append((counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo))
+                    Attendance.student == reg_no).all():
+        rows.append([counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"),
+                     attendance.uploaded_photo])
         counter += 1
 
-    print(session['student_id'], rows)
-    return render_template("lists/classes.html", title="Classes Attended", is_student=True, pid=session['student_id'],
-                           rows=rows, url="student.download", empty=True, wrap="Download Attendance")
+    if request.args.get("download"):
+        for row in rows:
+            # set path of picture to its absolute path
+            if isinstance(row[3], str) and row[3].endswith('.jpg'):
+                row[3] = os.path.abspath('app/static/' + row[3]).replace('\\', '/')
 
+        return make_pdf(reg_no, rows, outfile, html, wrap)
 
-@student.route('/download/')
-@login_required
-def download():
-    """
-    Function converts HTML template page to pdf and passes the pdf to user for download
-    :return: response to download pdf
-    """
-    return_403('lecturer_id')
-    rows, reg_no, outfile, text, counter = [], "", "attendance.pdf", '', 1
-    for attendance in Attendance.query.filter(
-                    Attendance.student == Student.query.filter_by(id=session['student_id']).first().reg_num).all():
-        reg_no = attendance.student
-        rows.append([counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"), attendance.uploaded_photo])
-        counter += 1
-
-    for row in rows:
-        # set path of picture to its absolute path
-        if isinstance(row[3], str) and row[3].endswith('.jpg'):
-            row[3] = os.path.abspath('app/static/' + row[3]).replace('\\', '/')
-
-    # list of css files
-    css = ['app/static/css/style.css', 'app/static/css/bootstrap.min.css', 'app/static/css/narrow-jumbotron.css']
-    # specify wkhtmltopdf options
-    options = {'quiet': ''}
-    # generate pdf as variable in memory
-    pdf = pdfkit.from_string(render_template("lists/classes.html",
-                                             reg_no=reg_no,
-                                             wrap="Download Attendance",
-                                             rows=rows, download=True),
-                             False, options=options, css=css
-                             )
-    # create custom response
-    response = make_response(pdf)
-    response.headers['Content-Type'] = 'application/pdf'  # receive pdf file
-    # try and download the file
-    response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
-
-    return response
+    return render_template(html, title="Classes Attended", is_student=True, pid=session['student_id'],
+                           rows=rows, url="student.classes", empty=True, wrap=wrap)

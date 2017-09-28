@@ -4,15 +4,21 @@
 {% block heading %}
     <th>Code</th><th>Name</th>
 {% endblock %}
+{% block report %}
+    <div class="report"><a href="{{ url_for('staff.list_units', download=True) }}" class="btn btn-link">
+        Download report</a> </div>
+{% endblock %}
 {% block contents %}
     {% for row in rows %}
         <tr>
             <td>{{ row[0] }}</td>
             <td>{{ row[1] }}</td>
+            {% if not download %}
             <td><a class="btn btn-outline-primary btn-sm" href="{{ url_for('staff._start_class', pid=pid) }}">
                     <i class="fa fa-clock-o" aria-hidden="true"> Start Class</i>
                 </a>
             </td>
+            {% endif %}
         </tr>
     {% endfor %}
 {% endblock %}

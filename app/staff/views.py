@@ -9,7 +9,7 @@ from . import staff
 from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm
 from ..database import db_session
 from ..models import Lecturer, Course, LecturersTeaching, Class, User
-from ..extras import return_403
+from ..extras import return_403, make_pdf
 
 
 @staff.route('/register/', methods=['GET', 'POST'])
@@ -301,17 +301,18 @@ def list_units():
     active = ''
     if 'active' in session:
         active = session['active']
-    rows = []
+    rows, pid, html = [], Lecturer.query.filter_by(id=session['lecturer_id']).first().id, "lists/subjects.html"
     for course in Course.query.filter(
                     (Course.id == LecturersTeaching.courses_id) &
-                    (LecturersTeaching.lecturers_id == Lecturer.query.filter_by(id=session['lecturer_id'])
-                        .first().id
+                    (LecturersTeaching.lecturers_id == pid
                      )
     ).all():
         rows.append(('FEE' + str(course.id), course.name))
 
-    print(rows)
+    if request.args.get("download"):
+        pid = Lecturer.query.filter_by(id=session['lecturer_id']).first().staff_id
+        return make_pdf(pid, rows, "subjects.pdf", html, "Add Courses")
 
-    return render_template("lists/subjects.html", title="Courses Registered", is_lecturer=True,
+    return render_template(html, title="Courses Registered", is_lecturer=True,
                            pid=session['lecturer_id'],
                            rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)

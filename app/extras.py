@@ -1,7 +1,10 @@
 # app/extras.py
 
 import os
-from flask import session, abort
+import pdfkit
+from datetime import datetime
+from flask import session, abort, make_response, render_template
+
 from .database import db_session
 from .models import Student, Photo, Attendance, VerificationStatus, User
 from populate import verification
@@ -119,3 +122,33 @@ def unique_files(directory, filename, basename, extension='pdf'):
                 start, end = tuple(filename.rsplit('_', 1))
                 filename = "_".join([start, ".".join([str(int(end[0]) + 1), extension])])
     return filename
+
+
+def make_pdf(pid, rows, outfile, html, wrap):
+    """
+    Function converts HTML template page to PDF and passes the PDF to user for download
+    :param wrap: Message above table
+    :param pid: Unique identifier of user
+    :param rows: List of fields in table
+    :param outfile: PDF to be downloaded
+    :param html: HTML template page to convert
+    :return: response to download PDF
+    """
+    # list of css files
+    css = ['app/static/css/style.css', 'app/static/css/bootstrap.min.css', 'app/static/css/narrow-jumbotron.css']
+    # specify wkhtmltopdf options
+    options = {'quiet': ''}
+    # generate pdf as variable in memory
+    pdf = pdfkit.from_string(render_template(html,
+                                             reg_no=pid,
+                                             date = datetime.now().strftime("%d %B %Y %I:%M:%S %p"),
+                                             wrap=wrap,
+                                             rows=rows, download=True),
+                             False, options=options, css=css
+                             )
+    # create custom response
+    response = make_response(pdf)
+    response.headers['Content-Type'] = 'application/pdf'  # receive pdf file
+    # try and download the file
+    response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
+    return response

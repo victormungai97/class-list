@@ -176,3 +176,12 @@ th {
     text-align: right;
     font-size: small;
 }
+
+.date{
+    font-size: small;
+}
+
+.report{
+    float: right;
+    font-size: small;
+}
