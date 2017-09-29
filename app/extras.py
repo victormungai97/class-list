@@ -141,7 +141,7 @@ def make_pdf(pid, rows, outfile, html, wrap):
     # generate pdf as variable in memory
     pdf = pdfkit.from_string(render_template(html,
                                              reg_no=pid,
-                                             date = datetime.now().strftime("%d %B %Y %I:%M:%S %p"),
+                                             date=datetime.now().strftime("%d %B %Y %I:%M:%S %p"),
                                              wrap=wrap,
                                              rows=rows, download=True),
                              False, options=options, css=css

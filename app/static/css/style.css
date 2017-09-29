@@ -177,6 +177,10 @@ th {
     font-size: small;
 }
 
+.img-circle{
+    border-radius:50%
+}
+
 .date{
     font-size: small;
 }

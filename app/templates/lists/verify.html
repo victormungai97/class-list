@@ -1,0 +1,29 @@
+<!-- app/templates/lists/verify.html -->
+
+{% extends "lists/index.html" %}
+{% block heading %}
+    <th></th><th>Admission Number</th><th>Message</th><th>Unverified Face</th><th>Registered Face</th>
+{% endblock %}
+{% block report %}
+    <div class="report"><a href="#" class="btn btn-link">
+        Download report</a> </div>
+{% endblock %}
+{% block contents %}
+    {% for row in rows %}
+        <tr>
+            <td>{{ row[0] }}</td>
+            <td>{{ row[1] }}</td>
+            <td>{{ row[2] }}</td>
+            <td><img class="img-circle"
+                     {% if download %} src="file:///{{ row[3] }}"
+                     {% else %} src="{{ url_for('static', filename=row[3]) }}" {% endif %}
+                     align="center" alt="{{ row[1] }}" style="width:100px;height:100px"></td>
+            <td><img class="img-circle"
+                     {% if download %} src="file:///{{ row[4] }}"
+                     {% else %} src="{{ url_for('static', filename=row[4]) }}" {% endif %}
+                     align="center" alt="{{ row[1] }}" style="width:100px;height:100px"></td>
+            <td><a href="#" class="btn btn-sm btn-link">Approve</a> </td>
+            <td><a href="#" class="btn btn-sm btn-link">Reject</a> </td>
+        </tr>
+    {% endfor %}
+{% endblock %}

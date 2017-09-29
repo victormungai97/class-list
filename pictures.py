@@ -63,7 +63,6 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
         move(file_, filename)
         file_ = filename
 
-
     filename = unique_files(path, filename, basename, extension)
 
     # save image

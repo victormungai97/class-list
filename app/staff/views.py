@@ -4,11 +4,11 @@ from flask import flash, redirect, render_template, url_for, session, request, j
 from flask_login import login_required, logout_user
 from datetime import datetime
 
-from populate import staff_roles, courses
+from populate import staff_roles, courses, verification
 from . import staff
 from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm
 from ..database import db_session
-from ..models import Lecturer, Course, LecturersTeaching, Class, User
+from ..models import Lecturer, Course, LecturersTeaching, Class, User, Attendance, Photo
 from ..extras import return_403, make_pdf
 
 
@@ -314,5 +314,27 @@ def list_units():
         return make_pdf(pid, rows, "subjects.pdf", html, "Add Courses")
 
     return render_template(html, title="Courses Registered", is_lecturer=True,
-                           pid=session['lecturer_id'],
+                           pid=session['lecturer_id'], to_download=False,
                            rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)
+
+
+@staff.route('/verify')
+def verify():
+    active = ''
+    if 'active' in session:
+        active = session['active']
+    rows, html, counter = [], 'lists/verify.html', 1
+
+    for attendance in Attendance.query.filter(Attendance.verified != 1).all():
+        rows.append([counter,
+                     attendance.student,
+                     verification[attendance.verified]['error_message'],
+                     attendance.uploaded_photo,
+                     Photo.query.filter((Photo.student_id == attendance.student) & (Photo.learning == 1))
+                    .all()[-1].address])
+        counter += 1
+
+    print(rows)
+    return render_template(html, title="Verify Students", is_lecturer=True,
+                           pid=session['lecturer_id'], rows=rows, to_download=False,
+                           url="staff.register_course", empty=True, wrap="Verified Students", active=active)

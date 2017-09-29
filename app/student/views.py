@@ -320,7 +320,8 @@ def attend_class():
 def registered_courses():
     """
     Function to list courses student is registered to
-    :return: HTML template of registered courses
+    One can also download a PDF document of this list
+    :return: HTML template of registered courses or PDF conversion of the HTML page
     """
     return_403('lecturer_id')
     rows, reg_no, html = [], Student.query.filter_by(id=session['student_id']).first().reg_num, "lists/units.html"
@@ -334,17 +335,22 @@ def registered_courses():
         return make_pdf(reg_no, rows, "courses.pdf", html, "Add Courses")
 
     return render_template(html, title="Courses Registered", is_student=True, pid=session['student_id'],
-                           rows=rows, url="student.courses_", empty=True, wrap="Add Courses")
+                           rows=rows, url="student.courses_", empty=True, wrap="Add Courses", to_download=False)
 
 
 @student.route('/classes/')
 @login_required
 def classes():
+    """
+    Function that shows the classes a student has attended
+    One can also download a PDF document of this list
+    :return: HTML template of attended classes or PDF conversion of the HTML page
+    """
     return_403('lecturer_id')
     rows, counter, reg_no = [], 1, Student.query.filter_by(id=session['student_id']).first().reg_num
     outfile, html, wrap = "attendance.pdf", "lists/classes.html", "Download Attendance"
     for attendance in Attendance.query.filter(
-                    Attendance.student == reg_no).all():
+            (Attendance.student == reg_no) & (Attendance.verified == 1)).all():
         rows.append([counter, attendance.course, attendance.time_attended.strftime("%A %d, %B %Y"),
                      attendance.uploaded_photo])
         counter += 1
@@ -358,4 +364,4 @@ def classes():
         return make_pdf(reg_no, rows, outfile, html, wrap)
 
     return render_template(html, title="Classes Attended", is_student=True, pid=session['student_id'],
-                           rows=rows, url="student.classes", empty=True, wrap=wrap)
+                           rows=rows, url="student.classes", empty=True, wrap=wrap, to_download=True)
