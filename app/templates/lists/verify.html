@@ -5,7 +5,7 @@
     <th></th><th>Admission Number</th><th>Message</th><th>Unverified Face</th><th>Registered Face</th>
 {% endblock %}
 {% block report %}
-    <div class="report"><a href="#" class="btn btn-link">
+    <div class="report"><a href="{{ url_for('staff.verify', download=True) }}" class="btn btn-link">
         Download report</a> </div>
 {% endblock %}
 {% block contents %}
@@ -22,8 +22,10 @@
                      {% if download %} src="file:///{{ row[4] }}"
                      {% else %} src="{{ url_for('static', filename=row[4]) }}" {% endif %}
                      align="center" alt="{{ row[1] }}" style="width:100px;height:100px"></td>
+        {% if not download %}
             <td><a href="#" class="btn btn-sm btn-link">Approve</a> </td>
             <td><a href="#" class="btn btn-sm btn-link">Reject</a> </td>
+        {% endif %}
         </tr>
     {% endfor %}
 {% endblock %}

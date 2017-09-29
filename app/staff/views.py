@@ -1,6 +1,7 @@
 # app/staff/views.py
 
-from flask import flash, redirect, render_template, url_for, session, request, jsonify
+import os
+from flask import flash, redirect, render_template, url_for, session, request, jsonify, abort
 from flask_login import login_required, logout_user
 from datetime import datetime
 
@@ -318,7 +319,7 @@ def list_units():
                            rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)
 
 
-@staff.route('/verify')
+@staff.route('/verify/')
 def verify():
     active = ''
     if 'active' in session:
@@ -334,7 +335,20 @@ def verify():
                     .all()[-1].address])
         counter += 1
 
-    print(rows)
+    if request.args.get("download"):
+        for row in rows:
+            # set path of pictures to their absolute paths
+            row[3] = os.path.abspath('app/static/' + row[3]).replace('\\', '/')
+            row[4] = os.path.abspath('app/static/' + row[4]).replace('\\', '/')
+
+        pid = Lecturer.query.filter_by(id=session['lecturer_id']).first().staff_id
+        return make_pdf(pid, rows, "verify.pdf", html, "Verified Students")
+
     return render_template(html, title="Verify Students", is_lecturer=True,
                            pid=session['lecturer_id'], rows=rows, to_download=False,
-                           url="staff.register_course", empty=True, wrap="Verified Students", active=active)
+                           url="staff.students", empty=True, wrap="Verified Students", active=active)
+
+
+@staff.route('/students')
+def students():
+    abort(503)
