@@ -13,6 +13,13 @@ from ..models import Lecturer, Course, LecturersTeaching, Class, User, Attendanc
 from ..extras import return_403, make_pdf
 
 
+def check_class_activity():
+    if 'active' in session:
+        return session['active']
+    else:
+        return False
+
+
 @staff.route('/register/', methods=['GET', 'POST'])
 def register():
     """
@@ -82,7 +89,7 @@ def logout():
     Log a staff member out through the logout link
     """
     return_403('student_id')
-    if 'active' in session and session['active']:
+    if check_class_activity() and session['active']:
         flash("You cannot log out while a class is running")
         return redirect(url_for('staff.dashboard'))
     logout_user()
@@ -99,9 +106,7 @@ def logout():
 @login_required
 def dashboard():
     return_403('student_id')
-    active = False
-    if 'active' in session:
-        active = session['active']
+    active = check_class_activity()
     # noinspection PyUnresolvedReferences
     return render_template("staff/dashboard.html", title="Staff Dashboard", home=True, active=active, is_lecturer=True,
                            pid=session['lecturer_id'])
@@ -128,9 +133,7 @@ def register_course(pid):
     :return: Dashboard if successful or template of registration form if otherwise
     """
     return_403('student_id')
-    active = False
-    if 'active' in session:
-        active = session['active']
+    active = check_class_activity()
     form = CourseForm()
     form.staff_id = Lecturer.query.filter_by(id=pid).first().id
 
@@ -183,7 +186,7 @@ def _start_class():
     :return: HTML template of the class form
     """
     return_403('student_id')
-    if 'active' in session and session['active']:
+    if check_class_activity() and session['active']:
         flash("You cannot start a class while a class is running")
         return redirect(url_for('staff.dashboard'))
     # get lecturer's ID
@@ -211,9 +214,7 @@ def _show_clock():
     :return:
     """
     return_403('student_id')
-    active = False
-    if 'active' in session:
-        active = session['active']
+    active = check_class_activity()
     staff_id = request.args.get("a")
     course = request.args.get("q")
     session['start'] = datetime.now()
@@ -251,9 +252,7 @@ def _show_clock():
 @login_required
 def running_class():
     return_403('student_id')
-    active = False
-    if 'active' in session:
-        active = session['active']
+    active = check_class_activity()
     return render_template('staff/clock.html', class_=session['name'], active=active, title="Running Class",
                            is_lecturer=True, pid=session['lecturer_id'])
 
@@ -288,9 +287,7 @@ def _end_class():
 
         return redirect(url_for('staff.dashboard'))
     else:
-        active = False
-        if 'active' in session:
-            active = session['active']
+        active = check_class_activity()
         return render_template("staff/clock.html", active=active, title="Running Class", is_lecturer=True,
                                pid=session['lecturer_id'])
 
@@ -299,9 +296,7 @@ def _end_class():
 @login_required
 def list_units():
     return_403('student_id')
-    active = ''
-    if 'active' in session:
-        active = session['active']
+    active = check_class_activity()
     rows, pid, html = [], Lecturer.query.filter_by(id=session['lecturer_id']).first().id, "lists/subjects.html"
     for course in Course.query.filter(
                     (Course.id == LecturersTeaching.courses_id) &
@@ -319,21 +314,31 @@ def list_units():
                            rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)
 
 
-@staff.route('/verify/')
-def verify():
-    active = ''
-    if 'active' in session:
-        active = session['active']
-    rows, html, counter = [], 'lists/verify.html', 1
-
+@login_required
+def verify_persons():
+    counter, rows = 1, []
     for attendance in Attendance.query.filter(Attendance.verified != 1).all():
         rows.append([counter,
                      attendance.student,
                      verification[attendance.verified]['error_message'],
                      attendance.uploaded_photo,
                      Photo.query.filter((Photo.student_id == attendance.student) & (Photo.learning == 1))
-                    .all()[-1].address])
+                    .all()[-1].address,
+                     attendance.id])
         counter += 1
+    return rows
+
+
+@staff.route('/verify/')
+@login_required
+def verify():
+    """
+    Function to display list of students whose face have not been verified
+    :return: HTML template page
+    """
+    active, rows, html = check_class_activity(), [], 'lists/verify.html'
+
+    rows = verify_persons()
 
     if request.args.get("download"):
         for row in rows:
@@ -349,6 +354,23 @@ def verify():
                            url="staff.students", empty=True, wrap="Verified Students", active=active)
 
 
-@staff.route('/students')
+@staff.route('/approve/<pid>/')
+@login_required
+def approve(pid):
+    """
+    Function to confirm student's appearance in class
+    :param pid: row ID in Attendance table
+    :return: HTML template table
+    """
+    attendance, active = Attendance.query.filter_by(id=pid).first(), check_class_activity()
+    attendance.verified = 1
+    db_session.commit()
+
+    return render_template('lists/verify.html', title="Verify Students", is_lecturer=True,
+                           pid=session['lecturer_id'], rows=verify_persons(), to_download=False,
+                           url="staff.students", empty=True, wrap="Verified Students", active=active)
+
+
+@staff.route('/students/')
 def students():
     abort(503)

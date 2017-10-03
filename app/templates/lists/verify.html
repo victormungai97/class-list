@@ -23,7 +23,7 @@
                      {% else %} src="{{ url_for('static', filename=row[4]) }}" {% endif %}
                      align="center" alt="{{ row[1] }}" style="width:100px;height:100px"></td>
         {% if not download %}
-            <td><a href="#" class="btn btn-sm btn-link">Approve</a> </td>
+            <td><a href="{{ url_for('staff.approve', pid=row[-1]) }}" class="btn btn-sm btn-link">Approve</a> </td>
             <td><a href="#" class="btn btn-sm btn-link">Reject</a> </td>
         {% endif %}
         </tr>
