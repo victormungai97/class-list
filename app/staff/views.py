@@ -363,8 +363,9 @@ def approve(pid):
     :return: HTML template table
     """
     attendance, active = Attendance.query.filter_by(id=pid).first(), check_class_activity()
-    attendance.verified = 1
-    db_session.commit()
+    if attendance and attendance.verified != 1:
+        attendance.verified = 1
+        db_session.commit()
 
     return render_template('lists/verify.html', title="Verify Students", is_lecturer=True,
                            pid=session['lecturer_id'], rows=verify_persons(), to_download=False,
