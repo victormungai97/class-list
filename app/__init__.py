@@ -19,7 +19,8 @@ login_manager = LoginManager()
 # app.config['SQLALCHEMY_DATABASE_URI'] = '''mysql+pymysql://username:password@localhost/db_name'''
 # app.config['SECRET_KEY'] = "your-secret-key"
 
-print(u"Current path is", os.path.abspath(os.curdir), sep=' ')
+home_folder = os.path.abspath(os.curdir)
+print(u"Current path is", home_folder, sep=' ')
 
 
 def train_images():
@@ -105,7 +106,7 @@ def create_app(config_name):
 
 
 # path to class pictures
-upload_folder = os.path.join("app/static/uploads")
+upload_folder = os.path.abspath(os.path.join("app/static/uploads"))
 
 # create the folders
 if not os.path.isdir(upload_folder):

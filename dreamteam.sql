@@ -44,7 +44,7 @@ CREATE TABLE `alembic_version` (
 
 LOCK TABLES `alembic_version` WRITE;
 /*!40000 ALTER TABLE `alembic_version` DISABLE KEYS */;
-INSERT INTO `alembic_version` VALUES ('bc793a9bc5e7');
+INSERT INTO `alembic_version` VALUES ('f775a2b938a4');
 /*!40000 ALTER TABLE `alembic_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -367,7 +367,9 @@ CREATE TABLE `students` (
   `class_rep` tinyint(1) NOT NULL,
   `is_student` tinyint(1) DEFAULT NULL,
   `user` int(11) DEFAULT NULL,
+  `email` varchar(120) NOT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `email` (`email`),
   UNIQUE KEY `ix_students_reg_num` (`reg_num`),
   KEY `ix_students_class_rep` (`class_rep`),
   KEY `ix_students_name` (`name`),
@@ -467,4 +469,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-09-25 20:42:23
+-- Dump completed on 2017-10-19  1:25:18

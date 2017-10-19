@@ -4,7 +4,7 @@ import re
 from flask_wtf import FlaskForm
 from flask_login import login_user
 from wtforms import StringField, SubmitField, SelectField, FileField, Field, SelectMultipleField
-from wtforms.validators import DataRequired
+from wtforms.validators import DataRequired, Email
 from flask_wtf.file import FileRequired, FileAllowed
 from wtforms.widgets import HTMLString, html_params
 
@@ -65,6 +65,7 @@ class RegistrationForm(FlaskForm):
     reg_num = StringField("Registration Number", validators=[DataRequired()])
     first_name = StringField("First Name", validators=[DataRequired()])
     last_name = StringField("Last Name", validators=[DataRequired()])
+    email = StringField("Email", validators=[Email(), DataRequired()])
     year_of_study = SelectField("Year of Study",
                                 choices=dict_to_tuple(year_of_study),
                                 validators=[DataRequired()],
@@ -91,6 +92,12 @@ class RegistrationForm(FlaskForm):
         # check if student is already registered
         if Student.query.filter_by(reg_num=self.reg_num.data).first():
             self.reg_num.errors.append('Registration number already registered')
+            return False
+
+        # check if email already registered
+        lecturer = Student.query.filter_by(email=self.email.data).first()
+        if lecturer:
+            self.email.errors.append("Email already registered")
             return False
 
         # check that correct format of student reg. num is followed

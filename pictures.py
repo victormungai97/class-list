@@ -4,8 +4,7 @@ import os
 from shutil import move
 from werkzeug.utils import secure_filename
 
-from app import upload_folder
-from app.extras import unique_files
+from app.extras import unique_files, create_path
 
 # from classifier import infer
 
@@ -36,10 +35,11 @@ def compress_image(filename):
     foo.save(filename, optimize=True, quality=100)
 
 
-def determine_picture(reg_num, image, filename, attendance=False, phone=False):
+def determine_picture(reg_num, name, image, filename, attendance=False, phone=False):
     """
     Function that processes images and
     returns their URLs and the verification status of the images, if any
+    :param name: Name of the student
     :param phone: Checks if image is from phone
     :param attendance: Checks whether student is registering or attending class
     :param filename: Name of the specific image file
@@ -47,16 +47,12 @@ def determine_picture(reg_num, image, filename, attendance=False, phone=False):
     :param image: Specific image being processed
     :return: URL of image and verification code if any
     """
-    # split reg_num to retrieve year, course and specific number of student
-    details = reg_num.split("/")
-    # create new path to folder for student's image(s)
-    path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
+    path = create_path(reg_num)
     file_ = os.path.join(path, filename)
-    # create the new folder
-    if not os.path.isdir(path):
-        os.makedirs(path)
     # split filename into basename and components
     basename, extension = filename.rsplit('.', 1)[0], filename.rsplit('.', 1)[-1]
+    # change base name to name of student
+    basename = name
     # get path of file
     filename = os.path.join(path, "".join([basename, "_", str(0), ".", extension]))
     if phone:
@@ -105,12 +101,7 @@ def decode_image(data, name, reg_num):
     """
     # get encoded version of the byte string
     img_data = data.encode('UTF-8', 'strict')
-    # split reg_num to retrieve year, course and specific number of student
-    details = reg_num.split("/")
-    # create new path to folder for student's image(s)
-    path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
-    if not os.path.isdir(path):
-        os.makedirs(path)
+    path = create_path(reg_num)
     import base64
     # create file name
     pic_name = path + secure_filename(name) + ".jpg"

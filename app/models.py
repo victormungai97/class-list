@@ -169,7 +169,8 @@ def load_user(user_id):
 class Student(User):
     """
     Class maps to the students table.
-    Contains the student's ID, registration number, year of study, department and whether on is a class representative
+    Contains the student's ID, registration number, email, year of study, department
+    and whether on is a class representative
     Also contains reference to general users table
     """
 
@@ -178,6 +179,7 @@ class Student(User):
     id = Column("id", Integer, primary_key=True)
     reg_num = Column("reg_num", String(45), unique=True, index=True)
     name = Column("name", String(60), nullable=False, index=True)
+    email = Column('email', String(120), unique=True, nullable=False)
     year_of_study = Column("year_of_study", Integer, nullable=False, index=True)
     programme = Column("programme", String(80), ForeignKey('programmes.name'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)

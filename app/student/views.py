@@ -5,14 +5,17 @@ import os
 from werkzeug.utils import secure_filename
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
+from zipfile import ZipFile, is_zipfile
+from shutil import move, rmtree
 
+from .. import home_folder
 from ..database import db_session
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
-from ..extras import add_student, atten_dance, return_403, make_pdf
+from ..extras import add_student, atten_dance, return_403, make_pdf, create_path
 
-from pictures import allowed_file, determine_picture, decode_image
+from pictures import allowed_file, determine_picture  # , decode_image
 from populate import courses
 
 
@@ -72,11 +75,13 @@ def logout():
 def phone():
     """
     Function to register student from the mobile app
+    Zipping functionality is courtesy of http://www.geeksforgeeks.org/working-zip-files-python/
     :return: JSON Object containing error code and accompanying message
     """
-    json, message, status, pic_url = request.get_json(force=True), '', 0, []
+    json, message, status, pic_url, filename, unzip, files = request.form, '', 0, [], None, False, []
     name = json['name']
     reg_no = json['regno']
+    email = json['email']
 
     # check that correct format of student reg. num is followed
     if not re.search("/[\S]+/", reg_no):
@@ -86,24 +91,73 @@ def phone():
     if Student.query.filter_by(reg_num=reg_no).first():
         return jsonify({'message': 'Registration number already registered', 'status': 2})
 
+    if Student.query.filter_by(email=email).first():
+        return jsonify({'message': 'Email already registered', 'status': 5})
+
     department = json['departments']
     year = json['year']
-    images = json['images']
+    # receive and save zip file
+    zip_file = request.files['FILE']
+    if zip_file:
+        filename = secure_filename(zip_file.filename)
+        zip_file.save(os.path.join(create_path(reg_no), filename))
+    path = create_path(reg_no) + "/" + os.path.basename(filename).replace(".zip", "")
 
-    for image in images:
-        image = decode_image(image, name, reg_no)
+    # confirm that file is a zip file
+    if is_zipfile(zip_file):
+        # open the zip file in READ mode
+        with ZipFile(os.path.join(create_path(reg_no), filename), 'r') as zip_file:
+            # print all the contents of the zip file in table format
+            zip_file.printdir()
 
-        filename = secure_filename(image)
-        if not allowed_file(filename):
-            # noinspection PyUnusedLocal
-            message, status = "File format not supported", 3
-        else:
-            url, verified = determine_picture(reg_no, image=image, filename=filename, phone=True)
-            pic_url.append(url)
+            # extract all the files in zip file
+            print('Extracting all the files now...')
+            zip_file.extractall(path=path)
+            # remember unzipping has happened
+            unzip = True
 
-    message, status = add_student(reg_no, name, year, department, pic_url)
+            # delete redundant zip file
+            print('Deleting file {}...'.format(filename))
+            filename = os.path.join(create_path(reg_no), filename)
+            os.remove(filename)
+            print('Done!')
 
-    return jsonify({'message': message, "status": status})
+    # if successful unzipping
+    if unzip:
+        # read the files in the resultant directory
+        files = os.listdir(path)
+        # change working directory in resultant directory
+        os.chdir(path)
+        for image in files:
+            # move files into the parent directory
+            filename = secure_filename(image)
+            move(filename, os.path.join(os.pardir, filename))
+
+    # move to parent directory
+    os.chdir(os.pardir)
+    # delete resultant directory
+    rmtree(path)
+    # process the files
+    for image in files:
+        if os.path.isfile(os.path.join(os.curdir, image)):
+            filename = secure_filename(image)
+            if not allowed_file(filename):
+                # noinspection PyUnusedLocal
+                message, status = "File format not supported", 3
+                break
+            else:
+                url, verified = determine_picture(reg_no, name.replace(" ", "_"), image, filename, phone=True)
+                pic_url.append(url)
+
+    # return to original location
+    os.chdir(home_folder)
+    print(u"Current path is", os.path.abspath(os.curdir), sep=' ')
+
+    message, status = add_student(reg_no, name, year, department, email, pic_url)
+
+    # print(reg_no, name, department, year, email, sep='\n')
+
+    return jsonify({'message': message, "status": 1})
 
 
 @student.route('/login2/', methods=['POST'])
@@ -155,12 +209,12 @@ def web():
                     return render_template("student/register.html", form=form, title="Student Registration",
                                            is_student=True)
                 else:
-                    url, verified = determine_picture(reg_num, image, filename)
+                    url, verified = determine_picture(reg_num, name.replace(" ", "_"), image, filename)
                     pic_url.append(url)
 
         # check if student already registered
         message, status = add_student(form.reg_num.data, name, form.year_of_study.data,
-                                      courses.get(form.programme.data), pic_url)
+                                      courses.get(form.programme.data), form.email.data, pic_url)
         if not status:
             flash(message)
             return redirect(url_for('student.login'))
@@ -281,7 +335,7 @@ def attend_class():
     reg_num, url, verified = Student.query.filter_by(id=session['student_id']).first().reg_num, "", 0
     # get chosen running class
     course = request.args.get("course")
-    name = Course.query.filter(Course.id == course).first().name
+    course_title = Course.query.filter(Course.id == course).first().name  # course title
     class_ = Class.query.filter(Class.is_active).filter(LecturersTeaching.courses_id == course) \
         .filter(Class.lec_course_id == LecturersTeaching.id).first().id
 
@@ -296,10 +350,13 @@ def attend_class():
         if allowed_file(image.filename):
             # get name of the source file + Make the filename safe, remove unsupported chars
             filename = str(secure_filename(image.filename))
+            # get name of student
+            student_name = Student.query.filter_by(reg_num=reg_num).first().name
             # if allowed, process image to get url and verification status of image
-            url, verified = determine_picture(reg_num, image, filename, attendance=True)
+            url, verified = determine_picture(reg_num, student_name.replace(" ", "_"), image, filename,
+                                              attendance=True)
             # add to db
-            message, status = atten_dance(reg_num, url, verified, class_, name)
+            message, status = atten_dance(reg_num, url, verified, class_, course_title)
 
             if not status:
                 flash(message)

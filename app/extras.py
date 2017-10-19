@@ -5,15 +5,17 @@ import pdfkit
 from datetime import datetime
 from flask import session, abort, make_response, render_template
 
+from app import upload_folder
 from .database import db_session
 from .models import Student, Photo, Attendance, VerificationStatus, User
 from populate import verification
 
 
 # noinspection PyArgumentList
-def add_student(reg_num, name, year, programme, pic_url):
+def add_student(reg_num, name, year, programme, email, pic_url):
     """
     Function to add student and registration photos to db
+    :param email: Email address of student
     :param reg_num: Registration number of student
     :param name: Name of student
     :param year: Year of study of student
@@ -27,6 +29,7 @@ def add_student(reg_num, name, year, programme, pic_url):
                        name=name,
                        year_of_study=year,
                        programme=programme,
+                       email=email,
                        class_rep=False,
                        user=len(User.query.all()) + 1,
                        is_student=True)
@@ -152,3 +155,19 @@ def make_pdf(pid, rows, outfile, html, wrap):
     # try and download the file
     response.headers['Content-Disposition'] = 'attachment; filename= {}'.format(outfile)
     return response
+
+
+def create_path(reg_num=""):
+    """
+    Function that creates the users' file directories using their registration numbers
+    :param reg_num: Registration number of students
+    :return: Path to the directories
+    """
+    # split reg_num to retrieve year, course and specific number of student
+    details = reg_num.split("/")
+    # create new path to folder for student's image(s)
+    path = '/'.join([upload_folder, details[0], details[2], details[1], '/'])
+    # create the new folder
+    if not os.path.isdir(path):
+        os.makedirs(path)
+    return os.path.abspath(path)
