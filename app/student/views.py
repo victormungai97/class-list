@@ -144,7 +144,7 @@ def phone():
             if not allowed_file(filename):
                 # noinspection PyUnusedLocal
                 message, status = "File format not supported", 3
-                break
+                return jsonify({'message': message, "status": status})
             else:
                 url, verified = determine_picture(reg_no, name.replace(" ", "_"), image, filename, phone=True)
                 pic_url.append(url)
@@ -157,7 +157,7 @@ def phone():
 
     # print(reg_no, name, department, year, email, sep='\n')
 
-    return jsonify({'message': message, "status": 1})
+    return jsonify({'message': message, "status": status})
 
 
 @student.route('/login2/', methods=['POST'])
