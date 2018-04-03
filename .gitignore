@@ -1,0 +1,4 @@
+# ignore the instance folder, hence allowing one to change SQLALCHEMY_DATABASE_URI freely
+instance/
+instance/config.py
+.env
