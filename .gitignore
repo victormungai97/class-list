@@ -2,3 +2,4 @@
 instance/
 instance/config.py
 *.env
+*.pyc
