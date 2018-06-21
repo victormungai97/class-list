@@ -21,4 +21,5 @@ def init_db():
     :return: None
     """
     import app.models
+    print(app.models)
     Base.metadata.create_all(bind=engine)

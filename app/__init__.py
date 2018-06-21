@@ -78,27 +78,32 @@ def create_app(config_name):
     # noinspection PyUnresolvedReferences
     @app.errorhandler(403)
     def forbidden(error):
+        print(repr(error))
         return render_template('errors/403.html', title='Forbidden', wrapper='Forbidden', error=True), 403
 
     # noinspection PyUnresolvedReferences
     @app.errorhandler(404)
     def page_not_found(error):
+        print(repr(error))
         return render_template('errors/404.html', title='Page Not Found', wrapper='Page Not Found', error=True), 404
 
     # noinspection PyUnresolvedReferences
     @app.errorhandler(500)
     def internal_server_error(error):
+        print(repr(error))
         return render_template('errors/500.html', title='Internal Server Error', wrapper='Server Error',
                                error=True), 500
 
     # noinspection PyUnresolvedReferences
     @app.errorhandler(401)
     def bad_or_missing_authentication(error):
+        print(repr(error))
         return render_template('errors/401.html', title='Unauthorized', wrapper="Unauthorized", error=True), 401
 
     # noinspection PyUnresolvedReferences
     @app.errorhandler(503)
     def temporarily_unavailable(error):
+        print(repr(error))
         return render_template('errors/503.html', title="Temporarily Unavailable", wrapper="Temporarily Unavailable",
                                error=True), 503
 
