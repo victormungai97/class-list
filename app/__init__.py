@@ -121,4 +121,6 @@ def shutdown_session(exception=None):
     Method closes database session after app closes or request is completed
     :return: None
     """
+    if exception:
+        print("Exception encountered: {}".format(repr(exception)))
     db_session.remove()
