@@ -4,23 +4,30 @@
 <nav class="navbar navbar-default">
     <div class="header clearfix">
         <a class="navbar-brand topnav" href={% if is_lecturer %}
-                "{{ url_for('staff.dashboard') }}">{% elif is_student %}
-                "{{ url_for('student.home') }}">{% else %}
-                "{{ url_for('home.index') }}"> {% endif %}
+            "{{ url_for('staff.dashboard') }}">{% elif is_student %}
+            "{{ url_for('student.home') }}">{% else %}
+            "{{ url_for('home.index') }}"> {% endif %}
         Class Attendance System</a>
         <ul style="font-size: small" class="nav nav-pills float-right">
             {% if current_user.is_authenticated %}
                 {% if is_lecturer %}
-                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
-                        {% if active %}
-                        <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End Class</a></li>
-                        {% else %}
-                            <li class="nav-item"><a class="nav-link" href="{{ url_for('staff._start_class', pid=pid) }}">Start Class
-                            </a></li>
-                        {% endif %}
+                    <li class="nav-item"><a class="nav-link active"
+                                            href="{{ url_for('staff.dashboard') }}">Dashboard</a></li>
+                    {% if active %}
+                        <li class="nav-item"><a class="nav-link" href="{{ url_for('staff.running_class') }}">End
+                            Class</a></li>
+                    {% else %}
+                        <li class="nav-item"><a class="nav-link"
+                                                href="{{ url_for('staff._start_class', pid=pid) }}">Start
+                            Class
+                        </a></li>
+                    {% endif %}
                 {% elif is_student %}
-                    <li class="nav-item"><a class="nav-link active" href="{{ url_for('student.home') }}">Dashboard</a> </li>
-                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_', pid=pid) }}">Attend Class</a> </li>
+                    <li class="nav-item"><a class="nav-link active"
+                                            href="{{ url_for('student.home') }}">Dashboard</a>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="{{ url_for('student.web_') }}">Attend
+                        Class</a></li>
                 {% endif %}
                 <li class="nav-item"><a class="nav-link"><i class="fa fa-user"></i></a></li>
             {% else %}
@@ -38,13 +45,13 @@
 
         function getUserName() {
             table = '';
-            {% if is_lecturer %} table='Lecturer' {% elif is_student %} table='Student' {% endif %}
+            {% if is_lecturer %} table = 'Lecturer' {% elif is_student %} table = 'Student' {% endif %}
             var send = {
-                id: {{ pid }},
+                id: {% if is_student %} {{ session['student_id'] }} {% else %} {{ pid }} {% endif %},
                 table: table
             }
             $.getJSON("{{ url_for('home.get_name') }}", send, function (data) {
-                $('.fa-user').html(data).css({"font-size":"95%","font-weight":"bold"});
+                $('.fa-user').html(data).css({"font-size": "95%", "font-weight": "bold"});
             });
         }
     })

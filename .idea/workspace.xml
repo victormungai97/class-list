@@ -2,95 +2,110 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="a4fef4b2-0807-4ece-8df9-c8a11a40be29" name="Default" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/sqldialects.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/cache.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/email.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/errors.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/security.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/email/confirm_email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/email/confirm_email.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/email/email.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/email/reset_password.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/email/reset_password.txt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/errors/error.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/staff/reset_password.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/templates/staff/reset_password_request.html" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/upgrade.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/class-list.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/class-list.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/alembic.ini" beforeDir="false" afterPath="$PROJECT_DIR$/alembic.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/extras.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/extras.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/home/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/home/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/home/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/home/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/staff/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/staff/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/staff/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/staff/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/staff/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/staff/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/bootstrap.min.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/bootstrap.min.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/narrow-jumbotron.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/narrow-jumbotron.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/css/style.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/img/ReadMe.txt" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/img/ReadMe.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/img/animated_favicon1.gif" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/img/animated_favicon1.gif" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/img/favicon.ico" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/img/favicon.ico" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/img/list.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/img/list.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/img/uon-logo.jpg" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/img/uon-logo.jpg" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/ie10-viewport-bug-workaround.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/ie10-viewport-bug-workaround.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/static/js/img_preview.js" beforeDir="false" afterPath="$PROJECT_DIR$/app/static/js/img_preview.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/student/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/student/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/student/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/student/forms.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/student/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/student/views.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/errors/401.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/errors/403.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/errors/404.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/errors/500.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/errors/503.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/home/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/home/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/includes/_footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/includes/_footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/includes/_navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/includes/_navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/lists/classes.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/lists/classes.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/lists/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/lists/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/lists/subjects.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/lists/subjects.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/lists/units.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/lists/units.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/lists/verify.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/lists/verify.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/main.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/main.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/class.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/class.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/clock.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/clock.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/course.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/course.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/staff/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/staff/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/attend.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/attend.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/class.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/class.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/course.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/course.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/templates/student/register.html" beforeDir="false" afterPath="$PROJECT_DIR$/app/templates/student/register.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config.py" beforeDir="false" afterPath="$PROJECT_DIR$/config.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dreamteam.sql" beforeDir="false" afterPath="$PROJECT_DIR$/dreamteam.sql" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/flaskapp.wsgi" beforeDir="false" afterPath="$PROJECT_DIR$/flaskapp.wsgi" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/README" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/README" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/env.py" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/env.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/script.py.mako" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/script.py.mako" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/04a84768a546_inclusion_of_altitude_field.py" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/versions/eb406bfd44b8_added_staff_email_confirmation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/1a45e87a0390_create_new_database.py" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/versions/8941e0dbb1ef_create_new_database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/31c8d6cf4739_create_new_table_users.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/587a02a3d968_change_on_primary_join.py" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/versions/b28095ca56f0_added_student_email_confirmation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/5cecaf75af73_new_fields_in_students_and_lecturers_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/6748113c1867_mapping_of_relationship_between_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/698c699453d7_drop_id_field.py" beforeDir="false" afterPath="$PROJECT_DIR$/migrations/versions/1b5dec2ad5aa_added_years_of_a_department.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/6d28c3f63bb8_new_foreign_keys.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/882074fb4391_remove_not_null_constraint.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/bc793a9bc5e7_modified_attendance.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/d42959eef8d4_changing_foreign_key_reference_in_.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/d6a8269736ed_create_days_table.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/migrations/versions/f4a8ef2b6155_create_suggestions_and_extras_tables.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/pictures.py" beforeDir="false" afterPath="$PROJECT_DIR$/pictures.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/populate.py" beforeDir="false" afterPath="$PROJECT_DIR$/populate.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run.py" beforeDir="false" afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
     </list>
-    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
-    <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/class_list$run.coverage" NAME="run Coverage Results" MODIFIED="1529613376814" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/class_list$upgrade.coverage" NAME="upgrade Coverage Results" MODIFIED="1532185693897" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/class_list$run.coverage" NAME="run Coverage Results" MODIFIED="1536311576515" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/class_list$Unittests_in_tests_py.coverage" NAME="Unittests in tests.py Coverage Results" MODIFIED="1545946970361" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/class_list$Unnamed.coverage" NAME="Unnamed Coverage Results" MODIFIED="1522766833604" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="" />
-  </component>
-  <component name="FileEditorManager">
-    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/instance/config.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="75">
-              <caret line="5" selection-start-line="5" selection-end-line="5" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="config.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/config.py">
-          <provider selected="true" editor-type-id="text-editor" />
-        </entry>
-      </file>
-      <file leaf-file-name=".gitignore" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.gitignore">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" column="19" selection-start-line="3" selection-start-column="19" selection-end-line="3" selection-end-column="19" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="run.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/run.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="165">
-              <caret line="13" selection-start-line="13" selection-end-line="13" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="__init__.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/__init__.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state>
-              <folding>
-                <element signature="e#19#28#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name=".env" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/.env">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="60">
-              <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="database.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/database.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="315">
-              <caret line="25" selection-start-line="25" selection-end-line="25" />
-              <folding>
-                <element signature="e#19#55#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="views.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app/student/views.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6120">
-              <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-    </leaf>
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -102,84 +117,37 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="IdeDocumentHistory">
-    <option name="CHANGED_PATHS">
-      <list>
-        <option value="$PROJECT_DIR$/.env" />
-        <option value="$PROJECT_DIR$/pictures.py" />
-        <option value="$PROJECT_DIR$/.gitignore" />
-        <option value="$PROJECT_DIR$/app/templates/errors/404.html" />
-        <option value="$PROJECT_DIR$/app/__init__.py" />
-        <option value="$PROJECT_DIR$/app/database.py" />
-        <option value="$PROJECT_DIR$/instance/config.py" />
-      </list>
-    </option>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
   </component>
-  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
-  <component name="JsGulpfileManager">
-    <detection-done>true</detection-done>
-    <sorting>DEFINITION_ORDER</sorting>
-  </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="x" value="65" />
-    <option name="y" value="24" />
-    <option name="width" value="1275" />
-    <option name="height" value="652" />
-  </component>
-  <component name="ProjectView">
-    <navigator proportions="" version="1">
-      <foldersAlwaysOnTop value="true" />
-    </navigator>
-    <panes>
-      <pane id="Scope" />
-      <pane id="ProjectPane">
-        <subPane>
-          <expand>
-            <path>
-              <item name="class-list" type="b2602c69:ProjectViewProjectNode" />
-              <item name="class-list" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="class-list" type="b2602c69:ProjectViewProjectNode" />
-              <item name="class-list" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="class-list" type="b2602c69:ProjectViewProjectNode" />
-              <item name="class-list" type="462c0819:PsiDirectoryNode" />
-              <item name="app" type="462c0819:PsiDirectoryNode" />
-              <item name="student" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="class-list" type="b2602c69:ProjectViewProjectNode" />
-              <item name="class-list" type="462c0819:PsiDirectoryNode" />
-              <item name="instance" type="462c0819:PsiDirectoryNode" />
-            </path>
-          </expand>
-          <select />
-        </subPane>
-      </pane>
-    </panes>
+  <component name="ProjectId" id="1PFiPAD1ChEq9FQjNgfCeN5cMHU" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$USER_HOME$/Envs/class-list-env" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="ts.external.directory.path" value="$PROJECT_DIR$/node_modules/typescript/lib" />
   </component>
-  <component name="RunDashboard">
-    <option name="ruleStates">
-      <list>
-        <RuleState>
-          <option name="name" value="ConfigurationTypeDashboardGroupingRule" />
-        </RuleState>
-        <RuleState>
-          <option name="name" value="StatusDashboardGroupingRule" />
-        </RuleState>
-      </list>
-    </option>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/templates/graphql" />
+      <recent name="$PROJECT_DIR$/app/templates/base" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/migrations" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/app/templates/email" />
+      <recent name="$PROJECT_DIR$/app/templates/staff" />
+    </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Python.run">
     <configuration name="run" type="PythonConfigurationType" factoryName="Python">
       <module name="class-list" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -198,8 +166,61 @@
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
       <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
     </configuration>
+    <configuration name="upgrade" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <module name="class-list" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/upgrade.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Unittests in tests.py" type="tests" factoryName="Unittests" temporary="true" nameIsGenerated="true">
+      <module name="class-list" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/tests.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <list>
+      <item itemvalue="Python.run" />
+      <item itemvalue="Python.upgrade" />
+      <item itemvalue="Python tests.Unittests in tests.py" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Python tests.Unittests in tests.py" />
+        <item itemvalue="Python.upgrade" />
+        <item itemvalue="Python.upgrade" />
+      </list>
+    </recent_temporary>
   </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="SvnConfiguration">
     <configuration />
   </component>
@@ -210,6 +231,81 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1522758390802</updated>
+      <workItem from="1545391652419" duration="92000" />
+      <workItem from="1545392061420" duration="32000" />
+      <workItem from="1545392901635" duration="33000" />
+      <workItem from="1545393089354" duration="198000" />
+      <workItem from="1545393366027" duration="506000" />
+      <workItem from="1545397694085" duration="2629000" />
+      <workItem from="1545413757721" duration="1056000" />
+      <workItem from="1545573560495" duration="1136000" />
+      <workItem from="1545588549831" duration="28067000" />
+      <workItem from="1545660330189" duration="1418000" />
+      <workItem from="1545716217736" duration="5771000" />
+      <workItem from="1545734441716" duration="950000" />
+      <workItem from="1545748249674" duration="7696000" />
+      <workItem from="1545757315919" duration="830000" />
+      <workItem from="1545793098241" duration="10871000" />
+      <workItem from="1545812571325" duration="612000" />
+      <workItem from="1545840581181" duration="1170000" />
+      <workItem from="1545842494020" duration="12632000" />
+      <workItem from="1545894737910" duration="25387000" />
+      <workItem from="1545981482115" duration="2622000" />
+      <workItem from="1546014738418" duration="5795000" />
+      <workItem from="1546064259064" duration="120000" />
+      <workItem from="1546069709640" duration="1325000" />
+      <workItem from="1546080515887" duration="17788000" />
+      <workItem from="1546242096183" duration="1618000" />
+      <workItem from="1546265411700" duration="1319000" />
+      <workItem from="1546282807711" duration="2037000" />
+      <workItem from="1546358386262" duration="599000" />
+      <workItem from="1550947918559" duration="101000" />
+      <workItem from="1550948118057" duration="5464000" />
+      <workItem from="1551081442162" duration="595000" />
+      <workItem from="1551276096433" duration="599000" />
+      <workItem from="1565476222470" duration="4774000" />
+      <workItem from="1565481011644" duration="4000" />
+      <workItem from="1565549644501" duration="14686000" />
+      <workItem from="1565632603783" duration="12843000" />
+      <workItem from="1565683499430" duration="4427000" />
+      <workItem from="1565713747025" duration="5907000" />
+      <workItem from="1565719887660" duration="6334000" />
+      <workItem from="1565924625220" duration="1266000" />
+      <workItem from="1566074056425" duration="4207000" />
+      <workItem from="1566080589820" duration="917000" />
+      <workItem from="1566081527629" duration="5373000" />
+      <workItem from="1566652960504" duration="665000" />
+      <workItem from="1566653853683" duration="27000" />
+      <workItem from="1566653960341" duration="125000" />
+      <workItem from="1566654135321" duration="349000" />
+      <workItem from="1566654515865" duration="352000" />
+      <workItem from="1566655466087" duration="180000" />
+      <workItem from="1566658877164" duration="27000" />
+      <workItem from="1566658982983" duration="8000" />
+      <workItem from="1566659061844" duration="47000" />
+      <workItem from="1566659128337" duration="1837000" />
+      <workItem from="1566663673514" duration="10625000" />
+      <workItem from="1566764968099" duration="1571000" />
+      <workItem from="1566808657560" duration="1026000" />
+      <workItem from="1566841809075" duration="3775000" />
+      <workItem from="1566916601954" duration="42000" />
+      <workItem from="1566916660009" duration="1193000" />
+      <workItem from="1566929741365" duration="8321000" />
+      <workItem from="1566973868893" duration="2974000" />
+      <workItem from="1567053756115" duration="1543000" />
+      <workItem from="1567061800560" duration="6508000" />
+      <workItem from="1567543225372" duration="2699000" />
+      <workItem from="1567547834765" duration="4241000" />
+      <workItem from="1567672077776" duration="5391000" />
+      <workItem from="1570607009795" duration="65000" />
+      <workItem from="1600320305456" duration="2484000" />
+      <workItem from="1652965575291" duration="84000" />
+      <workItem from="1652966770277" duration="1145000" />
+      <workItem from="1652968637986" duration="4420000" />
+      <workItem from="1654280486038" duration="3460000" />
+      <workItem from="1654292564458" duration="903000" />
+      <workItem from="1654298300520" duration="769000" />
+      <workItem from="1654299131391" duration="2549000" />
     </task>
     <task id="LOCAL-00001" summary="Hello in April 2018">
       <created>1522769747166</created>
@@ -228,408 +324,37 @@
     <option name="localTasksCounter" value="3" />
     <servers />
   </component>
-  <component name="ToolWindowManager">
-    <frame x="65" y="-4" width="1301" height="772" extended-state="6" />
-    <editor active="true" />
-    <layout>
-      <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
-      <window_info anchor="bottom" id="Database Changes" order="7" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Version Control" order="7" />
-      <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" weight="0.32831326" />
-      <window_info anchor="bottom" id="Terminal" order="7" weight="0.32831326" />
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.24596465" />
-      <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
-      <window_info anchor="right" id="Database" order="3" />
-      <window_info anchor="right" id="SciView" order="3" />
-      <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
-      <window_info id="Favorites" order="2" side_tool="true" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
-      <window_info anchor="bottom" id="Find" order="1" />
-    </layout>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
   </component>
   <component name="TypeScriptGeneratedFilesManager">
-    <option name="version" value="1" />
+    <option name="version" value="3" />
   </component>
-  <component name="VcsContentAnnotationSettings">
-    <option name="myLimit" value="2678400000" />
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Hello in April 2018" />
     <MESSAGE value="Hello in June 2018" />
     <option name="LAST_COMMIT_MESSAGE" value="Hello in June 2018" />
   </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <option name="time" value="1" />
-    </breakpoint-manager>
-  </component>
-  <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret lean-forward="true" />
-          <folding>
-            <element signature="e#19#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3015">
-          <caret line="217" column="22" lean-forward="true" selection-start-line="217" selection-start-column="22" selection-end-line="217" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="30">
-          <caret line="2" column="18" selection-start-line="2" selection-start-column="18" selection-end-line="2" selection-end-column="18" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pictures.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="37" column="12" selection-start-line="37" selection-start-column="12" selection-end-line="37" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="240">
-          <caret line="25" column="19" lean-forward="true" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3015">
-          <caret line="217" column="22" lean-forward="true" selection-start-line="217" selection-start-column="22" selection-end-line="217" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pictures.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="11" selection-start-line="11" selection-end-line="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pictures.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="11" lean-forward="true" selection-start-line="11" selection-end-line="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" column="87" lean-forward="true" selection-start-line="3" selection-end-line="4" selection-end-column="87" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="5895">
-          <caret line="409" column="55" lean-forward="true" selection-start-line="409" selection-start-column="55" selection-end-line="409" selection-end-column="55" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="9" column="11" selection-start-line="9" selection-start-column="11" selection-end-line="9" selection-end-column="11" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1725">
-          <caret line="124" selection-start-line="124" selection-end-line="124" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" lean-forward="true" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/pictures.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="495">
-          <caret line="37" column="12" selection-start-line="37" selection-start-column="12" selection-end-line="37" selection-end-column="12" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/templates/errors/401.html">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-45" />
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/database.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="315">
-          <caret line="25" selection-start-line="25" selection-end-line="25" />
-          <folding>
-            <element signature="e#19#55#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/student/views.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6120">
-          <caret line="424" lean-forward="true" selection-start-line="424" selection-end-line="424" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="45">
-          <caret line="3" column="19" selection-start-line="3" selection-start-column="19" selection-end-line="3" selection-end-column="19" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <folding>
-            <element signature="e#19#28#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.env">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="60">
-          <caret line="4" lean-forward="true" selection-start-line="4" selection-end-line="4" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/instance/config.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="75">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/config.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/run.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="165">
-          <caret line="13" selection-start-line="13" selection-end-line="13" />
-        </state>
-      </provider>
-    </entry>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/class_list$upgrade.coverage" NAME="upgrade Coverage Results" MODIFIED="1565476761964" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/class_list$run.coverage" NAME="run Coverage Results" MODIFIED="1600320717828" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/class_list$Unittests_in_tests_py.coverage" NAME="Unittests in tests.py Coverage Results" MODIFIED="1567678251792" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

@@ -1,26 +1,42 @@
 # app/__init__.py
 
+from __future__ import print_function
 import os
+import shlex
 from threading import Timer
 from datetime import datetime
-from flask import Flask, render_template
+from flask import Flask, send_from_directory, redirect, url_for, request
+from flask_cors import CORS
 # from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_bootstrap import Bootstrap
+from flask_mail import Mail
+from flask_jwt_extended import JWTManager
+from graphene_file_upload.flask import FileUploadGraphQLView
+from subprocess import Popen
 
 from config import app_config
+from app.cache import cache
 from app.database import db_session, init_db
+
 # from automate import automate
 
 # db = SQLAlchemy()  # db instance variable
 app = Flask(__name__, instance_relative_config=True)
 login_manager = LoginManager()
+mail = Mail()
+jwt = JWTManager()
+cors = CORS(resources={r"/classlist_api/": {"origins": "http://localhost:3000"}})
 
 # app.config['SQLALCHEMY_DATABASE_URI'] = '''mysql+pymysql://username:password@localhost/db_name'''
 # app.config['SECRET_KEY'] = "your-secret-key"
 
 home_folder = os.path.abspath(os.curdir)
 print(u"Current path is", home_folder, sep=' ')
+# set number of images for registration per user
+numOfImages = 10
+# This is the process that will set up Altair GraphQL Client IDE
+altair_process = None
 
 
 def train_images():
@@ -48,6 +64,12 @@ def train_images():
     print("Registration still on")
 
 
+# path to logs folder
+logs_folder = os.path.abspath(os.path.join("app/logs"))
+if not os.path.isdir(logs_folder):
+    os.makedirs(logs_folder)
+
+
 def create_app(config_name):
     """
     This is the method that initializes modules used in the app
@@ -62,10 +84,18 @@ def create_app(config_name):
     # db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_message = "Log in required to view this page"
-    Bootstrap(app)
+    if not app.config['TESTING']:
+        Bootstrap(app)
+    cache.init_app(app)
+    mail.init_app(app)
+    jwt.init_app(app)
+    cors.init_app(app)
 
-    from app import models
+    from app import models, errors, schema
 
+    errors.system_logging('ClassList - A class attendance system')
+
+    # these are blueprints, they are used in place of app in their respective view route decorators
     from .student import student as student_blueprint
     app.register_blueprint(student_blueprint)
 
@@ -75,49 +105,75 @@ def create_app(config_name):
     from .home import home as home_blueprint
     app.register_blueprint(home_blueprint)
 
-    # noinspection PyUnresolvedReferences
-    @app.errorhandler(403)
-    def forbidden(error):
-        print(repr(error))
-        return render_template('errors/403.html', title='Forbidden', wrapper='Forbidden', error=True), 403
-
-    # noinspection PyUnresolvedReferences
-    @app.errorhandler(404)
-    def page_not_found(error):
-        print(repr(error))
-        return render_template('errors/404.html', title='Page Not Found', wrapper='Page Not Found', error=True), 404
-
-    # noinspection PyUnresolvedReferences
-    @app.errorhandler(500)
-    def internal_server_error(error):
-        print(repr(error))
-        return render_template('errors/500.html', title='Internal Server Error', wrapper='Server Error',
-                               error=True), 500
-
-    # noinspection PyUnresolvedReferences
-    @app.errorhandler(401)
-    def bad_or_missing_authentication(error):
-        print(repr(error))
-        return render_template('errors/401.html', title='Unauthorized', wrapper="Unauthorized", error=True), 401
-
-    # noinspection PyUnresolvedReferences
-    @app.errorhandler(503)
-    def temporarily_unavailable(error):
-        print(repr(error))
-        return render_template('errors/503.html', title="Temporarily Unavailable", wrapper="Temporarily Unavailable",
-                               error=True), 503
+    # GraphQL has only a single URL from which it is accessed
+    if not app.config['TESTING']:
+        app.add_url_rule(
+            '/classlist_api/',  # expose the GraphQL schema under this url
+            view_func=FileUploadGraphQLView.as_view(
+                'api',
+                schema=schema.schema,
+            )
+        )
 
     return app
 
 
+# Here, we shall start a background cmd process where we shall run a Express JS program so as to start GraphQL IDE
+def setup_altair():
+    global altair_process
+    # set up command
+    if app.config['DEBUG']:
+        # during development
+        cmd = 'npm run dev'
+    else:
+        if app.config['TESTING']:
+            # During testing, do nothing
+            cmd = ''
+        else:
+            # during production
+            cmd = 'npm run start'
+    # Take a string command and split into a list to run in command line terminal
+    args = shlex.split(cmd)
+    # start background process
+    altair_process = Popen(args=args)
+
+
+# Serve GraphQL Playground for testing
+@app.route('/classlist_api/')
+def graphql():
+    from flask import render_template
+    return render_template("graphql/playground.html", title="GraphQL Playground")
+
+
+# serve home page
+@app.route('/')
+def index():
+    return redirect(url_for('home.index'))
+
+
+# serve the icon
+@app.route('/favicon.ico/')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static', 'img'), 'favicon.ico')
+
+
+# serve document from upload folder
+@app.route('/static/uploads/<filename>/')
+def upload(filename):
+    from werkzeug.utils import secure_filename
+    return send_from_directory(os.path.join(app.root_path, 'static', 'uploads'), secure_filename(filename))
+
+
 # path to class pictures
-upload_folder = os.path.abspath(os.path.join("app/static/uploads"))
+if not app.config.get("UPLOAD_FOLDER", None):
+    app.config["UPLOAD_FOLDER"] = "app/static/uploads"
 
 # create the folders
-if not os.path.isdir(upload_folder):
-    os.makedirs(upload_folder)
+if not os.path.isdir(app.config["UPLOAD_FOLDER"]):
+    os.makedirs(app.config["UPLOAD_FOLDER"])
 
 train_images()
+setup_altair()
 
 
 @app.teardown_appcontext
@@ -129,3 +185,6 @@ def shutdown_session(exception=None):
     if exception:
         print("Exception encountered: {}".format(repr(exception)))
     db_session.remove()
+    # close altair-running process
+    global altair_process
+    altair_process.terminate()

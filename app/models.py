@@ -1,6 +1,8 @@
 # app/models.py
 
 import datetime
+import jwt
+from time import time
 from sqlalchemy import Column, ForeignKey, Integer, String, DateTime, Float, Boolean
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import FetchedValue
@@ -9,7 +11,9 @@ from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from app.database import Base
-from app import login_manager
+from app import app, login_manager
+
+from .errors import system_logging
 
 
 class Class(Base):
@@ -48,6 +52,7 @@ class Programme(Base):
     id = Column("id", Integer, primary_key=True)
     program_id = Column("program_id", String(8), unique=True, nullable=False)
     name = Column("name", String(80), nullable=False, unique=True)
+    year = Column('years', Integer, nullable=False, default=4)
     student = relationship('Student', primaryjoin="Student.programme == Programme.name", backref='student')
     course = relationship('Course', primaryjoin='Course.programme_id == Programme.program_id', backref='course')
     lecturer = relationship('Lecturer', primaryjoin='Lecturer.programme == Programme.name', backref='lecturer')
@@ -109,6 +114,51 @@ class User(UserMixin, Base):
 
     user_id = Column("user_id", Integer, primary_key=True)
 
+    @staticmethod
+    def encode_auth_token(user_id):
+        """
+        This function generates the authentication token
+        to be used by user, either student or lecturer,
+        to request data from or add data to the system
+        :param user_id: The ID of the user from User table, not Student or Lecturer tables
+        :return: Generated JWT token as string
+        """
+        try:
+            payload = {
+                # token expires 30 minutes after login
+                'exp': datetime.datetime.utcnow() + datetime.timedelta(days=0, minutes=30),
+                # token issued at time of login
+                'iat': datetime.datetime.utcnow(),
+                # token not accepted before time of login
+                'nbf': datetime.datetime.utcnow(),
+                # this is subject of the token (the user whom it identifies)
+                'sub': user_id
+            }
+            return jwt.encode(
+                payload,
+                app.config.get('SECRET_KEY'),
+                algorithm='HS256',
+            ).decode('utf-8')
+        except Exception as e:
+            print(e)
+            system_logging(e, exception=True)
+            return "Error generating token."
+
+    @staticmethod
+    def decode_auth_token(request):
+        auth_header = request.headers.get('Authorization')
+        if auth_header:
+            auth_token = auth_header.split(" ")[1]
+        else:
+            auth_token = ''
+        try:
+            payload = jwt.decode(auth_token, app.config.get('SECRET_KEY'))
+            return payload['sub']
+        except jwt.ExpiredSignatureError:
+            return 'Signature expired. Please log in again.'
+        except jwt.InvalidTokenError:
+            return 'Invalid token. Please log in again.'
+
 
 class Lecturer(User):
     """
@@ -124,6 +174,7 @@ class Lecturer(User):
     staff_id = Column('staff_id', String(15), unique=True, nullable=False)
     name = Column('name', String(45), nullable=False)
     email = Column('email', String(120), unique=True, nullable=False)
+    email_confirmed = Column('email_confirmed', Boolean, nullable=False, default=False)
     rank = Column('rank', String(25), nullable=True)
     programme = Column('programme',
                        String(80),
@@ -150,17 +201,45 @@ class Lecturer(User):
         """
         self.password_hash = generate_password_hash(password)
 
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
     def verify_password(self, password):
         """
         Check if hashed password matches actual password
         """
         return check_password_hash(self.password_hash, password)
 
+    def get_reset_password_token(self, expires_in=600):
+        # generates a JWT token as a string.
+        # decode('utf-8') required to convert token which was generated as bytes to string
+        # Our payload consists of the user id and duration for validity of the JWT token
+        # After the duration, the token sent to the user in the reset password link is considered invalid
+        return jwt.encode(
+            {'reset_password': self.id, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256').decode('utf-8')
+
+    # noinspection PyUnresolvedReferences
+    @staticmethod
+    def verify_reset_password_token(token):
+        # This method takes a token and attempts to decode it by invoking PyJWT's jwt.decode() function.
+        # If the token cannot be validated or is expired, an exception will be raised
+        # Return None if error raised
+        # If the token is valid, then the value of the reset_password key from the token's payload is the ID of the user
+        # , so I can load the user and return it
+        try:
+            jwt_id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
+        except BaseException as e:
+            print(e)
+            return None
+        return Lecturer.query.filter_by(id=jwt_id).first()
+
     def __repr__(self):
         return "<Lecturer {}>".format(self.name)
 
 
 # Set up user_loader
+# noinspection PyUnresolvedReferences
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
@@ -180,6 +259,7 @@ class Student(User):
     reg_num = Column("reg_num", String(45), unique=True, index=True)
     name = Column("name", String(60), nullable=False, index=True)
     email = Column('email', String(120), unique=True, nullable=False)
+    email_confirmed = Column('email_confirmed', Boolean, nullable=False, default=False)
     year_of_study = Column("year_of_study", Integer, nullable=False, index=True)
     programme = Column("programme", String(80), ForeignKey('programmes.name'), nullable=False)
     class_rep = Column("class_rep", Boolean, nullable=False, default=False, index=True)
@@ -200,7 +280,7 @@ class Student(User):
 class Photo(Base):
     """
     Class maps to the photos table
-    Contains the photo's ID, itsaddress and the student's registration number
+    Contains the photo's ID, its address and the student's registration number
     """
 
     __tablename__ = 'photos'
@@ -282,7 +362,7 @@ class StudentCourses(Base):
                        nullable=False)
 
     def __repr__(self):
-        return "<Lecturer {}, Course {}.>".format(self.lecturers_id, self.courses_id)
+        return "<Student {}, Course {}.>".format(self.student_id, self.courses_id)
 
 
 class VerificationStatus(Base):

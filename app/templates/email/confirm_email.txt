@@ -1,0 +1,11 @@
+Dear {{ name }},
+
+Your account was successfully created. Please click the link below to confirm your email address and activate your account:
+
+{{ confirm_url }}.
+
+Please note that this link is only valid for twenty four (24) hours.
+
+Sincerely,
+
+The Class Attendance System Team

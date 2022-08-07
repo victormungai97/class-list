@@ -1,6 +1,11 @@
 # ignore the instance folder, hence allowing one to change SQLALCHEMY_DATABASE_URI freely
 instance/
 instance/config.py
+settings.py
 app/static/uploads/
+app/logs/
+dist
+.env
 *.env
 *.pyc
+*.log

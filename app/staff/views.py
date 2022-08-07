@@ -1,16 +1,21 @@
 # app/staff/views.py
 
 import os
-from flask import flash, redirect, render_template, url_for, session, request, jsonify, abort
-from flask_login import login_required, logout_user
+from flask import flash, redirect, render_template, url_for, session, abort, request
+from flask_login import login_required, logout_user, current_user
 from datetime import datetime
 
+from app import app
 from populate import staff_roles, courses, verification
 from . import staff
-from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm
+from .forms import RegistrationForm, LoginForm, CourseForm, ClassForm, ResetPasswordRequestForm, ResetPasswordForm
+from ..cache import cache
 from ..database import db_session
+from ..errors import system_logging
 from ..models import Lecturer, Course, LecturersTeaching, Class, User, Attendance, Photo
-from ..extras import return_403, make_pdf
+from ..extras import return_403, make_pdf, get_courses, staff_send_confirmation_email
+from ..email import send_password_reset_email
+from ..security import ts
 
 
 def check_class_activity():
@@ -20,6 +25,7 @@ def check_class_activity():
         return False
 
 
+# noinspection PyUnresolvedReferences
 @staff.route('/register/', methods=['GET', 'POST'])
 def register():
     """
@@ -35,28 +41,61 @@ def register():
 
     # if successful validation
     if form.validate_on_submit():
-        # noinspection PyArgumentList
-        lecturer = Lecturer(staff_id=form.staff_id.data,
-                            name=" ".join([form.first_name.data, form.last_name.data]),
-                            programme=courses.get(form.programme.data),
-                            email=form.email.data,
-                            rank=staff_roles.get(form.rank.data),
-                            password=form.password.data,
-                            user=len(User.query.all()) + 1,
-                            is_lecturer=True
-                            )
+        try:
+            name = " ".join([form.first_name.data, form.last_name.data])
+            email = form.email.data
+            # noinspection PyArgumentList
+            lecturer = Lecturer(staff_id=form.staff_id.data,
+                                name=name,
+                                programme=courses.get(form.programme.data),
+                                email=email,
+                                rank=staff_roles.get(form.rank.data),
+                                password=form.password.data,
+                                user=len(User.query.all()) + 1,
+                                is_lecturer=True,
+                                email_confirmed=False,
+                                )
 
-        # add staff to database
-        db_session.add(lecturer)
-        db_session.commit()
-        # send message of successful registration
-        flash("Successful registration of {}. You can now login".format(lecturer.name))
-        # redirect to login page
-        return redirect(url_for("staff.login"))
+            # add staff to database
+            db_session.add(lecturer)
+            db_session.commit()
+            # Now we'll send the email confirmation link
+            staff_send_confirmation_email(email, name)
+            # send message of successful registration
+            flash("Successful registration. Please check your email to activate your account.")
+            # redirect to home page
+            return redirect(url_for("home.index"))
+        except BaseException as err:
+            system_logging(err, exception=True)
+            print(err)
+            flash("Something went wrong. Please contact system administrator")
 
     # load registration template
     # noinspection PyUnresolvedReferences
     return render_template("staff/register.html", form=form, title='Register Staff')
+
+
+# noinspection PyUnresolvedReferences,DuplicatedCode
+@staff.route('/confirm/<token>/')
+def confirm_email(token):
+    try:
+        # retrieve user's email from token. Maximum duration is 24 hours
+        email = ts.loads(token, salt=app.config['EMAIL_CONFIRMATION_KEY'], max_age=86400)
+        user = Lecturer.query.filter_by(email=email).first()
+
+        user.email_confirmed = True
+
+        # Update lecturer's record to show as activated
+        db_session.add(user)
+        db_session.commit()
+        # send message of successful registration
+        flash("Successful account activation. You can now login.")
+        # redirect to login page
+        return redirect(url_for("staff.login"))
+    except BaseException as err:
+        system_logging(err, exception=True)
+        print(err)
+        abort(404)
 
 
 @staff.route('/login/', methods=['GET', 'POST'])
@@ -102,7 +141,49 @@ def logout():
     return redirect(url_for('home.index'))
 
 
+# noinspection PyUnresolvedReferences
+@staff.route('/reset_password_request/', methods=['GET', 'POST'])
+def reset_password_request():
+    # if user already logged in, just redirect to dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('staff.dashboard'))
+    form = ResetPasswordRequestForm()
+    if form.validate_on_submit():
+        user = Lecturer.query.filter_by(staff_id=form.staff_id.data).first()
+        if user:
+            send_password_reset_email(user)
+        # To prevent figuring out IDs of registered users,
+        # flash this message and redirect to login regardless of whether user is known or not
+        flash('Check your email for instructions on resetting your password')
+        return redirect(url_for('staff.login'))
+    return render_template('staff/reset_password_request.html',
+                           title='Request Password Request', form=form)
+
+
+@staff.route('/reset_password/<token>/', methods=['GET', 'POST'])
+def reset_password(token):
+    # if user already logged in, just redirect to dashboard
+    if current_user.is_authenticated:
+        return redirect(url_for('staff.dashboard'))
+    # Determine who the user is by invoking the token verification method in the Lecturer class
+    # This method returns the user if the token is valid, or None if not
+    user = Lecturer.verify_reset_password_token(token)
+    # If the token is invalid, redirect to the home page
+    if not user:
+        flash('The token is invalid')
+        return redirect(url_for('home.index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db_session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('staff.login'))
+    return render_template('staff/reset_password.html', form=form, title="Reset Password")
+
+
+@staff.route('/')
 @staff.route('/dashboard/')
+@cache.cached()
 @login_required
 def dashboard():
     return_403('student_id')
@@ -112,6 +193,7 @@ def dashboard():
                            pid=session['lecturer_id'])
 
 
+# noinspection PyUnresolvedReferences
 def autoincrement():
     """
     Function will autoincrement id in LecturersTeaching table
@@ -135,6 +217,7 @@ def register_course(pid):
     return_403('student_id')
     active = check_class_activity()
     form = CourseForm()
+    form.course.choices = [(course.id, course.name) for course in Course.query.all()]
     form.staff_id = Lecturer.query.filter_by(id=pid).first().id
 
     if form.validate_on_submit():
@@ -158,22 +241,11 @@ def register_course(pid):
                            is_lecturer=True, pid=session['lecturer_id'])
 
 
+# noinspection PyUnresolvedReferences
 @staff.route('/_get_courses/')
 @login_required
 def _get_courses():
-    """
-    This view will respond to XHR requests for courses
-    :return: JSON list of courses
-    """
-    department = request.args.get("department", type=str)
-    year = request.args.get("year", type=int)
-    sem = request.args.get("sem", type=int)
-    course = [(course.id, course.name)
-              for course in Course.query.filter((Course.programme_id == department) &
-                                                (Course.id.like("{}%".format(year))) &
-                                                (Course.id.like("%{}".format(sem)))
-                                                ).all()]
-    return jsonify(course)
+    return get_courses()
 
 
 # noinspection PyUnresolvedReferences
@@ -292,6 +364,7 @@ def _end_class():
                                pid=session['lecturer_id'])
 
 
+# noinspection PyUnresolvedReferences
 @staff.route('/list_units/')
 @login_required
 def list_units():
@@ -299,21 +372,23 @@ def list_units():
     active = check_class_activity()
     rows, pid, html = [], Lecturer.query.filter_by(id=session['lecturer_id']).first().id, "lists/subjects.html"
     for course in Course.query.filter(
-                    (Course.id == LecturersTeaching.courses_id) &
-                    (LecturersTeaching.lecturers_id == pid
-                     )
+            (Course.id == LecturersTeaching.courses_id) &
+            (
+                    LecturersTeaching.lecturers_id == pid
+            )
     ).all():
         rows.append(('FEE' + str(course.id), course.name))
 
     if request.args.get("download"):
         pid = Lecturer.query.filter_by(id=session['lecturer_id']).first().staff_id
-        return make_pdf(pid, rows, "subjects.pdf", html, "Add Courses")
+        return make_pdf(pid, rows, "subjects.pdf", html, "Add Courses", title="Courses Registered")
 
     return render_template(html, title="Courses Registered", is_lecturer=True,
                            pid=session['lecturer_id'], to_download=False,
                            rows=rows, url="staff.register_course", empty=True, wrap="Add Courses", active=active)
 
 
+# noinspection PyUnresolvedReferences
 @login_required
 def verify_persons():
     counter, rows = 1, []
@@ -329,6 +404,7 @@ def verify_persons():
     return rows
 
 
+# noinspection PyUnresolvedReferences
 @staff.route('/verify/')
 @login_required
 def verify():
@@ -347,13 +423,14 @@ def verify():
             row[4] = os.path.abspath('app/static/' + row[4]).replace('\\', '/')
 
         pid = Lecturer.query.filter_by(id=session['lecturer_id']).first().staff_id
-        return make_pdf(pid, rows, "verify.pdf", html, "Verified Students")
+        return make_pdf(pid, rows, "verify.pdf", html, "Verified Students", title="Verify Students")
 
     return render_template(html, title="Verify Students", is_lecturer=True,
                            pid=session['lecturer_id'], rows=rows, to_download=False,
                            url="staff.students", empty=True, wrap="Verified Students", active=active)
 
 
+# noinspection PyUnresolvedReferences
 @staff.route('/approve/<pid>/')
 @login_required
 def approve(pid):

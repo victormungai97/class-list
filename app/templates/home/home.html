@@ -3,29 +3,42 @@
 {% extends "main.html" %}
 {% block wrapper %}<h1 class="display-4">Class Attendance Website</h1>{% endblock %}
 {% block body %}
-<div class="intro-header">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="intro-message">
-                    <h1>Welcome to the Class Attendance Website</h1>
-                    <br/>
-                    {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                    <script>
-                        var messages = {{ messages | safe }};
-                        for (var i=0; i < messages.length; i++) {
-                            alert(messages[i]);
-                        }
-                    </script>
-                    {% endif %}
-                    {% endwith %}
-                    <br/>
-                    <h3>Hello there!</h3>
-                    <hr class="intro-divider">
+    <div class="intro-header">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="intro-message">
+                        <h6>Welcome to the Class Attendance Website</h6>
+                        <br>
+                        <div id="snackbar"></div>
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <script>
+                                    let messages = '';
+
+                                    function showSnackbar(message) {
+                                        const x = document.getElementById("snackbar");
+                                        x.className = "show";
+                                        x.textContent = message;
+                                        setTimeout(function () {
+                                            x.className = x.className.replace("show", "");
+                                        }, 3000);
+                                    }
+
+                                    messages = {{ messages | safe }};
+                                    for (let i = 0; i < messages.length; i++) {
+                                        showSnackbar(messages[i]);
+                                    }
+                                </script>
+                            {% endif %}
+                        {% endwith %}
+
+                        <br>
+                        <h3>Hello there!</h3>
+                        <hr class="intro-divider">
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

@@ -1,15 +1,17 @@
 # app/staff/forms.py
 
+from flask import flash
 from flask_login import login_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, BooleanField, SelectField
 from wtforms.validators import DataRequired, Email, EqualTo, Length
 
 from populate import courses, staff_roles, year_of_study, dict_to_tuple
-from ..models import Lecturer, Programme, Course, LecturersTeaching
+from ..models import Lecturer, Programme, LecturersTeaching
 from ..database import db_session
 
 
+# noinspection PyUnresolvedReferences
 class RegistrationForm(FlaskForm):
     """
     Form for the registration of a staff member
@@ -87,6 +89,7 @@ class RegistrationForm(FlaskForm):
         return True
 
 
+# noinspection PyUnresolvedReferences
 class LoginForm(FlaskForm):
     """
     This form facilitates the logging in of a staff members
@@ -120,6 +123,11 @@ class LoginForm(FlaskForm):
             self.password.errors.append("Invalid password")
             return False
 
+        # only allow activated accounts
+        if not lecturer.email_confirmed:
+            flash("Please check your email to activate your account")
+            return False
+
         # save lecturer
         self.lecturer = lecturer
         # log staff in
@@ -128,6 +136,30 @@ class LoginForm(FlaskForm):
         return True
 
 
+class ResetPasswordRequestForm(FlaskForm):
+    """
+    To reset password, we shall request their staff ID and use that to get their respective email
+    """
+    staff_id = StringField("Staff ID", validators=[DataRequired("Please enter the staff ID")])
+    submit = SubmitField('Request Password Reset')
+
+
+class ResetPasswordForm(FlaskForm):
+    """
+    Here, we shall get user to enter and repeat new password
+    """
+    password = PasswordField("Password", validators=[DataRequired(),
+                                                     Length(min=6, max=14,
+                                                            message="Password should be between 6 to 14 characters"),
+                                                     ])
+    confirm_password = PasswordField("Confirm Password", validators=[DataRequired(),
+                                                                     EqualTo('password',
+                                                                             message="Passwords should match")
+                                                                     ])
+    submit = SubmitField('Reset Password')
+
+
+# noinspection PyUnresolvedReferences
 class CourseForm(FlaskForm):
     """
     This form registers the course that a lecturer teaches
@@ -136,9 +168,7 @@ class CourseForm(FlaskForm):
     programme = SelectField("Department", validators=[DataRequired()], choices=dict_to_tuple(courses), default="")
     study_year = SelectField("Year", validators=[DataRequired()], choices=dict_to_tuple(year_of_study), coerce=int)
     semester = SelectField("Semester", validators=[DataRequired()], choices=[(1, "I"), (2, "II")], coerce=int)
-    course = SelectField("Course", validators=[DataRequired()],
-                         choices=[(course.id, course.name) for course in Course.query.all()],
-                         coerce=int)
+    course = SelectField("Course", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Submit")
     staff_id = ''
 

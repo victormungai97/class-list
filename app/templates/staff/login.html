@@ -1,20 +1,28 @@
 <!-- app/templates/staff/login.html -->
 
+{% extends "main.html" %}
 {% import "bootstrap/utils.html" as utils %}
 {% import "bootstrap/wtf.html" as wtf %}
-{% extends "main.html" %}
-{% block wrapper%}<h1 class="display-4">Login to your account</h1>{% endblock %}
+{% block wrapper %}<h1 class="display-4">Login to your account</h1>{% endblock %}
 {% block body %}
-<div class="content-section">
-  <br/>
-  {{ utils.flashed_messages() }}
-  <br/>
-  <div class="center">
-    <br/>
-    {{ wtf.quick_form(form) }}
-  </div>
-  <div class="center">
-      <button type="button" onclick="location.href = '{{ url_for('staff.register') }}'" class="btn btn-link">Register here</button>
-  </div>
-</div>
+    <div class="content-section">
+        <br/>
+        {{ utils.flashed_messages() }}
+        <br/>
+        <div class="center">
+            <br/>
+            {{ wtf.quick_form(form) }}
+        </div>
+        <div class="center">
+            <button type="button" onclick="location.href = '{{ url_for('staff.register') }}'" class="btn btn-link">
+                Register here
+            </button>
+        </div>
+        <div class="center">
+            <button type="button" onclick="location.href='{{ url_for('staff.reset_password_request') }}'"
+                    class="btn btn-danger">
+                Forgot password?
+            </button>
+        </div>
+    </div>
 {% endblock %}

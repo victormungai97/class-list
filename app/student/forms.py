@@ -1,6 +1,7 @@
 # app/student/forms.py
 
 import re
+from flask import flash
 from flask_wtf import FlaskForm
 from flask_login import login_user
 from wtforms import StringField, SubmitField, SelectField, FileField, Field, SelectMultipleField
@@ -58,6 +59,7 @@ class ImageField(Field):
             return u''
 
 
+# noinspection PyUnresolvedReferences
 class RegistrationForm(FlaskForm):
     """
     Form for the registration of a student
@@ -101,7 +103,7 @@ class RegistrationForm(FlaskForm):
             return False
 
         # check that correct format of student reg. num is followed
-        match = re.search("/[\S]+/", self.reg_num.data)
+        match = re.search(r"\w\d\d/[\d]+/\d\d\d\d", self.reg_num.data)
         if not match:
             self.reg_num.errors.append("Invalid registration number")
             return False
@@ -113,23 +115,30 @@ class RegistrationForm(FlaskForm):
             self.programme.errors.append("Programme not registered")
             return False
 
+        # confirm that registration number given matches the department selected
+        if self.reg_num.data.split('/')[0] != self.programme.data:
+            self.programme.errors.append('Registration number does not belong to this programme')
+            return False
+
+        # check if year selected is within years allocated to department
+        if self.year_of_study.data > Programme.query.filter_by(program_id=self.programme.data).first().year:
+            self.year_of_study.errors.append("Year selected is beyond department's range")
+            return False
+
         return True
 
 
+# noinspection PyUnresolvedReferences
 class CourseForm(FlaskForm):
     """
     This form registers the course that a student takes.
     It takes the program, year, semester and code of the course
     """
     reg_num = StringField("Registration Number", validators=[DataRequired()], render_kw={"disabled": True})
-    programme = SelectField("Department", validators=[DataRequired()],
-                            choices=[(programme.program_id, programme.name) for programme in Programme.query.all()],
-                            default="")
+    programme = SelectField("Department", validators=[DataRequired()], default="")
     study_year = SelectField("Year", validators=[DataRequired()], choices=dict_to_tuple(year_of_study), coerce=int)
     semester = SelectField("Semester", validators=[DataRequired()], choices=[(1, "I"), (2, "II")], coerce=int)
-    course = SelectMultipleField("Course", validators=[DataRequired()],
-                                 choices=[(course.id, course.name) for course in Course.query.all()],
-                                 coerce=int)
+    course = SelectMultipleField("Course", validators=[DataRequired()], coerce=int)
     submit = SubmitField("Submit")
 
     def validate(self):
@@ -171,6 +180,7 @@ class SignInForm(FlaskForm):
     submit = SubmitField("Sign In")
 
 
+# noinspection PyUnresolvedReferences
 class LoginForm(FlaskForm):
     """
     Form for student to login
@@ -191,9 +201,14 @@ class LoginForm(FlaskForm):
             self.reg_num.errors.append("Unknown Registration Number")
             return False
 
-        # save lecturer
+        # only allow activated accounts
+        if not student_.email_confirmed:
+            flash("Please check your email to activate your account")
+            return False
+
+        # save student
         self.student_ = student_
-        # log staff in
+        # log student in
         login_user(student_)
         # successful validation
         return True

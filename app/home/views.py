@@ -3,10 +3,12 @@
 from flask import render_template, request, jsonify, session, redirect, url_for
 
 from . import home
+from ..cache import cache
 from app.models import Lecturer, Student
 
 
 @home.route('/')
+# @cache.cached()
 def index():
     if 'student_id' in session:
         return redirect(url_for('student.home'))
@@ -15,6 +17,7 @@ def index():
     return render_template("home/home.html", title="Home", home=True)
 
 
+# noinspection PyUnresolvedReferences
 @home.route('/user_name/')
 def get_name():
     table = request.args.get("table")

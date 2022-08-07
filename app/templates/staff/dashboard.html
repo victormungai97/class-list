@@ -2,65 +2,70 @@
 
 {% extends "main.html" %}
 {% block wrapper %}<!--suppress HtmlUnknownTarget -->
-<h1 class="display-4">Staff Dashboard</h1>{% endblock %}
+    <h1 class="display-4">Staff Dashboard</h1>{% endblock %}
 {% block body %}
-<div class="intro-header">
-    <div class="container">
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="intro-message">
-                    <h1>Staff Dashboard</h1>
-                    <br/>
-                    {% with messages = get_flashed_messages() %}
-                    {% if messages %}
-                    <script>
-                        var messages = {{ messages | safe }}
-                        for (var i=0; i < messages.length; i++) {
-                            alert(messages[i]);
-                        }
-                    </script>
-                    {% endif %}
-                    {% endwith %}
-                    <br/>
-                    <h3>Here, you can send messages to class and verify attendances!</h3>
-                    <hr class="intro-divider"><br/>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            <h4>
-                                <a href="{{ url_for('staff.register_course', pid=pid) }}" style="font-size: medium">
-                                    Register Course</a>
-                            </h4>
-                        </li>
-                        <li class="divider"><h4>|</h4></li>
-                        <li class="list-inline-item">
-                            <h4>
-                                <a href="{{ url_for('staff.list_units', pid=pid) }}" style="font-size: medium">
-                                    Courses Registered
-                                </a>
-                            </h4>
-                        </li>
-                        <li class="divider"><h4>|</h4></li>
-                        <li class="list-inline-item">
-                            <h4>
-                                {% if active %}
-                                <a href="{{ url_for('staff.running_class') }}" style="font-size: medium">End Class</a>
-                                {% else %}
-                                <a href="{{ url_for('staff._start_class', pid=pid) }}" style="font-size: medium">Start Class</a>
-                                {% endif %}
-                            </h4>
-                        </li>
-                        <li class="divider"><h4>|</h4></li>
-                        <li class="list-inline-item">
-                            <h4><a href="{{ url_for('staff.verify') }}" style="font-size: medium">Verify Students</a></h4>
-                        </li>
-                        <li class="divider"><h4>|</h4></li>
-                        <li class="list-inline-item">
-                            <h4><a href="{{ url_for('staff.students') }}" style="font-size: medium">List Students</a></h4>
-                        </li>
-                    </ul>
+    <div class="intro-header">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="intro-message">
+                        <h1>Staff Dashboard</h1>
+                        <br/>
+                        {% with messages = get_flashed_messages() %}
+                            {% if messages %}
+                                <script>
+                                    let messages = {{ messages | safe }};
+                                    for (let i = 0; i < messages.length; i++) {
+                                        alert(messages[i]);
+                                    }
+                                </script>
+                            {% endif %}
+                        {% endwith %}
+                        <br/>
+                        <h3>Here, you can send messages to class and verify attendances!</h3>
+                        <hr class="intro-divider">
+                        <br/>
+                        <ul class="list-inline">
+                            <li class="list-inline-item">
+                                <h4>
+                                    <a href="{{ url_for('staff.register_course', pid=pid) }}" style="font-size: medium">
+                                        Register Course</a>
+                                </h4>
+                            </li>
+                            <li class="divider"><h4>|</h4></li>
+                            <li class="list-inline-item">
+                                <h4>
+                                    <a href="{{ url_for('staff.list_units', pid=pid) }}" style="font-size: medium">
+                                        Courses Registered
+                                    </a>
+                                </h4>
+                            </li>
+                            <li class="divider"><h4>|</h4></li>
+                            <li class="list-inline-item">
+                                <h4>
+                                    {% if active %}
+                                        <a href="{{ url_for('staff.running_class') }}" style="font-size: medium">End
+                                            Class</a>
+                                    {% else %}
+                                        <a href="{{ url_for('staff._start_class', pid=pid) }}"
+                                           style="font-size: medium">Start Class</a>
+                                    {% endif %}
+                                </h4>
+                            </li>
+                            <li class="divider"><h4>|</h4></li>
+                            <li class="list-inline-item">
+                                <h4><a href="{{ url_for('staff.verify') }}" style="font-size: medium">Verify
+                                    Students</a></h4>
+                            </li>
+                            <li class="divider"><h4>|</h4></li>
+                            <li class="list-inline-item">
+                                <h4><a href="{{ url_for('staff.students') }}" style="font-size: medium">List
+                                    Students</a></h4>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
 {% endblock %}

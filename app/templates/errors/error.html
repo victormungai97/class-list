@@ -1,0 +1,28 @@
+<!-- app/templates/errors/error.html -->
+
+{% extends "main.html" %}
+{% block wrapper %}<h1 class="display-4"> {{ title }} </h1>{% endblock %}
+{% block body %}
+    <div class="container">
+        <div class="row-xs-12">
+            <div class="content-section">
+                <div style="text-align: center">
+                    {% for error in errors %}
+                        <h5> {{ error }} </h5>
+                    {% endfor %}
+
+                    <hr class="intro-divider">
+                    <!--suppress HtmlUnknownTarget -->
+                    <a class="btn btn-default btn-lg"
+                       href={% if is_lecturer %}"{{ url_for('staff.dashboard') }}">
+                       {% elif is_student %}"{{ url_for('student.home') }}">
+                       {% else %}"{{ url_for('home.index') }}">
+                       {% endif %}
+                       <i class="fa fa-home"></i>
+                       Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

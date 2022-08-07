@@ -94,7 +94,6 @@ dayz = [
     DaysOfTheWeek(7, 'Saturday')
 ]
 
-
 # dictionary of courses offered and their course codes
 courses = {
     '': "None",
@@ -148,3 +147,17 @@ def dict_to_tuple(courses_dict):
     for course in courses_dict:
         list_.append((course, courses_dict.get(course)))
     return list_
+
+
+def key_from_value(search_value, dictionary):
+    """
+    Function that retrieves the key(s) of given value in dictionary
+    :param dictionary: Dictionary from which to get key
+    :param search_value: Value used to obtain key
+    :return: List of key(s) that hold given value or None
+    """
+    rs = []
+    for key, value in dictionary.items():  # for key, value in list.iteritems():   (for Python 2.x)
+        if value == search_value:
+            rs.append(key)
+    return rs

@@ -1,0 +1,27 @@
+{# app/templates/email/confirm_email.html #}
+
+{% extends 'email/email.html' %}
+{% block wrapper %}Class Attendance Website{% endblock %}
+{% block body %}
+    <tr>
+        <td>
+            Your account was successfully created. Please
+        </td>
+    </tr>
+    <tr>
+        <td><a href="{{ confirm_url }}" target="_blank" style="font-size: 14px; color: #428BCA;"> Click Here</a></td>
+    </tr>
+    <tr>
+        <td>to confirm your email address and activate your account.
+        </td>
+    </tr>
+    <tr>
+        <td>Alternatively, you can paste the following link in your browser's address bar:</td>
+    </tr>
+    <tr>
+        <td style="font-size: 14px;">{{ confirm_url }}</td>
+    </tr>
+    <tr>
+        <td>Please note that this link is only valid for twenty four (24) hours.</td>
+    </tr>
+{% endblock %}

@@ -5,23 +5,25 @@ import os
 from werkzeug.utils import secure_filename
 from flask import render_template, request, flash, redirect, url_for, jsonify, session
 from flask_login import login_required, logout_user
-from zipfile import ZipFile, is_zipfile
-from shutil import move, rmtree
 
-from .. import home_folder
+from .. import app, numOfImages
+from ..cache import cache
 from ..database import db_session
+from ..errors import system_logging
 from ..models import Student, Course, Programme, StudentCourses, Class, LecturersTeaching, Attendance
 from ..student import student
 from .forms import RegistrationForm, CourseForm, LoginForm, ClassForm, SignInForm
-from ..extras import add_student, atten_dance, return_403, make_pdf, create_path
+from ..extras import add_student, atten_dance, return_403, make_pdf, zipfile_handling, get_courses
+from ..security import ts
 
 from pictures import allowed_file, determine_picture  # , decode_image
-from populate import courses
+from populate import courses, key_from_value
 
 
 # noinspection PyUnresolvedReferences
 @student.route('/')
 @student.route('/dashboard/')
+@cache.cached()
 @login_required
 def home():
     """
@@ -29,8 +31,7 @@ def home():
     :return: HTML template to student homepage
     """
     return_403('lecturer_id')
-    return render_template("student/home.html", title="Students Homepage", home=True, is_student=True,
-                           pid=session['student_id'])
+    return render_template("student/home.html", title="Students Homepage", home=True, is_student=True, )
 
 
 @student.route("/login/", methods=["POST", 'GET'])
@@ -71,6 +72,7 @@ def logout():
     return redirect(url_for('home.index'))
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/phone/', methods=['POST'])
 def phone():
     """
@@ -82,9 +84,16 @@ def phone():
     name = json['name']
     reg_no = json['regno']
     email = json['email']
+    department = json['department']
+    try:
+        year = int(json['year'])
+    except ValueError as err:
+        print(err)
+        system_logging(err, exception=True)
+        return jsonify({'message': 'Year should be a number', 'status': -1})
 
     # check that correct format of student reg. num is followed
-    if not re.search("/[\S]+/", reg_no):
+    if not re.search(r"\w\d\d/[\d]+/\d\d\d\d", reg_no):
         return jsonify({'message': 'Invalid registration number', 'status': 4})
 
     # check if student is already registered
@@ -94,72 +103,32 @@ def phone():
     if Student.query.filter_by(email=email).first():
         return jsonify({'message': 'Email already registered', 'status': 5})
 
-    department = json['departments']
-    year = json['year']
+    # confirm that registration number given matches the department selected
+    if reg_no.split('/')[0] not in key_from_value(department, courses):
+        return jsonify({'message': 'Registration number does not belong to this programme', 'status': 6})
+
+    # check if programme is registered
+    program = Programme.query.filter(Programme.name == department).first()
+    # if not registered, raise error
+    if not program:
+        return jsonify({'message': 'Programme not registered', 'status': 7})
+
+    # check if year selected is within years allocated to department
+    if year > Programme.query.filter_by(name=department).first().year:
+        return jsonify({'message': "Year selected is beyond department's range", 'status': 8})
+
     # receive and save zip file
-    zip_file = request.files['FILE']
-    if zip_file:
-        filename = secure_filename(zip_file.filename)
-        zip_file.save(os.path.join(create_path(reg_no), filename))
-    path = create_path(reg_no) + "/" + os.path.basename(filename).replace(".zip", "")
+    message, status, pic_url = zipfile_handling(zip_file=request.files['FILE'], reg_no=reg_no, name=name)
 
-    # confirm that file is a zip file
-    if is_zipfile(zip_file):
-        # open the zip file in READ mode
-        with ZipFile(os.path.join(create_path(reg_no), filename), 'r') as zip_file:
-            # print all the contents of the zip file in table format
-            zip_file.printdir()
-
-            # extract all the files in zip file
-            print('Extracting all the files now...')
-            zip_file.extractall(path=path)
-            # remember unzipping has happened
-            unzip = True
-
-            # delete redundant zip file
-            print('Deleting file {}...'.format(filename))
-            filename = os.path.join(create_path(reg_no), filename)
-            os.remove(filename)
-            print('Done!')
-
-    # if successful unzipping
-    if unzip:
-        # read the files in the resultant directory
-        files = os.listdir(path)
-        # change working directory in resultant directory
-        os.chdir(path)
-        for image in files:
-            # move files into the parent directory
-            filename = secure_filename(image)
-            move(filename, os.path.join(os.pardir, filename))
-
-    # move to parent directory
-    os.chdir(os.pardir)
-    # delete resultant directory
-    rmtree(path)
-    # process the files
-    for image in files:
-        if os.path.isfile(os.path.join(os.curdir, image)):
-            filename = secure_filename(image)
-            if not allowed_file(filename):
-                # noinspection PyUnusedLocal
-                message, status = "File format not supported", 3
-                return jsonify({'message': message, "status": status})
-            else:
-                url, verified = determine_picture(reg_no, name.replace(" ", "_"), image, filename, phone=True)
-                pic_url.append(url)
-
-    # return to original location
-    os.chdir(home_folder)
-    print(u"Current path is", os.path.abspath(os.curdir), sep=' ')
-
-    message, status = add_student(reg_no, name, year, department, email, pic_url)
+    if not status:
+        message, status, args = add_student(reg_no, name, year, department, email, pic_url)
 
     # print(reg_no, name, department, year, email, sep='\n')
 
     return jsonify({'message': message, "status": status})
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/login2/', methods=['POST'])
 def login2():
     """
@@ -197,30 +166,57 @@ def web():
     if form.validate_on_submit():
         reg_num, name = form.reg_num.data, form.first_name.data + " " + form.last_name.data
         images, pic_url = request.files.getlist("photo"), []
+        # process images
         if images:
-            # if len(images) < 10: form.photo.errors.append("Please upload at least 10 images of yourself")
-            for image in images:
-                # get name of the source file + Make the filename safe, remove unsupported chars
-                filename = str(secure_filename(image.filename))
-                # check if allowed
-                if not allowed_file(image.filename):
-                    # if not allowed, raise error
-                    form.photo.errors.append("Files should only be pictures")
-                    return render_template("student/register.html", form=form, title="Student Registration",
-                                           is_student=True)
-                else:
-                    url, verified = determine_picture(reg_num, name.replace(" ", "_"), image, filename)
-                    pic_url.append(url)
+            if len(images) != numOfImages:
+                form.photo.errors.append("Please upload {} images of yourself".format(numOfImages))
+                return render_template("student/register.html", form=form, title="Student Registration")
+            else:
+                for image in images:
+                    # get name of the source file + Make the filename safe, remove unsupported chars
+                    filename = str(secure_filename(image.filename))
+                    # check if allowed
+                    if not allowed_file(image.filename):
+                        # if not allowed, raise error
+                        form.photo.errors.append("Files should only be pictures")
+                        return render_template("student/register.html", form=form, title="Student Registration",
+                                               is_student=True)
+                    else:
+                        url, verified = determine_picture(reg_num, name.replace(" ", "_"), image, filename)
+                        pic_url.append(url)
 
-        # check if student already registered
-        message, status = add_student(form.reg_num.data, name, form.year_of_study.data,
-                                      courses.get(form.programme.data), form.email.data, pic_url)
+        # process saving student
+        message, status, args = add_student(form.reg_num.data, name, form.year_of_study.data,
+                                            courses.get(form.programme.data), form.email.data, pic_url)
         if not status:
             flash(message)
             return redirect(url_for('student.login'))
         else:
             form.reg_num.errors.append(message)
     return render_template("student/register.html", form=form, title="Student Registration")
+
+
+# noinspection PyUnresolvedReferences,DuplicatedCode
+@student.route('/confirm/<token>/')
+def confirm_email(token):
+    try:
+        # retrieve user's email from token. Maximum duration is 24 hours
+        email = ts.loads(token, salt=app.config['EMAIL_CONFIRMATION_KEY'], max_age=86400)
+        user = Student.query.filter_by(email=email).first()
+
+        user.email_confirmed = True
+
+        # Update student's record to show as activated
+        db_session.add(user)
+        db_session.commit()
+        # send message of successful registration
+        flash("Successful account activation. You can now login.")
+        # redirect to login page
+        return redirect(url_for("student.login"))
+    except BaseException as err:
+        system_logging(err, exception=True)
+        print(err)
+        abort(404)
 
 
 # noinspection PyUnresolvedReferences
@@ -233,6 +229,8 @@ def courses_():
     """
     return_403('lecturer_id')
     form = CourseForm()
+    form.programme.choices = [(programme.program_id, programme.name) for programme in Programme.query.all()]
+    form.course.choices = [(course.id, course.name) for course in Course.query.all()]
     form.reg_num.data = Student.query.filter_by(id=session['student_id']).first().reg_num
 
     if form.validate_on_submit():
@@ -253,10 +251,10 @@ def courses_():
             db_session.rollback()
             flash("Error during registration")
 
-    return render_template("student/course.html", form=form, title="Course Registration", is_student=True,
-                           pid=session['student_id'])
+    return render_template("student/course.html", form=form, title="Course Registration", is_student=True, )
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/get_departments/')
 def get_departments():
     """
@@ -270,6 +268,7 @@ def get_departments():
     return jsonify(departments)
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/_get_department/')
 @login_required
 def _get_departments():
@@ -279,50 +278,40 @@ def _get_departments():
     return jsonify(departments)
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/_get_courses/')
 @login_required
 def _get_courses():
-    """
-    This view will respond to XHR requests for courses
-    :return: JSON list of courses
-    """
-    department = request.args.get("department", type=str)
-    year = request.args.get("year", type=int)
-    sem = request.args.get("sem", type=int)
-    course = [(course.id, course.name)
-              for course in Course.query.filter((Course.programme_id == department) &
-                                                (Course.id.like("{}%".format(year))) &
-                                                (Course.id.like("%{}".format(sem)))
-                                                ).all()]
-    return jsonify(course)
+    return get_courses()
 
 
-@student.route('/attend/<pid>/', methods=['POST', 'GET'])
+# noinspection PyUnresolvedReferences
+@student.route('/attend/', methods=['POST', 'GET'])
 @login_required
-def web_(pid):
+def web_():
     """
     Function that enables a student to sign into a respective class
     :return:
     """
     return_403('lecturer_id')
     # retrieve student's reg number
-    reg_num = Student.query.filter(Student.id == pid).first().reg_num
+    reg_num = Student.query.filter(Student.id == session['student_id']).first().reg_num
     # query courses student is registered to
     _courses = []
     for course in Course.query.filter(Course.id == StudentCourses.courses_id).filter(
-                    StudentCourses.student_id == reg_num).all():
+            StudentCourses.student_id == reg_num).all():
         # query running classes among registered courses
         for crs in Course.query.filter(Course.id == course.id).filter(LecturersTeaching.courses_id == Course.id).filter(
-                        Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
+                Class.lec_course_id == LecturersTeaching.id).filter(Class.is_active):
             _courses.append((crs.id, crs.name))
     # attach running class to form
     form = ClassForm()
     form.courses.choices = [(0, "None")]
     form.courses.choices.extend(_courses)
-    return render_template("student/class.html", form=form, title="Start Class", is_student=True,
-                           pid=session['student_id'])
+    return render_template("student/class.html", form=form, title="Attend Class", is_student=True, )
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/sign_in/', methods=['POST', 'GET'])
 @login_required
 def attend_class():
@@ -368,10 +357,10 @@ def attend_class():
             # if not allowed, raise error
             form.photo.errors.append("Files should only be pictures")
 
-    return render_template("student/attend.html", form=form, title="Attend Class", is_student=True,
-                           pid=session['student_id'])
+    return render_template("student/attend.html", form=form, title="Attend Class", is_student=True, )
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/registered/')
 @login_required
 def registered_courses():
@@ -383,18 +372,19 @@ def registered_courses():
     return_403('lecturer_id')
     rows, reg_no, html = [], Student.query.filter_by(id=session['student_id']).first().reg_num, "lists/units.html"
     for course in Course.query.filter(
-                    (Course.id == StudentCourses.courses_id) &
-                    (StudentCourses.student_id == reg_no)
+            (Course.id == StudentCourses.courses_id) &
+            (StudentCourses.student_id == reg_no)
     ).all():
         rows.append(('FEE' + str(course.id), course.name))
 
     if request.args.get("download"):
-        return make_pdf(reg_no, rows, "courses.pdf", html, "Add Courses")
+        return make_pdf(reg_no, rows, "courses.pdf", html, "Add Courses", title="Courses Registered")
 
-    return render_template(html, title="Courses Registered", is_student=True, pid=session['student_id'],
+    return render_template(html, title="Courses Registered", is_student=True,
                            rows=rows, url="student.courses_", empty=True, wrap="Add Courses", to_download=False)
 
 
+# noinspection PyUnresolvedReferences
 @student.route('/classes/')
 @login_required
 def classes():
@@ -418,7 +408,7 @@ def classes():
             if isinstance(row[3], str) and row[3].endswith('.jpg'):
                 row[3] = os.path.abspath('app/static/' + row[3]).replace('\\', '/')
 
-        return make_pdf(reg_no, rows, outfile, html, wrap)
+        return make_pdf(reg_no, rows, outfile, html, wrap, title="Courses Registered")
 
-    return render_template(html, title="Classes Attended", is_student=True, pid=session['student_id'],
+    return render_template(html, title="Classes Attended", is_student=True,
                            rows=rows, url="student.classes", empty=True, wrap=wrap, to_download=True)
